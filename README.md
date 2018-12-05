@@ -1,2 +1,2 @@
 # tri-d-chess
-A Tri Dimensional Chess web app
+A web application implementaion of Tri Dimensional Chess as seen in a popular science fiction television series.
