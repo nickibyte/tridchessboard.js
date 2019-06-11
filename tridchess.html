@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 	<head>
 		<title>tri-d-chess</title>
 		<style>
@@ -18,9 +19,11 @@
 
 	<body>
 		<script src="src/three.js/three.min.js"></script>
-		<script src="src/three.js/OrbitControls.js"></script>
+		<script src="src/three.js/controls/OrbitControls.js"></script>
+		<script src="src/three.js/controls/DragControls.js"></script>
 
 		<script>
+
 			// Init
 			var scene = new THREE.Scene();
 
@@ -34,21 +37,33 @@
 			renderer.setSize(width, height);
 			document.body.appendChild(renderer.domElement);
 
+			var objects = [];
+
 			// Controls
-			var controls = new THREE.OrbitControls(camera, renderer.domElement);
-			controls.minDistance = 2;
-			controls.maxDistance = 100;
-			controls.enablePan = false;
-			controls.zoomSpeed = 1.0;
-			controls.rotateSpeed = 1.0;
-			controls.minPolarAngle = 0;
-			controls.maxPolarAngle = Math.PI;
+			var orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+			orbitControls.minDistance = 2;
+			orbitControls.maxDistance = 100;
+			orbitControls.enablePan = false;
+			orbitControls.zoomSpeed = 1.0;
+			orbitControls.rotateSpeed = 1.0;
+			orbitControls.minPolarAngle = 0;
+			orbitControls.maxPolarAngle = Math.PI;
+
+			var dragControls = new THREE.DragControls(objects, camera, renderer.domElement);
+			dragControls.addEventListener('dragstart', function() {
+				orbitControls.enabled = false;
+			});
+			dragControls.addEventListener('dragend', function() {
+				orbitControls.enabled = true;
+			});
+			
 			
 			// World
 			var geometry = new THREE.BoxGeometry(1, 1, 1);
 			var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
 			var cube = new THREE.Mesh(geometry, material);
 			scene.add(cube);
+			objects.push(cube);
 
 			// Window Resizing
 			function onWindowResize() {
@@ -72,4 +87,5 @@
 
 		</script>
 	</body>
+
 <html>
