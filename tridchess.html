@@ -18,9 +18,11 @@
 	</head>
 
 	<body>
-		<script src="src/three.js/three.min.js"></script>
-		<script src="src/three.js/controls/OrbitControls.js"></script>
-		<script src="src/three.js/controls/DragControls.js"></script>
+		<script src="js/three.js/three.min.js"></script>
+		<script src="js/three.js/controls/OrbitControls.js"></script>
+		<script src="js/three.js/controls/DragControls.js"></script>
+
+		<script src="js/tridchess.js"></script>
 
 		<script>
 
@@ -30,7 +32,7 @@
 			var width = window.innerWidth;
 			var height = window.innerHeight;
 			var camera = new THREE.PerspectiveCamera(60, width / height, 1, 1000);
-			camera.position.set(10, 5, 5);
+			camera.position.set(-10, 7, -10);
 
 			var renderer = new THREE.WebGLRenderer( {antialias: true} );
 			renderer.setPixelRatio(window.devicePixelRatio);
@@ -38,6 +40,9 @@
 			document.body.appendChild(renderer.domElement);
 
 			var objects = [];
+
+			var axesHelper = new THREE.AxesHelper(10);
+			scene.add(axesHelper);
 
 			// Controls
 			var orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -59,11 +64,41 @@
 			
 			
 			// World
-			var geometry = new THREE.BoxGeometry(1, 1, 1);
-			var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
-			var cube = new THREE.Mesh(geometry, material);
-			scene.add(cube);
-			objects.push(cube);
+			//var geometry = new THREE.BoxGeometry(1, 1, 1);
+			//var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+			//var cube = new THREE.Mesh(geometry, material);
+			//scene.add(cube);
+			//objects.push(cube);
+
+			var squarePlanes = new THREE.Group();
+
+			board.forEach( function(file, indexFile) {
+				file.forEach( function(column, indexColumn) { 
+					column.forEach( function(square, indexSquare) {
+						if(!(square === null)) {
+							var geometry = new THREE.PlaneGeometry();
+							var material = new THREE.MeshBasicMaterial( {color: 0xfafcb8,
+																		 side: THREE.DoubleSide} );
+							var plane = new THREE.Mesh(geometry, material);
+							//plane.position = new THREE.Vector3(indexFile, indexSquare * 2, indexColumn);
+							plane.position.x = indexFile;
+							plane.position.y = indexSquare * 2;
+							plane.position.z = indexColumn;
+
+							plane.rotateX(Math.PI / 2);
+
+							squarePlanes.add(plane);
+						}
+					} );
+				} );
+			} );
+
+			// Center board on origin
+			squarePlanes.position.x -= 2.5;
+			squarePlanes.position.y -= 4;
+			squarePlanes.position.z -= 4.5;
+
+			scene.add(squarePlanes);
 
 			// Window Resizing
 			function onWindowResize() {
