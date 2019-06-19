@@ -122,5 +122,6 @@ var board = [ [ [ null, 'a1^2', null,null,null,null ],
                 [ null, null, null,null,null,'f10^6' ] ] ];
 
 var rows = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ];
-var columns = [ 'a', 'b', 'c', 'd', 'e', 'f' ];
+var files = [ 'a', 'b', 'c', 'd', 'e', 'f' ];
 var levels = [ 1, 2, 3, 4, 5, 6 ];
+var pieces = [ '', 'N', 'B', 'R', 'Q', 'K']; // Pawn, Knight, Bishop, Rook, Queen, King

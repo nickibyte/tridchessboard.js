@@ -70,35 +70,86 @@
 			//scene.add(cube);
 			//objects.push(cube);
 
-			var squarePlanes = new THREE.Group();
+			/* Build board */
 
+			// Board
+			var boardObj = new THREE.Group();
+
+			// Square Indicators
+			var squareInd = new THREE.Group();
+			var indGeo = new THREE.PlaneGeometry();
+			var indMat= new THREE.MeshBasicMaterial( {color: 0xfafcb8/*,
+													  side: THREE.DoubleSide*/} );
+
+			// Towers
+			var towers = new THREE.Group();
+			var towGeo = new THREE.BoxGeometry(0.25, 2, 0.25);
+			var towMat = new THREE.MeshBasicMaterial( {color: 0xff000} );
+
+			// Pieces
+			var pieces = new THREE.Group();
+			var pieHeight = 1.25;
+
+			var pieGeo = new THREE.BoxGeometry(0.5, pieHeight, 0.5);
+			var pieMat = new THREE.MeshBasicMaterial( {color: 0xaabce2} );
+
+			var pieModels = [];
+			for(var i=0; i<6; i++) {
+				pieModels.push(new THREE.Mesh(pieGeo, pieMat));
+			}
+
+			// Traverse board
 			board.forEach( function(file, indexFile) {
 				file.forEach( function(column, indexColumn) { 
 					column.forEach( function(square, indexSquare) {
-						if(!(square === null)) {
-							var geometry = new THREE.PlaneGeometry();
-							var material = new THREE.MeshBasicMaterial( {color: 0xfafcb8,
-																		 side: THREE.DoubleSide} );
-							var plane = new THREE.Mesh(geometry, material);
-							//plane.position = new THREE.Vector3(indexFile, indexSquare * 2, indexColumn);
-							plane.position.x = indexFile;
-							plane.position.y = indexSquare * 2;
-							plane.position.z = indexColumn;
 
-							plane.rotateX(Math.PI / 2);
+						if(square !== null) {
 
-							squarePlanes.add(plane);
+							// Add indicators
+							var ind = new THREE.Mesh(indGeo, indMat);
+
+							ind.position.x = indexFile;
+							ind.position.z = indexColumn;
+							ind.position.y = indexSquare * 2;
+
+							ind.rotateX(-Math.PI / 2);
+
+							squareInd.add(ind);
+
+							// Add pieces
+							// 1:Pawn, 2:Knight, 3:Bishop, 4:Rook, 5:Queen, 6:King
+							if(square !== 0) {
+								//var piece = pieModels[square-1];
+								var piece = new THREE.Mesh(pieGeo, pieMat);
+								
+								piece.position.x = indexFile;
+								piece.position.z = indexColumn;
+								piece.position.y = indexSquare * 2;
+
+								piece.position.y += pieHeight / 2;
+								
+								pieces.add(piece);
+								objects.push(piece); // TESTING
+							}
+
 						}
 					} );
 				} );
 			} );
 
-			// Center board on origin
-			squarePlanes.position.x -= 2.5;
-			squarePlanes.position.y -= 4;
-			squarePlanes.position.z -= 4.5;
+			// Add Towers
+			var tower = new THREE.Mesh(towGeo, towMat);
 
-			scene.add(squarePlanes);
+			boardObj.add(squareInd);
+			boardObj.add(pieces);
+			boardObj.add(towers);
+
+			// Center board on origin
+			boardObj.position.x -= 2.5;
+			boardObj.position.y -= 4;
+			boardObj.position.z -= 4.5;
+
+			scene.add(boardObj);
 
 			// Window Resizing
 			function onWindowResize() {
