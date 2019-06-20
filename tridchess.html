@@ -72,8 +72,11 @@
 
 			/* Build board */
 
+			var clickable = [];
+			
 			// Board
-			var boardObj = new THREE.Group();
+			var board = new THREE.Group();
+			var boardArr = Tridchess.getBoard();
 
 			// Square Indicators
 			var squareInd = new THREE.Group();
@@ -91,6 +94,7 @@
 			var pieHeight = 1.25;
 
 			var pieGeo = new THREE.BoxGeometry(0.5, pieHeight, 0.5);
+			pieGeo.translate(0, pieHeight / 2, 0); // Set Origin at bottom
 			var pieMat = new THREE.MeshBasicMaterial( {color: 0xaabce2} );
 
 			var pieModels = [];
@@ -99,18 +103,22 @@
 			}
 
 			// Traverse board
-			board.forEach( function(file, indexFile) {
-				file.forEach( function(column, indexColumn) { 
-					column.forEach( function(square, indexSquare) {
+			for (var iFile = 0; iFile < boardArr.length; iFile++) {
 
-						if(square !== null) {
+				for (var iColumn = 0; iColumn < boardArr[iFile].length; iColumn++) {
+
+					for (var iLevel = 0; iLevel < boardArr[iFile][iColumn].length; iLevel++) {
+						
+						var square = boardArr[iFile][iColumn][iLevel]; 
+
+						if (square !== null) {
 
 							// Add indicators
 							var ind = new THREE.Mesh(indGeo, indMat);
 
-							ind.position.x = indexFile;
-							ind.position.z = indexColumn;
-							ind.position.y = indexSquare * 2;
+							ind.position.x = -iFile;
+							ind.position.z = iColumn;
+							ind.position.y = iLevel * 2;
 
 							ind.rotateX(-Math.PI / 2);
 
@@ -118,38 +126,46 @@
 
 							// Add pieces
 							// 1:Pawn, 2:Knight, 3:Bishop, 4:Rook, 5:Queen, 6:King
-							if(square !== 0) {
+							if (square !== 0) {
+
 								//var piece = pieModels[square-1];
 								var piece = new THREE.Mesh(pieGeo, pieMat);
 								
-								piece.position.x = indexFile;
-								piece.position.z = indexColumn;
-								piece.position.y = indexSquare * 2;
+								piece.position.x = -iFile;
+								piece.position.z = iColumn;
+								piece.position.y = iLevel * 2;
 
-								piece.position.y += pieHeight / 2;
+								//piece.position.y += pieHeight / 2;
 								
 								pieces.add(piece);
-								objects.push(piece); // TESTING
-							}
 
+								clickable.push(piece);
+
+							}
 						}
-					} );
-				} );
-			} );
+					} 
+				} 
+			} 
 
 			// Add Towers
+			var towerPos;
 			var tower = new THREE.Mesh(towGeo, towMat);
 
-			boardObj.add(squareInd);
-			boardObj.add(pieces);
-			boardObj.add(towers);
+			board.add(squareInd);
+			board.add(pieces);
+			board.add(towers);
 
 			// Center board on origin
-			boardObj.position.x -= 2.5;
-			boardObj.position.y -= 4;
-			boardObj.position.z -= 4.5;
+			board.position.x += 2.5;
+			board.position.y -= 4;
+			board.position.z -= 4.5;
 
-			scene.add(boardObj);
+			scene.add(board);
+
+			function onDocumentMouseMove(event) { 
+				event.preventDefault();
+				pieces.visible=false; 
+			}
 
 			// Window Resizing
 			function onWindowResize() {
