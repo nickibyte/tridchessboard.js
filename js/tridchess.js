@@ -61,18 +61,119 @@
 	                [ null, null, null,null,null,'f10^6' ] ] ]; */
 
 
-var Tridchess = new function(notation) {
+var Tridchess = function(fen, notation) {
 	
-	
+	// ------------------------------------------------------------------------
+	// Types
+	// ------------------------------------------------------------------------
+
+	var Pos = function(file, row, level) {
+
+		this.file = file;
+		this.row = row;
+		this.level = level;
+
+	}
+
+	// ------------------------------------------------------------------------
+	// Constants
+	// ------------------------------------------------------------------------
+
+	var TOWER_POSITIONS = [ [ new Pos(0,0,1), new Pos(1,0,1), new Pos(0,1,1), new Pos(1,1,1) ],
+							[ new Pos(4,0,1), new Pos(5,0,1), new Pos(4,1,1), new Pos(5,1,1) ],
+							[ new Pos(0,4,1), new Pos(1,4,1), new Pos(0,5,1), new Pos(1,5,1) ],
+							[ new Pos(4,4,1), new Pos(5,0,1), new Pos(4,5,1), new Pos(5,5,1) ],
+
+							[ new Pos(0,2,3), new Pos(1,2,3), new Pos(0,3,3), new Pos(1,3,3) ],
+							[ new Pos(4,2,3), new Pos(5,2,3), new Pos(4,3,3), new Pos(5,3,3) ],
+							[ new Pos(0,6,3), new Pos(1,6,3), new Pos(0,7,3), new Pos(1,7,3) ],
+							[ new Pos(4,6,3), new Pos(5,6,3), new Pos(4,7,3), new Pos(5,7,3) ],
+
+							[ new Pos(0,4,5), new Pos(1,4,5), new Pos(0,5,5), new Pos(1,5,5) ],
+							[ new Pos(4,4,5), new Pos(5,0,5), new Pos(4,5,5), new Pos(5,5,5) ],
+							[ new Pos(0,8,5), new Pos(1,8,5), new Pos(0,9,5), new Pos(1,9,5) ],
+							[ new Pos(4,8,5), new Pos(5,8,5), new Pos(4,9,5), new Pos(5,9,5) ] ];
+
+
+	var MAIN_BOARDS = [ [ [ null, null, null, null, null, null ],
+                          [ null, null, null, null, null, null ],
+                          [ null, null, null, null, null, null ],
+                          [ null, null, null, null, null, null ],
+                          [ null, null, null, null, null, null ],
+                          [ null, null, null, null, null, null ],
+                          [ null, null, null, null, null, null ],
+                          [ null, null, null, null, null, null ],
+                          [ null, null, null, null, null, null ],
+                          [ null, null, null, null, null, null ] ],
+
+                        [ [ null, null, null, null, null, null ],
+                          [    0, null, null, null, null, null ],
+                          [    0, null, null, null, null, null ],
+                          [    0, null,    0, null, null, null ],
+                          [    0, null,    0, null, null, null ],
+                          [ null, null,    0, null,    0, null ],
+                          [ null, null,    0, null,    0, null ],
+                          [ null, null, null, null,    0, null ],
+                          [ null, null, null, null,    0, null ],
+                          [ null, null, null, null, null, null ] ],
+
+                        [ [ null, null, null, null, null, null ],
+                          [    0, null, null, null, null, null ],
+                          [    0, null, null, null, null, null ],
+                          [    0, null,    0, null, null, null ],
+                          [    0, null,    0, null, null, null ],
+                          [ null, null,    0, null,    0, null ],
+                          [ null, null,    0, null,    0, null ],
+                          [ null, null, null, null,    0, null ],
+                          [ null, null, null, null,    0, null ],
+                          [ null, null, null, null, null, null ] ],
+
+                        [ [ null, null, null, null, null, null ],
+                          [    0, null, null, null, null, null ],
+                          [    0, null, null, null, null, null ],
+                          [    0, null,    0, null, null, null ],
+                          [    0, null,    0, null, null, null ],
+                          [ null, null,    0, null,    0, null ],
+                          [ null, null,    0, null,    0, null ],
+                          [ null, null, null, null,    0, null ],
+                          [ null, null, null, null,    0, null ],
+                          [ null, null, null, null, null, null ] ],
+
+                        [ [ null, null, null, null, null, null ], 
+                          [    0, null, null, null, null, null ],
+                          [    0, null, null, null, null, null ],
+                          [    0, null,    0, null, null, null ],
+                          [    0, null,    0, null, null, null ],
+                          [ null, null,    0, null,    0, null ],
+                          [ null, null,    0, null,    0, null ],
+                          [ null, null, null, null,    0, null ],
+                          [ null, null, null, null,    0, null ],
+                          [ null, null, null, null, null, null ] ],
+
+                        [ [ null, null, null, null, null, null ],
+                          [ null, null, null, null, null, null ],
+                          [ null, null, null, null, null, null ],
+                          [ null, null, null, null, null, null ],
+                          [ null, null, null, null, null, null ],
+                          [ null, null, null, null, null, null ],
+                          [ null, null, null, null, null, null ],
+                          [ null, null, null, null, null, null ],
+                          [ null, null, null, null, null, null ],
+                          [ null, null, null, null, null, null ] ] ]; 
+
+	// Defaults
 	var DEFAULT_NOTATION = {
 	
 		rows: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ],
 		files: [ 'a', 'b', 'c', 'd', 'e', 'f' ],
 		levels: [ 1, 2, 3, 4, 5, 6 ],
 		towers: [ 'L1', 'L2', 'L3', 'L4', 'M1', 'M2', 'M3', 'M4', 'H1', 'H2', 'H3', 'H4' ],
-		pieces: [ '', 'N', 'B', 'R', 'Q', 'K', '', 'N', 'B', 'R', 'Q', 'K' ] // Pawn, Knight, Bishop, Rook, Queen, King
+		pieces: [ '', 'N', 'B', 'R', 'Q', 'K'] // Pawn, Knight, Bishop, Rook, Queen, King
 	
 	};
+
+	var DEFAULT_STARTING_FEN = "12bc R/P///////p/r/N/PB/P/2/2/2/2/p/pb/n//Q/P/2/2/2/2/p/q///K/P/2/2/2/2/p/k//N/PB/P/2/2/2/2/p/pb/n/R/P///////p/r w KQkq - 0 1";
+
 
 	// Board (6x10x6): Non existing squares are null
 	var board = [ [ [ null,	   4, null, null, null, null ],
@@ -136,34 +237,107 @@ var Tridchess = new function(notation) {
 	                [ null, null, null, null, null, 7 ],
 	                [ null, null, null, null, null, 10 ] ] ];
 	
-	var TOWER_POSITIONS;
-	var towers = [ 1, 2, 11, 12 ];
+	var board = MAIN_BOARDS;
+	var towers = [];
+	
+	loadFen(DEFAULT_STARTING_FEN);
+	moveTower(1,3);
 
-	this.getBoard = function() { return board };
+	function addTowers(towers) {
 
-	this.movePiece = function(from, to, options) {
+		for (var i = 0; i < towers.length; i++) {
 
-		board[to.file][to.rank][to.level] = board[from.file][from.rank][from.level];
-		board[from.file][from.rank][from.level] = 0;
-		
-	}
+			var towerPos = TOWER_POSITIONS[ towers[i] - 1 ];
 
-	this.moveTower = function(from, to, options) {
+			for (var j = 0; j < towerPos.length; j++) {
 
-		// Update tower positions
-		towers.splice(towers.indexOf(from), 1, to);
-		
-		// Update board
-		var from = TOWER_POSITIONS[from];
-		var to = TOWER_POSITIONS[to];
+				// Add an empty square for each tower square
+				var pos = towerPos[j];
+				place(0, pos);
 
-		for (var i = 0; i < from.length; i++) {
-			
-			movePiece(from[i], to[i]);
-			board[from[i].file][from[i].rank][from[i].level] = null;
+			}
 
 		}
 
 	}
+			
+	function loadFen(fen) {
+
+		// Reset
+		board = MAIN_BOARDS;
+		towers = [];
+
+		var fields = fen.split(' ');
+		console.log("Got fields from fen: " + fields);
+
+		// Get tower positions
+		var towerPos = fields[0].split('');
+		console.log("Got tower positions from fen: " + towerPos);
+
+		// Convert 12-base position to integer
+		for (var i = 0; i < towerPos.length; i++) {
+			
+			towerPos[i] = parseInt(towerPos[i], 13);
+
+		}
+		console.log("Converted tower positions to: " + towerPos)
+
+		// Set towers and add them to the static board
+		towers = towerPos;
+		addTowers(towers);
+
+		//// Get piece positions
+		//var position = fields[1].split('/');
+
+		//var file = fen.split('/', 10);
+		//fen = fen.slice(10);
+		//
+		//for (var i = 0; i < file.length; i++) {
+
+		//	file[i] = file[i].split('');
+
+		//}
+
+	}
+
+	function place(value, pos) {
+
+		board[pos.file][pos.row][pos.level] = value;
+
+	}
+
+	function move(from, to, newFrom = 0) {
+
+		board[to.file][to.row][to.level] = board[from.file][from.row][from.level];
+		board[from.file][from.row][from.level] = newFrom;
+
+	}
+
+	// ------------------------------------------------------------------------
+	// Public methods
+	// ------------------------------------------------------------------------
+
+	this.getBoard = function() { return board; }
+
+	this.movePiece = function(from, to) { move(from, to); }
+
+	function moveTower(from, to) { // TO-DO: Revert to public method
+
+		// Update tower positions
+		towers.splice(towers.indexOf(from), 1, to);
+		
+		// Move pieces and update tower squares
+		var from = TOWER_POSITIONS[from - 1];
+		var to = TOWER_POSITIONS[to - 1];
+
+		for (var i = 0; i < from.length; i++) {
+			
+			move(from[i], to[i], null);
+
+		}
+
+	}
+
+	this.load = function(fen) { loadFen(fen); }
 
 }

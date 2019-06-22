@@ -70,13 +70,15 @@
 			//scene.add(cube);
 			//objects.push(cube);
 
+			// Tridchess
+			var tridchess = new Tridchess();
 			/* Build board */
 
 			var clickable = [];
 			
 			// Board
 			var board = new THREE.Group();
-			var boardArr = Tridchess.getBoard();
+			var boardArr = tridchess.getBoard();
 
 			// Square Indicators
 			var squareInd = new THREE.Group();
