@@ -79,22 +79,26 @@ var Tridchess = function(fen, notation) {
 	// Constants
 	// ------------------------------------------------------------------------
 
-	var TOWER_POSITIONS = [ [ new Pos(0,0,1), new Pos(1,0,1), new Pos(0,1,1), new Pos(1,1,1) ],
-							[ new Pos(4,0,1), new Pos(5,0,1), new Pos(4,1,1), new Pos(5,1,1) ],
-							[ new Pos(0,4,1), new Pos(1,4,1), new Pos(0,5,1), new Pos(1,5,1) ],
-							[ new Pos(4,4,1), new Pos(5,0,1), new Pos(4,5,1), new Pos(5,5,1) ],
+	var TOWER_SQUARES = [  // Low board 
+						 [ new Pos(0,0,1), new Pos(1,0,1), new Pos(0,1,1), new Pos(1,1,1) ],
+						 [ new Pos(4,0,1), new Pos(5,0,1), new Pos(4,1,1), new Pos(5,1,1) ],
+						 [ new Pos(0,4,1), new Pos(1,4,1), new Pos(0,5,1), new Pos(1,5,1) ],
+						 [ new Pos(4,4,1), new Pos(5,0,1), new Pos(4,5,1), new Pos(5,5,1) ],
 
-							[ new Pos(0,2,3), new Pos(1,2,3), new Pos(0,3,3), new Pos(1,3,3) ],
-							[ new Pos(4,2,3), new Pos(5,2,3), new Pos(4,3,3), new Pos(5,3,3) ],
-							[ new Pos(0,6,3), new Pos(1,6,3), new Pos(0,7,3), new Pos(1,7,3) ],
-							[ new Pos(4,6,3), new Pos(5,6,3), new Pos(4,7,3), new Pos(5,7,3) ],
+						 // Middle board
+						 [ new Pos(0,2,3), new Pos(1,2,3), new Pos(0,3,3), new Pos(1,3,3) ],
+						 [ new Pos(4,2,3), new Pos(5,2,3), new Pos(4,3,3), new Pos(5,3,3) ],
+						 [ new Pos(0,6,3), new Pos(1,6,3), new Pos(0,7,3), new Pos(1,7,3) ],
+						 [ new Pos(4,6,3), new Pos(5,6,3), new Pos(4,7,3), new Pos(5,7,3) ],
+							
+						 // High board
+						 [ new Pos(0,4,5), new Pos(1,4,5), new Pos(0,5,5), new Pos(1,5,5) ],
+						 [ new Pos(4,4,5), new Pos(5,0,5), new Pos(4,5,5), new Pos(5,5,5) ],
+						 [ new Pos(0,8,5), new Pos(1,8,5), new Pos(0,9,5), new Pos(1,9,5) ],
+						 [ new Pos(4,8,5), new Pos(5,8,5), new Pos(4,9,5), new Pos(5,9,5) ] ];
 
-							[ new Pos(0,4,5), new Pos(1,4,5), new Pos(0,5,5), new Pos(1,5,5) ],
-							[ new Pos(4,4,5), new Pos(5,0,5), new Pos(4,5,5), new Pos(5,5,5) ],
-							[ new Pos(0,8,5), new Pos(1,8,5), new Pos(0,9,5), new Pos(1,9,5) ],
-							[ new Pos(4,8,5), new Pos(5,8,5), new Pos(4,9,5), new Pos(5,9,5) ] ];
 
-
+	// Board (6x10x6): Non existing squares are null, empty squares zero
 	var MAIN_BOARDS = [ [ [ null, null, null, null, null, null ],
                           [ null, null, null, null, null, null ],
                           [ null, null, null, null, null, null ],
@@ -167,76 +171,24 @@ var Tridchess = function(fen, notation) {
 		rows: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ],
 		files: [ 'a', 'b', 'c', 'd', 'e', 'f' ],
 		levels: [ 1, 2, 3, 4, 5, 6 ],
-		towers: [ 'L1', 'L2', 'L3', 'L4', 'M1', 'M2', 'M3', 'M4', 'H1', 'H2', 'H3', 'H4' ],
-		pieces: [ '', 'N', 'B', 'R', 'Q', 'K'] // Pawn, Knight, Bishop, Rook, Queen, King
+		towers: [ 'L1', 'L2', 'L3', 'L4',
+				  'M1', 'M2', 'M3', 'M4',
+				  'H1', 'H2', 'H3', 'H4' ],
+		// Pieces: Pawn, Knight, Bishop, Rook, Queen, King
+		pieces: [ '', 'N', 'B', 'R', 'Q', 'K' ]
 	
 	};
 
 	var DEFAULT_STARTING_FEN = "12bc R/P///////p/r/N/PB/P/2/2/2/2/p/pb/n//Q/P/2/2/2/2/p/q///K/P/2/2/2/2/p/k//N/PB/P/2/2/2/2/p/pb/n/R/P///////p/r w KQkq - 0 1";
 
-
-	// Board (6x10x6): Non existing squares are null
-	var board = [ [ [ null,	   4, null, null, null, null ],
-	           	    [ null,    1, null, null, null, null ],
-	           	    [ null, null, null, null, null, null ],
-	           	    [ null, null, null, null, null, null ],
-	           	    [ null, null, null, null, null, null ],
-	           	    [ null, null, null, null, null, null ],
-	           	    [ null, null, null, null, null, null ],
-	           	    [ null, null, null, null, null, null ],
-	           	    [ null, null, null, null, null, 7 ],
-	           	    [ null, null, null, null, null, 10 ] ],
-	              [ [ null,    2, null, null, null, null ],
-	                [    1,    3, null, null, null, null ],
-	                [    1, null, null, null, null, null ],
-	                [    0, null,    0, null, null, null ],
-	                [    0, null,    0, null, null, null ],
-	                [ null, null,    0, null,    0, null ],
-	                [ null, null,    0, null,    0, null ],
-	                [ null, null, null, null, 7, null ],
-	                [ null, null, null, null, 7, 9 ],
-	                [ null, null, null, null, null, 8 ] ],
-	              [ [ null, null, null, null, null, null ],
-	                [ 5, null, null, null, null, null ],
-	                [ 1, null, null, null, null, null ],
-	                [    0, null,    0, null, null, null ],
-	                [    0, null,    0, null, null, null ],
-	                [ null, null,    0, null,    0, null ],
-	                [ null, null,    0, null,    0, null ],
-	                [ null, null, null, null, 7, null ],
-	                [ null, null, null, null, 11, null ],
-	                [ null, null, null, null, null, null ] ],
-	              [ [ null, null, null, null, null, null ],
-	                [ 6, null, null, null, null, null ],
-	                [ 1, null, null, null, null, null ],
-	                [    0, null,    0, null, null, null ],
-	                [    0, null,    0, null, null, null ],
-	                [ null, null,    0, null,    0, null ],
-	                [ null, null,    0, null,    0, null ],
-	                [ null, null, null, null, 7, null ],
-	                [ null, null, null, null, 12, null ],
-	                [ null, null, null, null, null, null ] ],
-	              [ [ null, 2, null, null, null, null ], 
-	                [ 1, 3, null, null, null, null ],
-	                [ 1, null, null, null, null, null ],
-	                [    0, null,    0, null, null, null ],
-	                [    0, null,    0, null, null, null ],
-	                [ null, null,    0, null,    0, null ],
-	                [ null, null,    0, null,    0, null ],
-	                [ null, null, null, null, 7, null ],
-	                [ null, null, null, null, 7, 9 ],
-	                [ null, null, null, null, null, 8 ] ],
-	              [ [ null, 4, null, null, null, null ],
-	                [ null, 1, null, null, null, null ],
-	                [ null, null, null, null, null, null ],
-	                [ null, null, null, null, null, null ],
-	                [ null, null, null, null, null, null ],
-	                [ null, null, null, null, null, null ],
-	                [ null, null, null, null, null, null ],
-	                [ null, null, null, null, null, null ],
-	                [ null, null, null, null, null, 7 ],
-	                [ null, null, null, null, null, 10 ] ] ];
+	// ------------------------------------------------------------------------
+	// Init
+	// ------------------------------------------------------------------------
 	
+	// Apply settings or load defaults
+	if (notation === undefined) { notation = DEFAULT_NOTATION; }
+	if (fen === undefined) { fen = DEFAULT_STARTING_FEN; }
+
 	var board = MAIN_BOARDS;
 	var towers = [];
 	
@@ -247,12 +199,13 @@ var Tridchess = function(fen, notation) {
 
 		for (var i = 0; i < towers.length; i++) {
 
-			var towerPos = TOWER_POSITIONS[ towers[i] - 1 ];
+			// Get tower squares from tower positions
+			var towerSquares = TOWER_SQUARES[ towers[i] - 1 ];
 
-			for (var j = 0; j < towerPos.length; j++) {
+			for (var j = 0; j < towerSquares.length; j++) {
 
 				// Add an empty square for each tower square
-				var pos = towerPos[j];
+				var pos = towerSquares[j];
 				place(0, pos);
 
 			}
@@ -318,6 +271,7 @@ var Tridchess = function(fen, notation) {
 	// ------------------------------------------------------------------------
 
 	this.getBoard = function() { return board; }
+	this.getTowers = function() { return towers; }
 
 	this.movePiece = function(from, to) { move(from, to); }
 
@@ -327,8 +281,8 @@ var Tridchess = function(fen, notation) {
 		towers.splice(towers.indexOf(from), 1, to);
 		
 		// Move pieces and update tower squares
-		var from = TOWER_POSITIONS[from - 1];
-		var to = TOWER_POSITIONS[to - 1];
+		var from = TOWER_SQUARES[from - 1];
+		var to = TOWER_SQUARES[to - 1];
 
 		for (var i = 0; i < from.length; i++) {
 			

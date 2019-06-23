@@ -88,8 +88,26 @@
 
 			// Towers
 			var towers = new THREE.Group();
+			var towerPos = [ new THREE.Vector3(0.5, 0, 0.5),
+							 new THREE.Vector3(4.5, 0, 0.5),
+							 new THREE.Vector3(0.5, 0, 4.5),
+							 new THREE.Vector3(4.5, 0, 4.5),
+							 new THREE.Vector3(0.5, 4, 2.5),
+							 new THREE.Vector3(4.5, 4, 2.5),
+							 new THREE.Vector3(0.5, 4, 6.5),
+							 new THREE.Vector3(4.5, 4, 6.5),
+							 new THREE.Vector3(0.5, 8, 8.5),
+							 new THREE.Vector3(4.5, 8, 8.5),
+							 new THREE.Vector3(0.5, 8, 12.5),
+							 new THREE.Vector3(4.5, 8, 12.5) ];
+
+			var towerArr = tridchess.getTowers();
+
 			var towGeo = new THREE.BoxGeometry(0.25, 2, 0.25);
+			towGeo.translate(0, 1, 0); // Set origin at bottom
 			var towMat = new THREE.MeshBasicMaterial( {color: 0xff000} );
+
+			
 
 			// Pieces
 			var pieces = new THREE.Group();
@@ -120,7 +138,7 @@
 
 							ind.position.x = -iFile;
 							ind.position.z = iColumn;
-							ind.position.y = iLevel * 2;
+							ind.position.y = iLevel * 2 + 0.01;
 
 							ind.rotateX(-Math.PI / 2);
 
@@ -150,17 +168,27 @@
 			} 
 
 			// Add Towers
-			var towerPos;
-			var tower = new THREE.Mesh(towGeo, towMat);
+			for (var iTower = 0; iTower < towerArr.length; iTower++) {
+
+				var tower = new THREE.Mesh(towGeo, towMat);
+				
+				console.log("iTower: " + iTower + ", tower: " + towerArr[iTower]);
+				tower.position.x = -towerPos[ towerArr[iTower] - 1].x;
+				tower.position.y = towerPos[ towerArr[iTower]  - 1].y;
+				tower.position.z = towerPos[ towerArr[iTower]  - 1].z;
+
+				towers.add(tower);
+
+			}
 
 			board.add(squareInd);
 			board.add(pieces);
 			board.add(towers);
 
 			// Center board on origin
-			board.position.x += 2.5;
-			board.position.y -= 4;
-			board.position.z -= 4.5;
+			//board.position.x += 2.5;
+			//board.position.y -= 4;
+			//board.position.z -= 4.5;
 
 			scene.add(board);
 
