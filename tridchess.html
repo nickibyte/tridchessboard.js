@@ -83,8 +83,8 @@
 			// Square Indicators
 			var squareInd = new THREE.Group();
 			var indGeo = new THREE.PlaneGeometry();
-			var indMat= new THREE.MeshBasicMaterial( {color: 0xfafcb8/*,
-													  side: THREE.DoubleSide*/} );
+			var indMat= new THREE.MeshBasicMaterial( {color: 0xfafcb8,
+													  side: THREE.DoubleSide} );
 
 			// Towers
 			var towers = new THREE.Group();
@@ -96,10 +96,10 @@
 							 new THREE.Vector3(4.5, 4, 2.5),
 							 new THREE.Vector3(0.5, 4, 6.5),
 							 new THREE.Vector3(4.5, 4, 6.5),
+							 new THREE.Vector3(0.5, 8, 4.5),
+							 new THREE.Vector3(4.5, 8, 4.5),
 							 new THREE.Vector3(0.5, 8, 8.5),
-							 new THREE.Vector3(4.5, 8, 8.5),
-							 new THREE.Vector3(0.5, 8, 12.5),
-							 new THREE.Vector3(4.5, 8, 12.5) ];
+							 new THREE.Vector3(4.5, 8, 8.5) ];
 
 			var towerArr = tridchess.getTowers();
 
@@ -186,9 +186,9 @@
 			board.add(towers);
 
 			// Center board on origin
-			//board.position.x += 2.5;
-			//board.position.y -= 4;
-			//board.position.z -= 4.5;
+			board.position.x += 2.5;
+			board.position.y -= 4;
+			board.position.z -= 4.5;
 
 			scene.add(board);
 
