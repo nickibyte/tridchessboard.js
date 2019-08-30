@@ -60,20 +60,19 @@
 	                [ null, null, null,null,null,'f9^6' ],
 	                [ null, null, null,null,null,'f10^6' ] ] ]; */
 
+// Global Position Object
+
+var Pos = function(file, row, level) {
+
+	this.f = file;
+	this.r = row;
+	this.l = level;
+
+}
+
 
 var Tridchess = function(fen, notation) {
 	
-	// ------------------------------------------------------------------------
-	// Types
-	// ------------------------------------------------------------------------
-
-	var Pos = function(file, row, level) {
-
-		this.file = file;
-		this.row = row;
-		this.level = level;
-
-	}
 
 	// ------------------------------------------------------------------------
 	// Constants
@@ -255,14 +254,14 @@ var Tridchess = function(fen, notation) {
 
 	function place(value, pos) {
 
-		board[pos.file][pos.row][pos.level] = value;
+		board[pos.f][pos.r][pos.l] = value;
 
 	}
 
 	function move(from, to, newFrom = 0) {
 
-		board[to.file][to.row][to.level] = board[from.file][from.row][from.level];
-		board[from.file][from.row][from.level] = newFrom;
+		board[to.f][to.r][to.l] = board[from.f][from.r][from.l];
+		board[from.f][from.r][from.l] = newFrom;
 
 	}
 

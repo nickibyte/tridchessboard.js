@@ -39,7 +39,7 @@
 			renderer.setSize(width, height);
 			document.body.appendChild(renderer.domElement);
 
-			var objects = [];
+			//var objects = [];
 
 			var axesHelper = new THREE.AxesHelper(10);
 			scene.add(axesHelper);
@@ -54,22 +54,15 @@
 			orbitControls.minPolarAngle = 0;
 			orbitControls.maxPolarAngle = Math.PI;
 
-			var dragControls = new THREE.DragControls(objects, camera, renderer.domElement);
-			dragControls.addEventListener('dragstart', function() {
-				orbitControls.enabled = false;
-			});
-			dragControls.addEventListener('dragend', function() {
-				orbitControls.enabled = true;
-			});
+			//var dragControls = new THREE.DragControls(objects, camera, renderer.domElement);
+			//dragControls.addEventListener('dragstart', function() {
+			//	orbitControls.enabled = false;
+			//});
+			//dragControls.addEventListener('dragend', function() {
+			//	orbitControls.enabled = true;
+			//});
 			
 			
-			// World
-			//var geometry = new THREE.BoxGeometry(1, 1, 1);
-			//var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
-			//var cube = new THREE.Mesh(geometry, material);
-			//scene.add(cube);
-			//objects.push(cube);
-
 			// Tridchess
 			var tridchess = new Tridchess();
 			/* Build board */
