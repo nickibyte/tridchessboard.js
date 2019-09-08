@@ -82,7 +82,7 @@ var Tridchess = function(fen, notation) {
 						 [ new Pos(0,0,1), new Pos(1,0,1), new Pos(0,1,1), new Pos(1,1,1) ],
 						 [ new Pos(4,0,1), new Pos(5,0,1), new Pos(4,1,1), new Pos(5,1,1) ],
 						 [ new Pos(0,4,1), new Pos(1,4,1), new Pos(0,5,1), new Pos(1,5,1) ],
-						 [ new Pos(4,4,1), new Pos(5,0,1), new Pos(4,5,1), new Pos(5,5,1) ],
+						 [ new Pos(4,4,1), new Pos(5,4,1), new Pos(4,5,1), new Pos(5,5,1) ],
 
 						 // Middle board
 						 [ new Pos(0,2,3), new Pos(1,2,3), new Pos(0,3,3), new Pos(1,3,3) ],
@@ -92,7 +92,7 @@ var Tridchess = function(fen, notation) {
 							
 						 // High board
 						 [ new Pos(0,4,5), new Pos(1,4,5), new Pos(0,5,5), new Pos(1,5,5) ],
-						 [ new Pos(4,4,5), new Pos(5,0,5), new Pos(4,5,5), new Pos(5,5,5) ],
+						 [ new Pos(4,4,5), new Pos(5,4,5), new Pos(4,5,5), new Pos(5,5,5) ],
 						 [ new Pos(0,8,5), new Pos(1,8,5), new Pos(0,9,5), new Pos(1,9,5) ],
 						 [ new Pos(4,8,5), new Pos(5,8,5), new Pos(4,9,5), new Pos(5,9,5) ] ];
 
@@ -266,9 +266,11 @@ var Tridchess = function(fen, notation) {
 	}
 
 	// ------------------------------------------------------------------------
-	// Public methods
+	// Public methods and variables
 	// ------------------------------------------------------------------------
 
+	this.towerSquares = TOWER_SQUARES;
+	
 	this.getBoard = function() { return board; }
 	this.getTowers = function() { return towers; }
 

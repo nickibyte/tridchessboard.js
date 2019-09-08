@@ -32,14 +32,18 @@
 			var width = window.innerWidth;
 			var height = window.innerHeight;
 			var camera = new THREE.PerspectiveCamera(60, width / height, 1, 1000);
-			camera.position.set(-10, 7, -10);
+			camera.position.set(-10, 7, 10);
+			var mouseMain = new THREE.Vector2();
 
 			var renderer = new THREE.WebGLRenderer( {antialias: true} );
 			renderer.setPixelRatio(window.devicePixelRatio);
 			renderer.setSize(width, height);
 			document.body.appendChild(renderer.domElement);
 
-			//var objects = [];
+			renderer.domElement.addEventListener('mousemove', onDocumentMouseMove);
+			renderer.domElement.addEventListener('mousedown', onDocumentMouseDown);
+
+			var objects = [];
 
 			var axesHelper = new THREE.AxesHelper(10);
 			scene.add(axesHelper);
@@ -61,7 +65,18 @@
 			//dragControls.addEventListener('dragend', function() {
 			//	orbitControls.enabled = true;
 			//});
+
+			var raycaster = new THREE.Raycaster();
 			
+			/* Tri-D-Chess */
+			
+			function posToVector3(pos) {
+
+				var vector = new THREE.Vector3(pos.r, pos.l * 2, pos.f );
+				
+				return vector;
+
+			}
 			
 			// Tridchess
 			var tridchess = new Tridchess();
@@ -72,15 +87,66 @@
 			// Board
 			var board = new THREE.Group();
 			var boardArr = tridchess.getBoard();
-
+			
 			// Square Indicators
 			var squareInd = new THREE.Group();
 			var indGeo = new THREE.PlaneGeometry();
 			var indMat= new THREE.MeshBasicMaterial( {color: 0xfafcb8,
 													  side: THREE.DoubleSide} );
 
+			// ----------------------------------------------------------------
 			// Towers
+			// ----------------------------------------------------------------
+
 			var towers = new THREE.Group();
+			var towGeo = new THREE.BoxGeometry(0.25, 2, 0.25);
+			towGeo.translate(0, -1, 0); // Set origin at bottom
+			var towMat = new THREE.MeshBasicMaterial( {color: 0xff000} );
+
+			// Add Towers
+			for (var tower = 0; tower < 12; tower++) { 
+
+				var towGroup = new THREE.Group();
+				towGroup.name = "T" + (tower+1);
+				var vec;
+
+				for (var square = 0; square < 4; square++) {
+
+					// Get position
+					var pos = tridchess.towerSquares[tower][square];
+					vec = posToVector3(pos); 	
+
+					// Place square indicator
+					var ind = new THREE.Mesh(indGeo, indMat);
+
+					ind.position.x = vec.x;
+					ind.position.y = vec.y;
+					ind.position.z = vec.z;
+
+					ind.rotateX(-Math.PI / 2); // Rotate upright
+
+					ind.name = "Square " + pos.f + ", " + pos.r + ", " + pos.l;
+					towGroup.add(ind);
+					objects.push(ind);
+
+				}
+
+				// Add offset from square to center of tower
+				vec = vec.add( new THREE.Vector3(-0.5, 0, -0.5) ); 
+
+				// Place tower
+				var tow = new THREE.Mesh(towGeo, towMat);
+
+				tow.position.x = vec.x;
+				tow.position.y = vec.y;
+				tow.position.z = vec.z;
+
+				towGroup.add(tow);
+
+				towers.add(towGroup);
+
+			}
+
 			var towerPos = [ new THREE.Vector3(0.5, 0, 0.5),
 							 new THREE.Vector3(4.5, 0, 0.5),
 							 new THREE.Vector3(0.5, 0, 4.5),
@@ -96,11 +162,6 @@
 
 			var towerArr = tridchess.getTowers();
 
-			var towGeo = new THREE.BoxGeometry(0.25, 2, 0.25);
-			towGeo.translate(0, 1, 0); // Set origin at bottom
-			var towMat = new THREE.MeshBasicMaterial( {color: 0xff000} );
-
-			
 
 			// Pieces
 			var pieces = new THREE.Group();
@@ -114,7 +175,7 @@
 			for(var i=0; i<6; i++) {
 				pieModels.push(new THREE.Mesh(pieGeo, pieMat));
 			}
-
+/*
 			// Traverse board
 			for (var iFile = 0; iFile < boardArr.length; iFile++) {
 
@@ -129,8 +190,8 @@
 							// Add indicators
 							var ind = new THREE.Mesh(indGeo, indMat);
 
-							ind.position.x = -iFile;
-							ind.position.z = iColumn;
+							ind.position.z = iFile;
+							ind.position.x = iColumn;
 							ind.position.y = iLevel * 2 + 0.01;
 
 							ind.rotateX(-Math.PI / 2);
@@ -144,8 +205,8 @@
 								//var piece = pieModels[square-1];
 								var piece = new THREE.Mesh(pieGeo, pieMat);
 								
-								piece.position.x = -iFile;
-								piece.position.z = iColumn;
+								piece.position.z = iFile;
+								piece.position.x = iColumn;
 								piece.position.y = iLevel * 2;
 
 								//piece.position.y += pieHeight / 2;
@@ -159,35 +220,47 @@
 					} 
 				} 
 			} 
-
+/*
 			// Add Towers
 			for (var iTower = 0; iTower < towerArr.length; iTower++) {
 
 				var tower = new THREE.Mesh(towGeo, towMat);
 				
 				console.log("iTower: " + iTower + ", tower: " + towerArr[iTower]);
-				tower.position.x = -towerPos[ towerArr[iTower] - 1].x;
+				tower.position.x = towerPos[ towerArr[iTower] - 1].x;
 				tower.position.y = towerPos[ towerArr[iTower]  - 1].y;
 				tower.position.z = towerPos[ towerArr[iTower]  - 1].z;
 
 				towers.add(tower);
 
 			}
-
+*/
 			board.add(squareInd);
 			board.add(pieces);
 			board.add(towers);
 
 			// Center board on origin
-			board.position.x += 2.5;
+			board.position.x -= 4.5;
 			board.position.y -= 4;
-			board.position.z -= 4.5;
+			board.position.z -= 2.5;
 
 			scene.add(board);
 
 			function onDocumentMouseMove(event) { 
 				event.preventDefault();
-				pieces.visible=false; 
+
+				console.log("MouseMove");
+				//mouseMain.x = event.clientX;
+				//mouseMain.y = event.clientY;
+				mouseMain.x = (event.clientX /renderer.domElement.clientWidth) * 2 -1;
+				mouseMain.y = -(event.clientY /renderer.domElement.clientHeight) * 2 +1;
+
+			}
+
+			function onDocumentMouseDown(event) {
+
+				console.log("MouseDown");
+				
 			}
 
 			// Window Resizing
@@ -203,8 +276,23 @@
 			// Animation loop
 			function animate() {
 				requestAnimationFrame(animate);
-				//cube.rotation.x += 0.01;
-				//cube.rotation.y += 0.01;
+
+				raycaster.setFromCamera(mouseMain, camera);
+				var intersected;
+				var intersects = raycaster.intersectObjects(objects);
+				if (intersects.length > 0) {
+					intersected = intersects[0].object;
+					intersected.parent.visible = false;
+					console.log("Intersected " + intersected.name);
+				}
+				else { 
+					if (intersected !== undefined) {
+						intersected.parent.visible = true;
+						intersected = null;
+						console.log("Else");
+					}
+				}
+
 				renderer.render(scene, camera);
 			}
 
