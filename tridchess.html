@@ -40,8 +40,6 @@
 			renderer.setSize(width, height);
 			document.body.appendChild(renderer.domElement);
 
-			renderer.domElement.addEventListener('mousemove', onDocumentMouseMove);
-			renderer.domElement.addEventListener('mousedown', onDocumentMouseDown);
 
 			var objects = [];
 
@@ -248,52 +246,61 @@
 
 			function onDocumentMouseMove(event) { 
 				event.preventDefault();
-
 				console.log("MouseMove");
-				//mouseMain.x = event.clientX;
-				//mouseMain.y = event.clientY;
+
 				mouseMain.x = (event.clientX /renderer.domElement.clientWidth) * 2 -1;
 				mouseMain.y = -(event.clientY /renderer.domElement.clientHeight) * 2 +1;
 
 			}
 
+			renderer.domElement.addEventListener('mousemove', onDocumentMouseMove);
+
+
+			var selected = null;
+
 			function onDocumentMouseDown(event) {
 
+				event.preventDefault();
 				console.log("MouseDown");
+
+				if (selected != null) {
+					selected.parent.visible = true;
+					selected = null;
+					console.log("Make visible");
+				}
+
+				raycaster.setFromCamera(mouseMain, camera);
+				var intersects = raycaster.intersectObjects(objects);
+				if (intersects.length > 0) {
+					selected = intersects[0].object;
+					selected.parent.visible = false;
+					console.log("Intersected " + selected.name);
+				}
 				
 			}
 
+			renderer.domElement.addEventListener('mousedown', onDocumentMouseDown);
+
+
 			// Window Resizing
 			function onWindowResize() {
+
 				camera.aspect = window.innerWidth / window.innerHeight;
 				camera.updateProjectionMatrix();
 
 				renderer.setSize(window.innerWidth, window.innerHeight);
+
 			}
 
 			window.addEventListener('resize', onWindowResize, false);
 
+
 			// Animation loop
 			function animate() {
+
 				requestAnimationFrame(animate);
-
-				raycaster.setFromCamera(mouseMain, camera);
-				var intersected;
-				var intersects = raycaster.intersectObjects(objects);
-				if (intersects.length > 0) {
-					intersected = intersects[0].object;
-					intersected.parent.visible = false;
-					console.log("Intersected " + intersected.name);
-				}
-				else { 
-					if (intersected !== undefined) {
-						intersected.parent.visible = true;
-						intersected = null;
-						console.log("Else");
-					}
-				}
-
 				renderer.render(scene, camera);
+
 			}
 
 			animate();
