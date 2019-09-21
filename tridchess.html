@@ -66,46 +66,61 @@
 
 			var raycaster = new THREE.Raycaster();
 			
-			/* Tri-D-Chess */
+			// ----------------------------------------------------------------
+			// ----------------------------------------------------------------
+			// Setup
+			// ----------------------------------------------------------------
+			// ----------------------------------------------------------------
 			
 			function posToVector3(pos) {
 
-				var vector = new THREE.Vector3(pos.r, pos.l * 2, pos.f );
-				
-				return vector;
+				return new THREE.Vector3(pos.r, pos.l * 2, pos.f );
 
 			}
 			
 			// Tridchess
 			var tridchess = new Tridchess();
-			/* Build board */
 
-			var clickable = [];
+			var selectable = [];
 			
-			// Board
-			var board = new THREE.Group();
-			var boardArr = tridchess.getBoard();
 			
+			// ----------------------------------------------------------------
 			// Square Indicators
-			var squareInd = new THREE.Group();
+			// ----------------------------------------------------------------
+
 			var indGeo = new THREE.PlaneGeometry();
+			indGeo.translate(0, 0, 0.01); // Set origin below square
 			var indMat= new THREE.MeshBasicMaterial( {color: 0xfafcb8,
 													  side: THREE.DoubleSide} );
+
+
+			// ----------------------------------------------------------------
+			// Main Board
+			// ----------------------------------------------------------------
+
+			var board = new THREE.Group();
+
+			// TODO: Build board
+
+
+			var boardArr = tridchess.getBoard();
 
 			// ----------------------------------------------------------------
 			// Towers
 			// ----------------------------------------------------------------
 
-			var towers = new THREE.Group();
 			var towGeo = new THREE.BoxGeometry(0.25, 2, 0.25);
-			towGeo.translate(0, -1, 0); // Set origin at bottom
+			towGeo.translate(0, -1, 0); // Set origin at top
 			var towMat = new THREE.MeshBasicMaterial( {color: 0xff000} );
 
 			// Add Towers
+			var towers = new THREE.Group();
+
 			for (var tower = 0; tower < 12; tower++) { 
 
 				var towGroup = new THREE.Group();
 				towGroup.name = "T" + (tower+1);
+
 				var vec;
 
 				for (var square = 0; square < 4; square++) {
@@ -113,6 +128,10 @@
 					// Get position
 					var pos = tridchess.towerSquares[tower][square];
 					vec = posToVector3(pos); 	
+					
+					var squGroup = new THREE.Group();
+					squGroup.name = 'abcdef'.charAt(pos.f) + pos.r + "_" + pos.l;
+					squGroup.userData = pos;
 
 					// Place square indicator
 					var ind = new THREE.Mesh(indGeo, indMat);
@@ -123,9 +142,8 @@
 
 					ind.rotateX(-Math.PI / 2); // Rotate upright
 
-					ind.name = "Square " + pos.f + ", " + pos.r + ", " + pos.l;
-					towGroup.add(ind);
-					objects.push(ind);
+					squGroup.add(ind);
+					towGroup.add(squGroup);
 
 				}
 
@@ -143,25 +161,17 @@
 
 				towers.add(towGroup);
 
+				selectable.push(towGroup); // DEBUG
 			}
 
-			var towerPos = [ new THREE.Vector3(0.5, 0, 0.5),
-							 new THREE.Vector3(4.5, 0, 0.5),
-							 new THREE.Vector3(0.5, 0, 4.5),
-							 new THREE.Vector3(4.5, 0, 4.5),
-							 new THREE.Vector3(0.5, 4, 2.5),
-							 new THREE.Vector3(4.5, 4, 2.5),
-							 new THREE.Vector3(0.5, 4, 6.5),
-							 new THREE.Vector3(4.5, 4, 6.5),
-							 new THREE.Vector3(0.5, 8, 4.5),
-							 new THREE.Vector3(4.5, 8, 4.5),
-							 new THREE.Vector3(0.5, 8, 8.5),
-							 new THREE.Vector3(4.5, 8, 8.5) ];
 
 			var towerArr = tridchess.getTowers();
 
 
+			// ----------------------------------------------------------------
 			// Pieces
+			// ----------------------------------------------------------------
+
 			var pieces = new THREE.Group();
 			var pieHeight = 1.25;
 
@@ -233,8 +243,6 @@
 
 			}
 */
-			board.add(squareInd);
-			board.add(pieces);
 			board.add(towers);
 
 			// Center board on origin
@@ -270,11 +278,14 @@
 				}
 
 				raycaster.setFromCamera(mouseMain, camera);
-				var intersects = raycaster.intersectObjects(objects);
+				var intersects = raycaster.intersectObjects(selectable, true);
 				if (intersects.length > 0) {
 					selected = intersects[0].object;
 					selected.parent.visible = false;
-					console.log("Intersected " + selected.name);
+					selectable.splice(selectable.indexOf(selected.parent), 1); // NOT FOUND REMOVES LAST ELEMENT
+
+					console.log("Selected " + selected.parent.name);
+					console.log(selectable);
 				}
 				
 			}
