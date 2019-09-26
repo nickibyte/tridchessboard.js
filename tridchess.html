@@ -65,7 +65,9 @@
 			//});
 
 			var raycaster = new THREE.Raycaster();
+			var selectable = [];
 			
+
 			// ----------------------------------------------------------------
 			// ----------------------------------------------------------------
 			// Setup
@@ -80,8 +82,6 @@
 			
 			// Tridchess
 			var tridchess = new Tridchess();
-
-			var selectable = [];
 			
 			
 			// ----------------------------------------------------------------
@@ -99,11 +99,43 @@
 			// ----------------------------------------------------------------
 
 			var board = new THREE.Group();
+			board.position.set(-4.5, -4, -2.5); // Center board on origin
 
-			// TODO: Build board
+			scene.add(board);
 
+			// Add board model
+			var boardGeo = new THREE.BoxGeometry();
+			boardGeo.translate(0, -0.5, 0); // Set origin at top
+			var boardMat = new THREE.MeshBasicMaterial( {color: 0x92b4ce} );
+			
+			var boardMod = new THREE.Mesh(boardGeo, boardMat);
+			boardMod.position.set(4.5, 4, 2.5);
 
-			var boardArr = tridchess.getBoard();
+			board.add(boardMod);
+
+			// Add squares
+			for (var square = 0; square < 48; square++) {
+				
+				// Get position
+				var pos = MAIN_SQUARES[square];
+				vec = posToVector3(pos); 	
+				
+				var squGroup = new THREE.Group();
+				squGroup.name = 'abcdef'.charAt(pos.f) + pos.r + "_" + pos.l;
+				squGroup.userData = pos;
+
+				// Place square indicator
+				var ind = new THREE.Mesh(indGeo, indMat);
+
+				ind.position.set(vec.x, vec.y, vec.z);
+				ind.rotateX(-Math.PI / 2); // Rotate upright
+
+				squGroup.add(ind);
+				board.add(squGroup);
+
+				selectable.push(squGroup); // DEBUG
+			}
+
 
 			// ----------------------------------------------------------------
 			// Towers
@@ -126,7 +158,7 @@
 				for (var square = 0; square < 4; square++) {
 
 					// Get position
-					var pos = tridchess.towerSquares[tower][square];
+					var pos = TOWER_SQUARES[tower][square];
 					vec = posToVector3(pos); 	
 					
 					var squGroup = new THREE.Group();
@@ -136,10 +168,7 @@
 					// Place square indicator
 					var ind = new THREE.Mesh(indGeo, indMat);
 
-					ind.position.x = vec.x;
-					ind.position.y = vec.y;
-					ind.position.z = vec.z;
-
+					ind.position.set(vec.x, vec.y, vec.z);
 					ind.rotateX(-Math.PI / 2); // Rotate upright
 
 					squGroup.add(ind);
@@ -153,19 +182,15 @@
 				// Place tower
 				var tow = new THREE.Mesh(towGeo, towMat);
 
-				tow.position.x = vec.x;
-				tow.position.y = vec.y;
-				tow.position.z = vec.z;
+				tow.position.set(vec.x, vec.y, vec.z);
 
 				towGroup.add(tow);
-
 				towers.add(towGroup);
 
 				selectable.push(towGroup); // DEBUG
 			}
 
-
-			var towerArr = tridchess.getTowers();
+			board.add(towers);
 
 
 			// ----------------------------------------------------------------
@@ -183,74 +208,17 @@
 			for(var i=0; i<6; i++) {
 				pieModels.push(new THREE.Mesh(pieGeo, pieMat));
 			}
-/*
-			// Traverse board
-			for (var iFile = 0; iFile < boardArr.length; iFile++) {
 
-				for (var iColumn = 0; iColumn < boardArr[iFile].length; iColumn++) {
 
-					for (var iLevel = 0; iLevel < boardArr[iFile][iColumn].length; iLevel++) {
-						
-						var square = boardArr[iFile][iColumn][iLevel]; 
+			// ----------------------------------------------------------------
+			// ----------------------------------------------------------------
+			// Update
+			// ----------------------------------------------------------------
+			// ----------------------------------------------------------------
 
-						if (square !== null) {
-
-							// Add indicators
-							var ind = new THREE.Mesh(indGeo, indMat);
-
-							ind.position.z = iFile;
-							ind.position.x = iColumn;
-							ind.position.y = iLevel * 2 + 0.01;
-
-							ind.rotateX(-Math.PI / 2);
-
-							squareInd.add(ind);
-
-							// Add pieces
-							// 1:Pawn, 2:Knight, 3:Bishop, 4:Rook, 5:Queen, 6:King
-							if (square !== 0) {
-
-								//var piece = pieModels[square-1];
-								var piece = new THREE.Mesh(pieGeo, pieMat);
-								
-								piece.position.z = iFile;
-								piece.position.x = iColumn;
-								piece.position.y = iLevel * 2;
-
-								//piece.position.y += pieHeight / 2;
-								
-								pieces.add(piece);
-
-								clickable.push(piece);
-
-							}
-						}
-					} 
-				} 
-			} 
-/*
-			// Add Towers
-			for (var iTower = 0; iTower < towerArr.length; iTower++) {
-
-				var tower = new THREE.Mesh(towGeo, towMat);
-				
-				console.log("iTower: " + iTower + ", tower: " + towerArr[iTower]);
-				tower.position.x = towerPos[ towerArr[iTower] - 1].x;
-				tower.position.y = towerPos[ towerArr[iTower]  - 1].y;
-				tower.position.z = towerPos[ towerArr[iTower]  - 1].z;
-
-				towers.add(tower);
-
-			}
-*/
-			board.add(towers);
-
-			// Center board on origin
-			board.position.x -= 4.5;
-			board.position.y -= 4;
-			board.position.z -= 2.5;
-
-			scene.add(board);
+			// Update 
+			var towerArr = tridchess.getTowers();
+			var boardArr = tridchess.getBoard();
 
 			function onDocumentMouseMove(event) { 
 				event.preventDefault();
@@ -282,7 +250,11 @@
 				if (intersects.length > 0) {
 					selected = intersects[0].object;
 					selected.parent.visible = false;
-					selectable.splice(selectable.indexOf(selected.parent), 1); // NOT FOUND REMOVES LAST ELEMENT
+
+					var index = selectable.indexOf(selected.parent);
+					if (index != -1) {
+						selectable.splice(index, 1); // NOT FOUND REMOVES LAST ELEMENT
+					}
 
 					console.log("Selected " + selected.parent.name);
 					console.log(selectable);

@@ -60,7 +60,12 @@
 	                [ null, null, null,null,null,'f9^6' ],
 	                [ null, null, null,null,null,'f10^6' ] ] ]; */
 
-// Global Position Object
+
+// ----------------------------------------------------------------
+// ----------------------------------------------------------------
+// Globals
+// ----------------------------------------------------------------
+// ----------------------------------------------------------------
 
 var Pos = function(file, row, level) {
 
@@ -70,54 +75,55 @@ var Pos = function(file, row, level) {
 
 }
 
+var TOWER_SQUARES = [ // Low board 
+					  [ new Pos(0,0,1), new Pos(1,0,1), new Pos(0,1,1), new Pos(1,1,1) ],
+					  [ new Pos(4,0,1), new Pos(5,0,1), new Pos(4,1,1), new Pos(5,1,1) ],
+					  [ new Pos(0,4,1), new Pos(1,4,1), new Pos(0,5,1), new Pos(1,5,1) ],
+					  [ new Pos(4,4,1), new Pos(5,4,1), new Pos(4,5,1), new Pos(5,5,1) ],
+
+					  // Middle board
+					  [ new Pos(0,2,3), new Pos(1,2,3), new Pos(0,3,3), new Pos(1,3,3) ],
+					  [ new Pos(4,2,3), new Pos(5,2,3), new Pos(4,3,3), new Pos(5,3,3) ],
+					  [ new Pos(0,6,3), new Pos(1,6,3), new Pos(0,7,3), new Pos(1,7,3) ],
+					  [ new Pos(4,6,3), new Pos(5,6,3), new Pos(4,7,3), new Pos(5,7,3) ],
+					     
+					  // High board
+					  [ new Pos(0,4,5), new Pos(1,4,5), new Pos(0,5,5), new Pos(1,5,5) ],
+					  [ new Pos(4,4,5), new Pos(5,4,5), new Pos(4,5,5), new Pos(5,5,5) ],
+					  [ new Pos(0,8,5), new Pos(1,8,5), new Pos(0,9,5), new Pos(1,9,5) ],
+					  [ new Pos(4,8,5), new Pos(5,8,5), new Pos(4,9,5), new Pos(5,9,5) ] ];
+
+var MAIN_SQUARES = [ // Low board 
+					 new Pos(1,1,0), new Pos(2,1,0), new Pos(3,1,0), new Pos(4,1,0),
+					 new Pos(1,2,0), new Pos(2,2,0), new Pos(3,2,0), new Pos(4,2,0),
+					 new Pos(1,3,0), new Pos(2,3,0), new Pos(3,3,0), new Pos(4,3,0),
+					 new Pos(1,4,0), new Pos(2,4,0), new Pos(3,4,0), new Pos(4,4,0),
+
+					 // Middle board
+					 new Pos(1,3,2), new Pos(2,3,2), new Pos(3,3,2), new Pos(4,3,2),
+					 new Pos(1,4,2), new Pos(2,4,2), new Pos(3,4,2), new Pos(4,4,2),
+					 new Pos(1,5,2), new Pos(2,5,2), new Pos(3,5,2), new Pos(4,5,2),
+					 new Pos(1,6,2), new Pos(2,6,2), new Pos(3,6,2), new Pos(4,6,2),
+					   
+					 // High board
+					 new Pos(1,5,4), new Pos(2,5,4), new Pos(3,5,4), new Pos(4,5,4),
+					 new Pos(1,6,4), new Pos(2,6,4), new Pos(3,6,4), new Pos(4,6,4),
+					 new Pos(1,7,4), new Pos(2,7,4), new Pos(3,7,4), new Pos(4,7,4),
+					 new Pos(1,8,4), new Pos(2,8,4), new Pos(3,8,4), new Pos(4,8,4) ];
+
+
+// ----------------------------------------------------------------
+// ----------------------------------------------------------------
+// Tri-D-Chess
+// ----------------------------------------------------------------
+// ----------------------------------------------------------------
 
 var Tridchess = function(fen, notation) {
 	
 
-	// ------------------------------------------------------------------------
-	// Constants
-	// ------------------------------------------------------------------------
-
-	// TODO: Make Constants global
-
-	var TOWER_SQUARES = [ // Low board 
-						  [ new Pos(0,0,1), new Pos(1,0,1), new Pos(0,1,1), new Pos(1,1,1) ],
-						  [ new Pos(4,0,1), new Pos(5,0,1), new Pos(4,1,1), new Pos(5,1,1) ],
-						  [ new Pos(0,4,1), new Pos(1,4,1), new Pos(0,5,1), new Pos(1,5,1) ],
-						  [ new Pos(4,4,1), new Pos(5,4,1), new Pos(4,5,1), new Pos(5,5,1) ],
-
-						  // Middle board
-						  [ new Pos(0,2,3), new Pos(1,2,3), new Pos(0,3,3), new Pos(1,3,3) ],
-						  [ new Pos(4,2,3), new Pos(5,2,3), new Pos(4,3,3), new Pos(5,3,3) ],
-						  [ new Pos(0,6,3), new Pos(1,6,3), new Pos(0,7,3), new Pos(1,7,3) ],
-						  [ new Pos(4,6,3), new Pos(5,6,3), new Pos(4,7,3), new Pos(5,7,3) ],
-						     
-						  // High board
-						  [ new Pos(0,4,5), new Pos(1,4,5), new Pos(0,5,5), new Pos(1,5,5) ],
-						  [ new Pos(4,4,5), new Pos(5,4,5), new Pos(4,5,5), new Pos(5,5,5) ],
-						  [ new Pos(0,8,5), new Pos(1,8,5), new Pos(0,9,5), new Pos(1,9,5) ],
-						  [ new Pos(4,8,5), new Pos(5,8,5), new Pos(4,9,5), new Pos(5,9,5) ] ];
-
-	var MAIN_SQUARES = [ // Low board 
-						 new Pos(1,1,0), new Pos(2,1,0), new Pos(3,1,0), new Pos(4,1,0),
-						 new Pos(1,2,0), new Pos(2,2,0), new Pos(3,2,0), new Pos(4,2,0),
-						 new Pos(1,3,0), new Pos(2,3,0), new Pos(3,3,0), new Pos(4,3,0),
-						 new Pos(1,4,0), new Pos(2,4,0), new Pos(3,4,0), new Pos(4,4,0),
-
-						 // Middle board
-						 new Pos(1,3,2), new Pos(2,3,2), new Pos(3,3,2), new Pos(4,3,2),
-						 new Pos(1,4,2), new Pos(2,4,2), new Pos(3,4,2), new Pos(4,4,2),
-						 new Pos(1,5,2), new Pos(2,5,2), new Pos(3,5,2), new Pos(4,5,2),
-						 new Pos(1,6,2), new Pos(2,6,2), new Pos(3,6,2), new Pos(4,6,2),
-						   
-						 // High board
-						 new Pos(1,5,4), new Pos(2,5,4), new Pos(3,5,4), new Pos(4,5,4),
-						 new Pos(1,6,4), new Pos(2,6,4), new Pos(3,6,4), new Pos(4,6,4),
-						 new Pos(1,7,4), new Pos(2,7,4), new Pos(3,7,4), new Pos(4,7,4),
-						 new Pos(1,8,4), new Pos(2,8,4), new Pos(3,8,4), new Pos(4,9,4) ];
-
 	// Board (6x10x6): Non existing squares are null, empty squares empty strings
-	var MAIN_BOARDS = [ [ [ null, null, null, null, null, null ], // TODO: Generate MAIN_BOARDS from MAIN_SQUARES
+	// TODO: Generate MAIN_BOARDS from MAIN_SQUARES
+	var MAIN_BOARDS = [ [ [ null, null, null, null, null, null ], 
                           [ null, null, null, null, null, null ],
                           [ null, null, null, null, null, null ],
                           [ null, null, null, null, null, null ],
@@ -198,6 +204,7 @@ var Tridchess = function(fen, notation) {
 	};
 
 	var DEFAULT_STARTING_FEN = "12bc R/P///////p/r/N/PB/P/2/2/2/2/p/pb/n//Q/P/2/2/2/2/p/q///K/P/2/2/2/2/p/k//N/PB/P/2/2/2/2/p/pb/n/R/P///////p/r w KQkq - 0 1";
+
 
 	// ------------------------------------------------------------------------
 	// Init
@@ -284,12 +291,11 @@ var Tridchess = function(fen, notation) {
 
 	}
 
+
 	// ------------------------------------------------------------------------
 	// Public methods and variables
 	// ------------------------------------------------------------------------
 
-	this.towerSquares = TOWER_SQUARES;
-	
 	this.getBoard = function() { return board; }
 	this.getTowers = function() { return towers; }
 
