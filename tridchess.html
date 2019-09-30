@@ -197,18 +197,29 @@
 			// Pieces
 			// ----------------------------------------------------------------
 
-			var pieces = new THREE.Group();
+			var pieces = [];
 			var pieHeight = 1.25;
 
 			var pieGeo = new THREE.BoxGeometry(0.5, pieHeight, 0.5);
 			pieGeo.translate(0, pieHeight / 2, 0); // Set Origin at bottom
 			var pieMat = new THREE.MeshBasicMaterial( {color: 0xaabce2} );
 
-			var pieModels = [];
+			/*var pieModels = [];
 			for(var i=0; i<6; i++) {
 				pieModels.push(new THREE.Mesh(pieGeo, pieMat));
-			}
+			}*/
 
+			// Pieces: Pawn, Knight, Bishop, Rook, Queen, King
+			var pieModels = {
+
+				p: null,
+				n: null,
+				b: null,
+				r: null,
+				q: null,
+				k: null
+
+			};
 
 			// ----------------------------------------------------------------
 			// ----------------------------------------------------------------
@@ -216,9 +227,37 @@
 			// ----------------------------------------------------------------
 			// ----------------------------------------------------------------
 
-			// Update 
-			var towerArr = tridchess.getTowers();
-			var boardArr = tridchess.getBoard();
+			function updateBoard() {
+
+				// Get tower and piece positions
+				var towArr = tridchess.getTowers();
+				var boardArr = tridchess.getBoard();
+
+				// Deactivate all towers
+				for (var i = 0; i < towers.children.length; i++) {
+
+					towers.children[i].visible = false;
+
+				}
+
+				// TODO: Make all towers unselectable
+
+				// Activate placed towers
+				for (var i = 0; i < towArr.length; i++) {
+
+					var towPos = towArr[i];
+					var tower = towers.getObjectByName("T" + towPos);
+
+					tower.visible = true;
+
+					// TODO: Make selectable
+
+				}
+
+			}
+
+			tridchess.moveTower(1,5);
+			updateBoard();
 
 			function onDocumentMouseMove(event) { 
 				event.preventDefault();

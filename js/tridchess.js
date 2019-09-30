@@ -218,7 +218,6 @@ var Tridchess = function(fen, notation) {
 	var towers = [];
 	
 	loadFen(DEFAULT_STARTING_FEN);
-	moveTower(1,3);
 
 	function addTowers(towers) {
 
@@ -301,7 +300,7 @@ var Tridchess = function(fen, notation) {
 
 	this.movePiece = function(from, to) { move(from, to); }
 
-	function moveTower(from, to) { // TO-DO: Revert to public method
+	this.moveTower = function(from, to) { 
 
 		// Update tower positions
 		towers.splice(towers.indexOf(from), 1, to);
