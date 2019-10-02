@@ -121,7 +121,7 @@
 				vec = posToVector3(pos); 	
 				
 				var squGroup = new THREE.Group();
-				squGroup.name = 'abcdef'.charAt(pos.f) + pos.r + "_" + pos.l;
+				squGroup.name = 'abcdef'.charAt(pos.f) + (pos.r + 1) + '_' + (pos.l + 1);
 				squGroup.userData = pos;
 
 				// Place square indicator
@@ -151,7 +151,7 @@
 			for (var tower = 0; tower < 12; tower++) { 
 
 				var towGroup = new THREE.Group();
-				towGroup.name = "T" + (tower+1);
+				towGroup.name = 'T' + (tower+1);
 
 				var vec;
 
@@ -162,7 +162,7 @@
 					vec = posToVector3(pos); 	
 					
 					var squGroup = new THREE.Group();
-					squGroup.name = 'abcdef'.charAt(pos.f) + pos.r + "_" + pos.l;
+					squGroup.name = 'abcdef'.charAt(pos.f) + (pos.r + 1) + '_' + (pos.l + 1);
 					squGroup.userData = pos;
 
 					// Place square indicator
@@ -212,12 +212,12 @@
 			// Pieces: Pawn, Knight, Bishop, Rook, Queen, King
 			var pieModels = {
 
-				p: null,
-				n: null,
-				b: null,
-				r: null,
-				q: null,
-				k: null
+				p: new THREE.Mesh(pieGeo, pieMat),
+				n: new THREE.Mesh(pieGeo, pieMat),
+				b: new THREE.Mesh(pieGeo, pieMat),
+				r: new THREE.Mesh(pieGeo, pieMat), 
+				q: new THREE.Mesh(pieGeo, pieMat), 
+				k: new THREE.Mesh(pieGeo, pieMat) 
 
 			};
 
@@ -246,7 +246,7 @@
 				for (var i = 0; i < towArr.length; i++) {
 
 					var towPos = towArr[i];
-					var tower = towers.getObjectByName("T" + towPos);
+					var tower = towers.getObjectByName('T' + towPos);
 
 					tower.visible = true;
 
@@ -254,10 +254,60 @@
 
 				}
 
+				// Delete all pieces
+				for (var i = 0; i < pieces.length; i++) {
+
+					console.log("Deleted " + pieces[i].parent.name);
+					pieces[i].parent.remove(pieces[i]);
+
+				}
+
+				// Place pieces
+				pieces = [];
+				console.log(pieces); // DEBUG
+
+				for (var f = 0; f < boardArr.length; f++) {
+					for (var r = 0; r < boardArr[f].length; r++) {
+						for (var l = 0; l < boardArr[f][r].length; l++) {
+
+							var pieType = boardArr[f][r][l];
+
+							if (pieType != null && pieType != '') {
+
+								// Get position as Pos, vector and string (fr_l)
+								var pos = new Pos(f, r, l);
+								var vec = posToVector3(pos);
+								var sPos = 'abcdef'.charAt(pos.f) + (pos.r + 1) + '_' + (pos.l + 1);
+
+								// Place appropriate piece model
+								var piece = pieModels[pieType].clone();
+
+								piece.position.set(vec.x, vec.y, vec.z);
+
+								// Add piece to square
+								var squ = board.getObjectByName(sPos, true);
+								squ.add(piece);
+
+								// Add piece to pieces array
+								pieces.push(piece);
+
+							}
+
+						}
+					}
+				}
+
 			}
 
+			// DEBUG
+			tridchess.placePiece('p', new Pos(1,1,0));
 			tridchess.moveTower(1,5);
 			updateBoard();
+			tridchess.placePiece('p', new Pos(3,3,2));
+			tridchess.moveTower(2,4);
+			updateBoard();
+			updateBoard();
+
 
 			function onDocumentMouseMove(event) { 
 				event.preventDefault();

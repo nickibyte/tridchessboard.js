@@ -263,6 +263,8 @@ var Tridchess = function(fen, notation) {
 		towers = towerPos;
 		addTowers(towers);
 
+		// TODO: Add pieces
+
 		//// Get piece positions
 		//var position = fields[1].split('/');
 
@@ -298,6 +300,7 @@ var Tridchess = function(fen, notation) {
 	this.getBoard = function() { return board; }
 	this.getTowers = function() { return towers; }
 
+	this.placePiece = function(value, pos) { place(value, pos); } // TODO: Remove public or change
 	this.movePiece = function(from, to) { move(from, to); }
 
 	this.moveTower = function(from, to) { 
