@@ -5,8 +5,8 @@
 		<title>tri-d-chess</title>
 		<style>
 			body {
-				background-color: #000;
-				color: #000;
+				background-color: #afafaf;
+				color: #afafaf;
 				margin: 0;
 			}
 
@@ -38,10 +38,10 @@
 			var renderer = new THREE.WebGLRenderer( {antialias: true} );
 			renderer.setPixelRatio(window.devicePixelRatio);
 			renderer.setSize(width, height);
+			renderer.setClearColor(0xafafaf, 1);
 			document.body.appendChild(renderer.domElement);
 
-
-			var objects = [];
+			//var objects = [];
 
 			var axesHelper = new THREE.AxesHelper(10);
 			scene.add(axesHelper);
@@ -200,32 +200,37 @@
 			var pieces = [];
 			var pieHeight = 1.25;
 
-			var pieGeo = new THREE.BoxGeometry(0.5, pieHeight, 0.5);
-			pieGeo.translate(0, pieHeight / 2, 0); // Set Origin at bottom
-			var pieMat = new THREE.MeshBasicMaterial( {color: 0xaabce2} );
+			function pieGeo(height) {
 
-			/*var pieModels = [];
-			for(var i=0; i<6; i++) {
-				pieModels.push(new THREE.Mesh(pieGeo, pieMat));
-			}*/
+				var pieGeo = new THREE.BoxGeometry(0.5, height, 0.5);
+				pieGeo.translate(0, height / 2, 0); // Set Origin at bottom
+
+				return pieGeo;
+
+			}
+
+			var pieMatWhite = new THREE.MeshBasicMaterial( {color: 0xededed} );
+			var pieMatBlack = new THREE.MeshBasicMaterial( {color: 0x0c0c0c} );
 
 			// Pieces: Pawn, Knight, Bishop, Rook, Queen, King
+			// White: uppercase, Black: lowercase
 			var pieModels = {
 
-				P: new THREE.Mesh(pieGeo, pieMat),
-				N: new THREE.Mesh(pieGeo, pieMat),
-				B: new THREE.Mesh(pieGeo, pieMat),
-				R: new THREE.Mesh(pieGeo, pieMat), 
-				Q: new THREE.Mesh(pieGeo, pieMat), 
-				K: new THREE.Mesh(pieGeo, pieMat),
-				p: new THREE.Mesh(pieGeo, pieMat),
-				n: new THREE.Mesh(pieGeo, pieMat),
-				b: new THREE.Mesh(pieGeo, pieMat),
-				r: new THREE.Mesh(pieGeo, pieMat), 
-				q: new THREE.Mesh(pieGeo, pieMat), 
-				k: new THREE.Mesh(pieGeo, pieMat) 
+				P: new THREE.Mesh(pieGeo(0.6), pieMatWhite),
+				N: new THREE.Mesh(pieGeo(0.9), pieMatWhite),
+				B: new THREE.Mesh(pieGeo(1), pieMatWhite),
+				R: new THREE.Mesh(pieGeo(0.8), pieMatWhite), 
+				Q: new THREE.Mesh(pieGeo(1.2), pieMatWhite), 
+				K: new THREE.Mesh(pieGeo(1.25), pieMatWhite),
+				p: new THREE.Mesh(pieGeo(0.6), pieMatBlack),
+				n: new THREE.Mesh(pieGeo(0.9), pieMatBlack),
+				b: new THREE.Mesh(pieGeo(1), pieMatBlack),
+				r: new THREE.Mesh(pieGeo(0.8), pieMatBlack), 
+				q: new THREE.Mesh(pieGeo(1.2), pieMatBlack), 
+				k: new THREE.Mesh(pieGeo(1.25), pieMatBlack) 
 
 			};
+
 
 			// ----------------------------------------------------------------
 			// ----------------------------------------------------------------
@@ -278,7 +283,7 @@
 
 							var pieType = boardArr[f][r][l];
 
-							if (pieType != null && pieType != ' ') {
+							if (pieType !== null && pieType !== ' ') {
 
 								// Get position as Pos, vector and string (fr_l)
 								var pos = new Pos(f, r, l);
@@ -305,14 +310,16 @@
 
 			}
 
+			updateBoard();
+
 			// DEBUG
 			//tridchess.placePiece('p', new Pos(1,1,0));
-			tridchess.moveTower(1,5);
-			//updateBoard();
+			////updateBoard();
+			//tridchess.moveTower(1,5);
+			////updateBoard();
 			//tridchess.placePiece('p', new Pos(3,3,2));
 			//tridchess.moveTower(2,4);
 			//updateBoard();
-			updateBoard();
 
 
 			function onDocumentMouseMove(event) { 
@@ -334,8 +341,8 @@
 				event.preventDefault();
 				console.log("MouseDown");
 
-				if (selected != null) {
-					selected.parent.visible = true;
+				if (selected !== null) {
+					//selected.visible = true;
 					selected = null;
 					console.log("Make visible");
 				}
@@ -343,15 +350,15 @@
 				raycaster.setFromCamera(mouseMain, camera);
 				var intersects = raycaster.intersectObjects(selectable, true);
 				if (intersects.length > 0) {
-					selected = intersects[0].object;
-					selected.parent.visible = false;
+					selected = intersects[0].object.parent;
+					selected.visible = false;
 
-					var index = selectable.indexOf(selected.parent);
-					if (index != -1) {
-						selectable.splice(index, 1); // NOT FOUND REMOVES LAST ELEMENT
-					}
+					//var index = selectable.indexOf(selected);
+					//if (index !== -1) {
+					//	selectable.splice(index, 1); // NOT FOUND REMOVES LAST ELEMENT
+					//}
 
-					console.log("Selected " + selected.parent.name);
+					console.log("Selected " + selected.name);
 					console.log(selectable);
 				}
 				
