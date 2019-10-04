@@ -135,47 +135,47 @@ var Tridchess = function(fen, notation) {
                           [ null, null, null, null, null, null ] ],
 
                         [ [ null, null, null, null, null, null ],
-                          [   '', null, null, null, null, null ],
-                          [   '', null, null, null, null, null ],
-                          [   '', null,   '', null, null, null ],
-                          [   '', null,   '', null, null, null ],
-                          [ null, null,   '', null,   '', null ],
-                          [ null, null,   '', null,   '', null ],
-                          [ null, null, null, null,   '', null ],
-                          [ null, null, null, null,   '', null ],
+                          [   ' ', null, null, null, null, null ],
+                          [   ' ', null, null, null, null, null ],
+                          [   ' ', null,   ' ', null, null, null ],
+                          [   ' ', null,   ' ', null, null, null ],
+                          [ null, null,   ' ', null,   ' ', null ],
+                          [ null, null,   ' ', null,   ' ', null ],
+                          [ null, null, null, null,   ' ', null ],
+                          [ null, null, null, null,   ' ', null ],
                           [ null, null, null, null, null, null ] ],
 
                         [ [ null, null, null, null, null, null ],
-                          [   '', null, null, null, null, null ],
-                          [   '', null, null, null, null, null ],
-                          [   '', null,   '', null, null, null ],
-                          [   '', null,   '', null, null, null ],
-                          [ null, null,   '', null,   '', null ],
-                          [ null, null,   '', null,   '', null ],
-                          [ null, null, null, null,   '', null ],
-                          [ null, null, null, null,   '', null ],
+                          [   ' ', null, null, null, null, null ],
+                          [   ' ', null, null, null, null, null ],
+                          [   ' ', null,   ' ', null, null, null ],
+                          [   ' ', null,   ' ', null, null, null ],
+                          [ null, null,   ' ', null,   ' ', null ],
+                          [ null, null,   ' ', null,   ' ', null ],
+                          [ null, null, null, null,   ' ', null ],
+                          [ null, null, null, null,   ' ', null ],
                           [ null, null, null, null, null, null ] ],
 
                         [ [ null, null, null, null, null, null ],
-                          [   '', null, null, null, null, null ],
-                          [   '', null, null, null, null, null ],
-                          [   '', null,   '', null, null, null ],
-                          [   '', null,   '', null, null, null ],
-                          [ null, null,   '', null,   '', null ],
-                          [ null, null,   '', null,   '', null ],
-                          [ null, null, null, null,   '', null ],
-                          [ null, null, null, null,   '', null ],
+                          [   ' ', null, null, null, null, null ],
+                          [   ' ', null, null, null, null, null ],
+                          [   ' ', null,   ' ', null, null, null ],
+                          [   ' ', null,   ' ', null, null, null ],
+                          [ null, null,   ' ', null,   ' ', null ],
+                          [ null, null,   ' ', null,   ' ', null ],
+                          [ null, null, null, null,   ' ', null ],
+                          [ null, null, null, null,   ' ', null ],
                           [ null, null, null, null, null, null ] ],
 
                         [ [ null, null, null, null, null, null ], 
-                          [   '', null, null, null, null, null ],
-                          [   '', null, null, null, null, null ],
-                          [   '', null,   '', null, null, null ],
-                          [   '', null,   '', null, null, null ],
-                          [ null, null,   '', null,   '', null ],
-                          [ null, null,   '', null,   '', null ],
-                          [ null, null, null, null,   '', null ],
-                          [ null, null, null, null,   '', null ],
+                          [   ' ', null, null, null, null, null ],
+                          [   ' ', null, null, null, null, null ],
+                          [   ' ', null,   ' ', null, null, null ],
+                          [   ' ', null,   ' ', null, null, null ],
+                          [ null, null,   ' ', null,   ' ', null ],
+                          [ null, null,   ' ', null,   ' ', null ],
+                          [ null, null, null, null,   ' ', null ],
+                          [ null, null, null, null,   ' ', null ],
                           [ null, null, null, null, null, null ] ],
 
                         [ [ null, null, null, null, null, null ],
@@ -230,7 +230,7 @@ var Tridchess = function(fen, notation) {
 
 				// Add an empty square for each tower square
 				var pos = towerSquares[j];
-				place('', pos);
+				place(' ', pos);
 
 			}
 
@@ -263,21 +263,44 @@ var Tridchess = function(fen, notation) {
 		towers = towerPos;
 		addTowers(towers);
 
-		// TODO: Add pieces
 
-		//// Get piece positions
-		//var position = fields[1].split('/');
+		// Get piece positions
+		var position = fields[1].split('/'); // Remove slashes
+		position = position.join('');
 
-		//var file = fen.split('/', 10);
-		//fen = fen.slice(10);
-		//
-		//for (var i = 0; i < file.length; i++) {
+		// Expand empty squares
+		for (var i = 0; i < position.length; i++) {
 
-		//	file[i] = file[i].split('');
+			if ('0123456789'.indexOf(position[i]) !== -1) { // Is number
+				
+				// Replace number with number of spaces (3 ->    )
+				var num = parseInt(position[i], 10);
+				var str = new Array(num + 1).join(' ');
+				position = position.replace(position[i], str);
 
-		//}
+			}
+
+		}
+
+		// Place pieces
+		var i = 0;
+
+		for (var f = 0; f < board.length; f++) {
+			for (var r = 0; r < board[f].length; r++) {
+				for (var l = 0; l < board[f][r].length; l++) {
+
+					if (board[f][r][l] == ' ') {
+
+						board[f][r][l] = position[i];
+						i++;
+					}
+
+				}
+			}
+		}
 
 	}
+
 
 	function place(value, pos) {
 
@@ -285,7 +308,7 @@ var Tridchess = function(fen, notation) {
 
 	}
 
-	function move(from, to, newFrom = '') {
+	function move(from, to, newFrom = ' ') {
 
 		board[to.f][to.r][to.l] = board[from.f][from.r][from.l];
 		board[from.f][from.r][from.l] = newFrom;
