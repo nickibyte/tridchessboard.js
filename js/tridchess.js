@@ -4,7 +4,7 @@
 // ----------------------------------------------------------------
 // ----------------------------------------------------------------
 
-var Pos = function(file, row, level) {
+export var Pos = function(file, row, level) {
 
 	this.f = file;
 	this.r = row;
@@ -12,7 +12,7 @@ var Pos = function(file, row, level) {
 
 }
 
-var TOWER_SQUARES = [ // Low board 
+export var TOWER_SQUARES = [ // Low board 
 					  [ new Pos(0,0,1), new Pos(1,0,1), new Pos(0,1,1), new Pos(1,1,1) ],
 					  [ new Pos(4,0,1), new Pos(5,0,1), new Pos(4,1,1), new Pos(5,1,1) ],
 					  [ new Pos(0,4,1), new Pos(1,4,1), new Pos(0,5,1), new Pos(1,5,1) ],
@@ -30,7 +30,7 @@ var TOWER_SQUARES = [ // Low board
 					  [ new Pos(0,8,5), new Pos(1,8,5), new Pos(0,9,5), new Pos(1,9,5) ],
 					  [ new Pos(4,8,5), new Pos(5,8,5), new Pos(4,9,5), new Pos(5,9,5) ] ];
 
-var MAIN_SQUARES = [ // Low board 
+export var MAIN_SQUARES = [ // Low board 
 					 new Pos(1,1,0), new Pos(2,1,0), new Pos(3,1,0), new Pos(4,1,0),
 					 new Pos(1,2,0), new Pos(2,2,0), new Pos(3,2,0), new Pos(4,2,0),
 					 new Pos(1,3,0), new Pos(2,3,0), new Pos(3,3,0), new Pos(4,3,0),
@@ -55,7 +55,7 @@ var MAIN_SQUARES = [ // Low board
 // ----------------------------------------------------------------
 // ----------------------------------------------------------------
 
-var Tridchess = function(fen, notation) {
+export var Tridchess = function(fen, notation) {
 	
 
 	// Board (6x10x6): Non existing squares are null, empty squares empty strings
