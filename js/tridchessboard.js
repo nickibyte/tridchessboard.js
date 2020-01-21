@@ -1,20 +1,19 @@
+// TODO: Import three.js and OrbitControls here instead of in index.html
+
 
 var Tridchessboard = function( canvasId ) {
 
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
-	// Setup
-	// ----------------------------------------------------------------
-	// ----------------------------------------------------------------
-	
-	// ----------------------------------------------------------------
 	// Three.js
+	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
 	
 	// Canvas element
 	var canvas = document.getElementById( canvasId );
 	var width = canvas.offsetWidth;
 	var height = canvas.offsetHeight;
+	console.log( "w: " + width + ", h: " + height );
 
 
 	// Scene
@@ -43,11 +42,6 @@ var Tridchessboard = function( canvasId ) {
 
 
 	// DEBUG
-	var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-	var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-	var cube = new THREE.Mesh( geometry, material );
-	scene.add( cube );
-
 	var axesHelper = new THREE.AxesHelper(10);
 	scene.add(axesHelper);
 
@@ -78,4 +72,117 @@ var Tridchessboard = function( canvasId ) {
 
 	animate();
 
+
+	// ----------------------------------------------------------------
+	// ----------------------------------------------------------------
+	// Tri-D-Chess
+	// ----------------------------------------------------------------
+	// ----------------------------------------------------------------
+	
+	// ----------------------------------------------------------------
+	// Globals and helper functions
+	// ----------------------------------------------------------------
+		
+	// Position object: Specifies a certain square on the board
+	var Pos = function( file, row, level ) {
+
+		this.f = file;
+		this.r = row;
+		this.l = level;
+
+	}
+	
+	function posToVector3( pos ) {
+
+		return new THREE.Vector3( pos.r, pos.l * 2, pos.f );
+
+	}
+
+	
+	// ----------------------------------------------------------------
+	// Board
+	// ----------------------------------------------------------------
+
+	var board = new THREE.Group();
+	board.position.set( -4.5, -4, -2.5 );    // Center board on origin
+
+	scene.add( board );
+
+	// Add board model
+	// TODO: Add real board model
+	var boardGeo = new THREE.BoxGeometry();
+	boardGeo.translate( 0, -0.5, 0 );    // Set origin at top
+	var boardMat = new THREE.MeshBasicMaterial( { color: 0x92b4ce } );
+
+	var boardMod = new THREE.Mesh( boardGeo, boardMat );
+	boardMod.position.set( 4.5, 4, 2.5 );
+
+	board.add( boardMod );
+
+	// ----------------------------------------------------------------
+	// Squares
+	// ----------------------------------------------------------------
+	
+	// Square Indicators
+	var indGeo = new THREE.PlaneGeometry();
+	indGeo.translate( 0, 0, 0.01 );    // Set origin below square
+	var indMat= new THREE.MeshBasicMaterial( { color: 0xfafcb8,
+											   side: THREE.DoubleSide } );
+
+	var Square = function( name, pos ) {
+
+		// Object3D constructor
+		THREE.Object3D.apply( this );
+		
+		// Properties
+		this.type = 'square';
+		this.name = name;
+		this.pos = pos;
+
+		// Add to board
+		board.add( this );
+
+		// Position
+		vec = posToVector3( pos );
+		this.position.set( vec.x, vec.y, vec.z );
+
+		// Square Indicator
+		var ind = new THREE.Mesh( indGeo, indMat );
+		ind.position.set( vec.x, vec.y, vec.z );
+		ind.rotateX( - Math.PI / 2 );    // Rotate upright
+		this.add( ind );
+
+		// Piece
+		var piece;
+		this.addPiece = function( piece ) {
+
+			// TODO: Piece class?
+			//this.piece = new Piece( piece );
+		
+	}
+
+	Square.prototype = Object.create( THREE.Object3D.prototype );
+	Square.prototype.constructor = Square;
+
+
+	// ----------------------------------------------------------------
+	// Towers
+	// ----------------------------------------------------------------
+
+
+	// ----------------------------------------------------------------
+	// Pieces
+	// ----------------------------------------------------------------
+	
+
+	// ----------------------------------------------------------------
+	// Selecting
+	// ----------------------------------------------------------------
+	
+
+	// ----------------------------------------------------------------
+	// ----------------------------------------------------------------
+	// Public functions
+	// ----------------------------------------------------------------
+	// ----------------------------------------------------------------
 }
