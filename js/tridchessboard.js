@@ -44,7 +44,7 @@ var Tridchessboard = function( canvasId ) {
 	// DEBUG
 	var axesHelper = new THREE.AxesHelper(10);
 	scene.add(axesHelper);
-
+	
 
 	// Window Resizing
 	function onWindowResize() {
@@ -97,6 +97,50 @@ var Tridchessboard = function( canvasId ) {
 		return new THREE.Vector3( pos.r, pos.l * 2, pos.f );
 
 	}
+
+
+	// Squares
+	var MAIN_SQUARES = [ 
+		// Low board 
+		new Pos(1,1,0), new Pos(2,1,0), new Pos(3,1,0), new Pos(4,1,0),
+		new Pos(1,2,0), new Pos(2,2,0), new Pos(3,2,0), new Pos(4,2,0),
+		new Pos(1,3,0), new Pos(2,3,0), new Pos(3,3,0), new Pos(4,3,0),
+		new Pos(1,4,0), new Pos(2,4,0), new Pos(3,4,0), new Pos(4,4,0),
+
+		// Middle board
+		new Pos(1,3,2), new Pos(2,3,2), new Pos(3,3,2), new Pos(4,3,2),
+		new Pos(1,4,2), new Pos(2,4,2), new Pos(3,4,2), new Pos(4,4,2),
+		new Pos(1,5,2), new Pos(2,5,2), new Pos(3,5,2), new Pos(4,5,2),
+		new Pos(1,6,2), new Pos(2,6,2), new Pos(3,6,2), new Pos(4,6,2),
+
+		// High board
+		new Pos(1,5,4), new Pos(2,5,4), new Pos(3,5,4), new Pos(4,5,4),
+		new Pos(1,6,4), new Pos(2,6,4), new Pos(3,6,4), new Pos(4,6,4),
+		new Pos(1,7,4), new Pos(2,7,4), new Pos(3,7,4), new Pos(4,7,4),
+		new Pos(1,8,4), new Pos(2,8,4), new Pos(3,8,4), new Pos(4,8,4)
+	];
+
+	var TOWER_SQUARES = [
+		// Low board 
+		[ new Pos(0,0,1), new Pos(1,0,1), new Pos(0,1,1), new Pos(1,1,1) ],
+		[ new Pos(4,0,1), new Pos(5,0,1), new Pos(4,1,1), new Pos(5,1,1) ],
+		[ new Pos(0,4,1), new Pos(1,4,1), new Pos(0,5,1), new Pos(1,5,1) ],
+		[ new Pos(4,4,1), new Pos(5,4,1), new Pos(4,5,1), new Pos(5,5,1) ],
+
+		// Middle board
+		[ new Pos(0,2,3), new Pos(1,2,3), new Pos(0,3,3), new Pos(1,3,3) ],
+		[ new Pos(4,2,3), new Pos(5,2,3), new Pos(4,3,3), new Pos(5,3,3) ],
+		[ new Pos(0,6,3), new Pos(1,6,3), new Pos(0,7,3), new Pos(1,7,3) ],
+		[ new Pos(4,6,3), new Pos(5,6,3), new Pos(4,7,3), new Pos(5,7,3) ],
+
+		// High board
+		[ new Pos(0,4,5), new Pos(1,4,5), new Pos(0,5,5), new Pos(1,5,5) ],
+		[ new Pos(4,4,5), new Pos(5,4,5), new Pos(4,5,5), new Pos(5,5,5) ],
+		[ new Pos(0,8,5), new Pos(1,8,5), new Pos(0,9,5), new Pos(1,9,5) ],
+		[ new Pos(4,8,5), new Pos(5,8,5), new Pos(4,9,5), new Pos(5,9,5) ]
+	];
+
+
 
 	
 	// ----------------------------------------------------------------
@@ -153,11 +197,25 @@ var Tridchessboard = function( canvasId ) {
 		this.add( ind );
 
 		// Piece
-		var piece;
-		this.addPiece = function( piece ) {
+		var piece = null;
 
-			// TODO: Piece class?
-			//this.piece = new Piece( piece );
+		this.getPiece = function() { return piece }
+		this.setPiece = function( pieceName ) {
+
+			if ( pieceName !== null ) {
+
+				console.log("Add piece");
+				piece = new Piece( pieceName );
+				this.add( piece );
+
+			} else {
+
+				console.log("Remove piece");
+				this.remove( piece );
+				piece = null
+			}
+
+		}
 		
 	}
 
@@ -173,6 +231,20 @@ var Tridchessboard = function( canvasId ) {
 	// ----------------------------------------------------------------
 	// Pieces
 	// ----------------------------------------------------------------
+
+	var Piece = function( name ) {
+
+		// Object3D constructor
+		THREE.Object3D.apply( this );
+
+		// Properties
+		this.type = 'piece';
+		this.name = name;
+
+	}
+
+	Piece.prototype = Object.create( THREE.Object3D.prototype );
+	Piece.prototype.constructor = Piece;
 	
 
 	// ----------------------------------------------------------------
@@ -185,4 +257,15 @@ var Tridchessboard = function( canvasId ) {
 	// Public functions
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
+	
+
+	// DEBUG
+	var dbg_pos = new Pos(0,0,1);
+	var dbg_square = new Square("b3_3", dbg_pos);
+	dbg_square.setPiece("wK");
+	console.log(dbg_square);
+	console.log(dbg_square.type);
+	console.log(dbg_square.name);
+	console.log(dbg_square.pos);
+	console.log(dbg_square.getPiece());
 }
