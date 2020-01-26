@@ -140,9 +140,21 @@ var Tridchessboard = function( canvasId ) {
 		[ new Pos(4,8,5), new Pos(5,8,5), new Pos(4,9,5), new Pos(5,9,5) ]
 	];
 
-
-
-	
+	var TOWER_POSITIONS = [ 
+		new Pos(0.5,0.5,0),
+		new Pos(4.5,0.5,0),
+		new Pos(0.5,4.5,0),
+		new Pos(4.5,4.5,0),
+		new Pos(0.5,2.5,2),
+		new Pos(4.5,2.5,2),
+		new Pos(0.5,6.5,2),
+		new Pos(4.5,6.5,2),
+		new Pos(0.5,4.5,4),
+		new Pos(4.5,4.5,4),
+		new Pos(0.5,8.5,4),
+		new Pos(4.5,8.5,4)
+	];
+							
 	// ----------------------------------------------------------------
 	// Board
 	// ----------------------------------------------------------------
@@ -183,17 +195,14 @@ var Tridchessboard = function( canvasId ) {
 		this.name = name;
 		this.pos = pos;
 
-		// Add to board
-		board.add( this );
-
 		// Position
-		vec = posToVector3( pos );
-		this.position.set( vec.x, vec.y, vec.z );
+		var vec = posToVector3( pos );
+		//this.position.set( vec.x, vec.y, vec.z );
 
 		// Square Indicator
 		var ind = new THREE.Mesh( indGeo, indMat );
-		ind.position.set( vec.x, vec.y, vec.z );
 		ind.rotateX( - Math.PI / 2 );    // Rotate upright
+		ind.position.set( vec.x, vec.y, vec.z );
 		this.add( ind );
 
 		// Piece
@@ -204,13 +213,12 @@ var Tridchessboard = function( canvasId ) {
 
 			if ( pieceName !== null ) {
 
-				console.log("Add piece");
 				piece = new Piece( pieceName );
+				piece.position.set( vec.x, vec.y, vec.z );
 				this.add( piece );
 
 			} else {
 
-				console.log("Remove piece");
 				this.remove( piece );
 				piece = null
 			}
@@ -223,27 +231,165 @@ var Tridchessboard = function( canvasId ) {
 	Square.prototype.constructor = Square;
 
 
+	// Create squares for main boards
+	for ( let squ = 0; squ < MAIN_SQUARES.length; squ++ ) {
+
+		// Get position
+		let pos = MAIN_SQUARES[ squ ];
+		let name = 'abcdef'.charAt(pos.f) + (pos.r + 1) + '_' + (pos.l + 1);
+	 
+		// Add square
+		let square = new Square( name, pos );
+		board.add( square );
+		
+	}
+
+	
 	// ----------------------------------------------------------------
 	// Towers
 	// ----------------------------------------------------------------
+
+	// Tower model
+	// TODO: Add real tower model
+	var towGeo = new THREE.BoxGeometry( 0.25, 2, 0.25 );
+	towGeo.translate( 0, 1, 0 );    // Set origin at bottom
+	var towMat = new THREE.MeshBasicMaterial( { color: 0xff000 } );
+
+
+	// Tower object
+	var Tower = function( name, pos, squares ) {
+
+		// Object3D constructor
+		THREE.Object3D.apply( this );
+		
+		// Properties
+		this.type = 'tower';
+		this.name = name;
+		this.pos = pos;    // Integer
+
+		// Position
+		var vec = posToVector3( TOWER_POSITIONS[ pos -1 ] );
+
+		// Active/inactive
+		this.active = false;    // TODO: Make private somehow
+
+		this.activate = function() { 
+
+			this.active = true; 
+			this.visible = true; 
+
+		}
+
+		this.deactivate = function() { 
+
+			this.active = false;
+			this.visible = false; 
+
+		}
+
+		// Tower model
+		var model = new THREE.Mesh( towGeo, towMat );
+		model.position.set( vec.x, vec.y, vec.z );
+		this.add( model );
+
+		// Squares
+		this.squares = squares;
+
+		for ( let squ = 0; squ < this.squares.length; squ++ ) {
+
+			this.add( this.squares[ squ ] );
+
+		}
+
+	}
+
+	Tower.prototype = Object.create( THREE.Object3D.prototype );
+	Tower.prototype.constructor = Tower;
+
+
+	// Add towers
+	for ( let tow = 0; tow < TOWER_SQUARES.length; tow++ ) {
+
+		let squares = [];
+
+		for ( let squ = 0; squ < TOWER_SQUARES[ tow ].length; squ++ ) {
+
+			// Get position
+			let pos = TOWER_SQUARES[ tow ][ squ ];
+			let name = 'abcdef'.charAt(pos.f) + (pos.r + 1) + '_' + (pos.l + 1);
+		 
+			// Add square
+			let square = new Square( name, pos );
+			squares.push( square );
+
+		}
+		
+		let pos = tow + 1;
+		let name = 'T' + pos;
+
+		// Add tower
+		let tower = new Tower( name, pos, squares );
+		board.add( tower );
+
+	}
 
 
 	// ----------------------------------------------------------------
 	// Pieces
 	// ----------------------------------------------------------------
 
-	var Piece = function( name ) {
+	// TODO: Add real piece models
+	var pieces = [];
+	var pieHeight = 1.25;
 
-		// Object3D constructor
-		THREE.Object3D.apply( this );
+	function pieGeo( height ) {
 
-		// Properties
-		this.type = 'piece';
-		this.name = name;
+		var pieGeo = new THREE.BoxGeometry( 0.5, height, 0.5 );
+		pieGeo.translate( 0, height / 2, 0 );    // Set Origin at bottom
+
+		return pieGeo;
 
 	}
 
-	Piece.prototype = Object.create( THREE.Object3D.prototype );
+	var pieMatWhite = new THREE.MeshBasicMaterial( { color: 0xededed } );
+	var pieMatBlack = new THREE.MeshBasicMaterial( { color: 0x0c0c0c } );
+
+	// Pieces: Pawn, Knight, Bishop, Rook, Queen, King
+	// White: uppercase, Black: lowercase
+	var pieModels = {
+
+		P: [ pieGeo( 0.60 ), pieMatWhite ],
+		N: [ pieGeo( 0.90 ), pieMatWhite ],
+		B: [ pieGeo( 1.00 ), pieMatWhite ],
+		R: [ pieGeo( 0.80 ), pieMatWhite ],
+		Q: [ pieGeo( 1.20 ), pieMatWhite ],
+		K: [ pieGeo( 1.25 ), pieMatWhite ],
+		p: [ pieGeo( 0.60 ), pieMatBlack ],
+		n: [ pieGeo( 0.90 ), pieMatBlack ],
+		b: [ pieGeo( 1.00 ), pieMatBlack ],
+		r: [ pieGeo( 0.80 ), pieMatBlack ],
+		q: [ pieGeo( 1.20 ), pieMatBlack ],
+		k: [ pieGeo( 1.25 ), pieMatBlack ] 
+
+	};
+
+
+	// Piece object
+	var Piece = function( name ) {
+
+		// Mesh constructor
+		// TODO: Load real models
+		var geo = pieModels[ name ][ 0 ];
+		var mat = pieModels[ name ][ 1 ];
+		THREE.Mesh.apply( this, [ geo, mat ] );
+		
+		// Properties
+		this.type = 'piece';
+		this.name = name;
+		
+	}
+
+	Piece.prototype = Object.create( THREE.Mesh.prototype );
 	Piece.prototype.constructor = Piece;
 	
 
@@ -260,12 +406,10 @@ var Tridchessboard = function( canvasId ) {
 	
 
 	// DEBUG
-	var dbg_pos = new Pos(0,0,1);
-	var dbg_square = new Square("b3_3", dbg_pos);
-	dbg_square.setPiece("wK");
-	console.log(dbg_square);
-	console.log(dbg_square.type);
-	console.log(dbg_square.name);
-	console.log(dbg_square.pos);
-	console.log(dbg_square.getPiece());
+	var square = board.getObjectByName( 'b4_4', true );
+	square.setPiece( 'k' );
+	console.log( square );
+	console.log( square.getPiece() );
+	var mesh = new THREE.Mesh( pieGeo(1), pieMatBlack );
+
 }
