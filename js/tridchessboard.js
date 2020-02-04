@@ -179,10 +179,12 @@ var Tridchessboard = function( canvasId ) {
 	// Squares
 	// ----------------------------------------------------------------
 	
+	// Defaults
+	var DEFAULT_HIGHLIGHT_COLOR = 0xfafcb8;
 	// Square Indicators
 	var indGeo = new THREE.PlaneGeometry();
 	indGeo.translate( 0, 0, 0.01 );    // Set origin below square
-	var indMat= new THREE.MeshBasicMaterial( { color: 0xfafcb8,
+	var indMat= new THREE.MeshBasicMaterial( { color: DEFAULT_HIGHLIGHT_COLOR,
 											   side: THREE.DoubleSide } );
 
 	var Square = function( name, pos ) {
@@ -197,12 +199,14 @@ var Tridchessboard = function( canvasId ) {
 
 		// Position
 		var vec = posToVector3( pos );
-		//this.position.set( vec.x, vec.y, vec.z );
+		this.position.set( vec.x, vec.y, vec.z );
 
 		// Square Indicator
-		var ind = new THREE.Mesh( indGeo, indMat );
+		var mat = indMat.clone();
+		var ind = new THREE.Mesh( indGeo, mat );
 		ind.rotateX( - Math.PI / 2 );    // Rotate upright
-		ind.position.set( vec.x, vec.y, vec.z );
+		ind.material.visible = false;
+		//ind.position.set( vec.x, vec.y, vec.z );
 		this.add( ind );
 
 		// Piece
@@ -214,7 +218,7 @@ var Tridchessboard = function( canvasId ) {
 			if ( pieceName !== null ) {
 
 				piece = new Piece( pieceName );
-				piece.position.set( vec.x, vec.y, vec.z );
+				//piece.position.set( vec.x, vec.y, vec.z );
 				this.add( piece );
 
 			} else {
@@ -224,7 +228,18 @@ var Tridchessboard = function( canvasId ) {
 			}
 
 		}
+
+		// Highlight
+		this.highlight = function( color = DEFAULT_HIGHLIGHT_COLOR ) {
 		
+			// Highlight indicator
+			ind.material.visible = true;
+			color = new THREE.Color( color );
+			ind.material.color = color;
+
+			// TODO: Highlight piece
+
+		}
 	}
 
 	Square.prototype = Object.create( THREE.Object3D.prototype );
@@ -408,8 +423,10 @@ var Tridchessboard = function( canvasId ) {
 	// DEBUG
 	var square = board.getObjectByName( 'b4_4', true );
 	square.setPiece( 'k' );
-	console.log( square );
-	console.log( square.getPiece() );
-	var mesh = new THREE.Mesh( pieGeo(1), pieMatBlack );
+	square.highlight();
+	//console.log( square );
+	//console.log( square.getPiece() );
+	var tower = board.getObjectByName( 'T4', true );
+	tower.deactivate();
 
 }
