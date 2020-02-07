@@ -30,7 +30,7 @@ var Tridchessboard = function( canvasId ) {
 	document.getElementById( canvasId ).appendChild( renderer.domElement );
 
 	
-	// Controls
+	// Orbit controls
 	var orbitControls = new THREE.OrbitControls( camera, renderer.domElement );
 	orbitControls.minDistance = 2;
 	orbitControls.maxDistance = 100;
@@ -40,6 +40,38 @@ var Tridchessboard = function( canvasId ) {
 	orbitControls.minPolarAngle = 0;
 	orbitControls.maxPolarAngle = Math.PI;
 
+
+	// Drag controls
+	var draggable = [];
+	var selected, target = null;
+
+	var dragControls = new THREE.DragControls(draggable, camera, renderer.domElement);
+
+	dragControls.addEventListener( 'dragstart', function( event ) {
+
+		orbitControls.enabled = false;
+
+		// Get selected object
+		selected = event.object;
+
+		// DEBUG
+		console.log( "Selected: " );
+		console.log( selected );
+
+	} );
+
+	dragControls.addEventListener( 'dragend', function( event ) {
+
+		orbitControls.enabled = true;
+
+		// TODO: Get target object
+
+		// DEBUG
+		console.log( "Target: " );
+		console.log( target );
+
+	} );
+	
 
 	// DEBUG
 	var axesHelper = new THREE.AxesHelper(10);
@@ -164,6 +196,7 @@ var Tridchessboard = function( canvasId ) {
 
 	scene.add( board );
 
+
 	// Add board model
 	// TODO: Add real board model
 	var boardGeo = new THREE.BoxGeometry();
@@ -180,12 +213,20 @@ var Tridchessboard = function( canvasId ) {
 	// ----------------------------------------------------------------
 	
 	// Defaults
-	var DEFAULT_HIGHLIGHT_COLOR = 0xfafcb8;
+	var DEFAULT_SQU_IND_COLOR = 0xfafcb8;
+	var DEFAULT_SQU_IND_OPACITY = 0.85;
+
+
 	// Square Indicators
-	var indGeo = new THREE.PlaneGeometry();
-	indGeo.translate( 0, 0, 0.01 );    // Set origin below square
-	var indMat= new THREE.MeshBasicMaterial( { color: DEFAULT_HIGHLIGHT_COLOR,
-											   side: THREE.DoubleSide } );
+	var squIndGeo = new THREE.PlaneGeometry();
+	squIndGeo.translate( 0, 0, 0.01 );    // Set origin below square
+
+	var squIndMat= new THREE.MeshBasicMaterial();
+	squIndMat.color = DEFAULT_SQU_IND_COLOR;
+	squIndMat.transparent = true;
+	squIndMat.opacity = DEFAULT_SQU_IND_OPACITY;
+	squIndMat.side = THREE.DoubleSide;
+
 
 	var Square = function( name, pos ) {
 
@@ -202,23 +243,21 @@ var Tridchessboard = function( canvasId ) {
 		this.position.set( vec.x, vec.y, vec.z );
 
 		// Square Indicator
-		var mat = indMat.clone();
-		var ind = new THREE.Mesh( indGeo, mat );
+		var mat = squIndMat.clone();
+		var ind = new THREE.Mesh( squIndGeo, mat );
 		ind.rotateX( - Math.PI / 2 );    // Rotate upright
 		ind.material.visible = false;
-		//ind.position.set( vec.x, vec.y, vec.z );
 		this.add( ind );
 
 		// Piece
 		var piece = null;
 
 		this.getPiece = function() { return piece }
-		this.setPiece = function( pieceName ) {
+		this.setPiece = function( piece ) {
 
-			if ( pieceName !== null ) {
+			if ( piece !== null ) {
 
-				piece = new Piece( pieceName );
-				//piece.position.set( vec.x, vec.y, vec.z );
+				piece = new Piece( piece );
 				this.add( piece );
 
 			} else {
@@ -230,7 +269,7 @@ var Tridchessboard = function( canvasId ) {
 		}
 
 		// Highlight
-		this.highlight = function( color = DEFAULT_HIGHLIGHT_COLOR ) {
+		this.highlight = function( color = DEFAULT_SQU_IND_COLOR ) {
 		
 			// Highlight indicator
 			ind.material.visible = true;
@@ -240,6 +279,9 @@ var Tridchessboard = function( canvasId ) {
 			// TODO: Highlight piece
 
 		}
+
+		this.unhighlight = function() { ind.material.visible = false; }
+
 	}
 
 	Square.prototype = Object.create( THREE.Object3D.prototype );
@@ -256,6 +298,9 @@ var Tridchessboard = function( canvasId ) {
 		// Add square
 		let square = new Square( name, pos );
 		board.add( square );
+
+		// DEBUG
+		square.highlight();
 		
 	}
 
@@ -264,11 +309,25 @@ var Tridchessboard = function( canvasId ) {
 	// Towers
 	// ----------------------------------------------------------------
 
+	// Defaults
+	var DEFAULT_TOW_IND_COLOR = 0x9cc5d6;
+	var DEFAULT_TOW_IND_OPACITY = 0.75;
+
+
 	// Tower model
 	// TODO: Add real tower model
 	var towGeo = new THREE.BoxGeometry( 0.25, 2, 0.25 );
 	towGeo.translate( 0, 1, 0 );    // Set origin at bottom
 	var towMat = new THREE.MeshBasicMaterial( { color: 0xff000 } );
+
+
+	// Tower indicator
+	var towIndGeo = new THREE.BoxGeometry( 2, 2, 2 );
+	towIndGeo.translate( 0, 1, 0 );    // Set origin at bottom
+	var towIndMat = new THREE.MeshBasicMaterial();
+	towIndMat.color = DEFAULT_TOW_IND_COLOR;
+	towIndMat.transparent = true;
+	towIndMat.opacity = DEFAULT_TOW_IND_OPACITY;
 
 
 	// Tower object
@@ -284,6 +343,7 @@ var Tridchessboard = function( canvasId ) {
 
 		// Position
 		var vec = posToVector3( TOWER_POSITIONS[ pos -1 ] );
+		this.position.set( vec.x, vec.y, vec.z );
 
 		// Active/inactive
 		this.active = false;    // TODO: Make private somehow
@@ -304,8 +364,15 @@ var Tridchessboard = function( canvasId ) {
 
 		// Tower model
 		var model = new THREE.Mesh( towGeo, towMat );
-		model.position.set( vec.x, vec.y, vec.z );
 		this.add( model );
+
+		// TODO: Make draggable
+
+		// Tower Indicator
+		var mat = towIndMat.clone();
+		var ind = new THREE.Mesh( towIndGeo, mat );
+		ind.material.visible = false;
+		this.add( ind );
 
 		// Squares
 		this.squares = squares;
@@ -314,7 +381,24 @@ var Tridchessboard = function( canvasId ) {
 
 			this.add( this.squares[ squ ] );
 
+			// Convert Square position to Tower space
+			this.squares[ squ ].position.sub( this.position );
+
+			// DEBUG
+			this.squares[ squ ].highlight();
 		}
+
+		// Highlight
+		this.highlight = function( color = DEFAULT_TOW_IND_COLOR ) {
+		
+			// Highlight indicator
+			ind.material.visible = true;
+			color = new THREE.Color( color );
+			ind.material.color = color;
+
+		}
+
+		this.unhighlight = function() { ind.material.visible = false; }
 
 	}
 
@@ -336,7 +420,7 @@ var Tridchessboard = function( canvasId ) {
 			// Add square
 			let square = new Square( name, pos );
 			squares.push( square );
-
+			
 		}
 		
 		let pos = tow + 1;
@@ -401,6 +485,9 @@ var Tridchessboard = function( canvasId ) {
 		// Properties
 		this.type = 'piece';
 		this.name = name;
+
+		// Make draggable
+		draggable.push( this );
 		
 	}
 
@@ -423,10 +510,12 @@ var Tridchessboard = function( canvasId ) {
 	// DEBUG
 	var square = board.getObjectByName( 'b4_4', true );
 	square.setPiece( 'k' );
-	square.highlight();
+	//square.unhighlight();
 	//console.log( square );
 	//console.log( square.getPiece() );
 	var tower = board.getObjectByName( 'T4', true );
-	tower.deactivate();
+	//tower.position.set(4.5, 4.5, 4.5);
+	//tower.deactivate();
+	tower.highlight();
 
 }
