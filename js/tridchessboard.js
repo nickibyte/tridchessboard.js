@@ -66,12 +66,20 @@ var Tridchessboard = function( canvasId ) {
 
 		// TODO: Get target object
 
-		// DEBUG
-		console.log( "Target: " );
-		console.log( target );
+		if ( target === null ) {
+
+			// Snapback piece
+			selected.position.set( 0, 0, 0 );
+
+		}
+		else {
+
+			movePiece( selected.parent, target );
+
+		}
 
 	} );
-	
+
 
 	// DEBUG
 	var axesHelper = new THREE.AxesHelper(10);
@@ -253,12 +261,13 @@ var Tridchessboard = function( canvasId ) {
 		var piece = null;
 
 		this.getPiece = function() { return piece }
-		this.setPiece = function( piece ) {
+		this.setPiece = function( pie ) {
 
-			if ( piece !== null ) {
+			if ( pie !== null ) {
 
-				piece = new Piece( piece );
+				piece = pie;
 				this.add( piece );
+				piece.position.set( 0, 0, 0 );    // Move to relative origin
 
 			} else {
 
@@ -308,6 +317,9 @@ var Tridchessboard = function( canvasId ) {
 	// ----------------------------------------------------------------
 	// Towers
 	// ----------------------------------------------------------------
+
+	var towers = [];
+
 
 	// Defaults
 	var DEFAULT_TOW_IND_COLOR = 0x9cc5d6;
@@ -496,9 +508,55 @@ var Tridchessboard = function( canvasId ) {
 	
 
 	// ----------------------------------------------------------------
-	// Selecting
+	// Moving
 	// ----------------------------------------------------------------
 	
+	function movePiece( source, target ) {
+
+		if ( typeof( source ) === "string" ) {
+
+			source = board.getObjectByName( source );
+
+		}
+		
+		if ( typeof( target ) === "string" ) {
+
+			target = board.getObjectByName( target );
+
+		}
+
+		// Move piece
+		target.setPiece( source.getPiece() );
+		source.setPiece( null );
+
+	}
+
+	function moveTower( source, target ) {
+
+		if ( typeof( source ) === "string" ) {
+
+			source = board.getObjectByName( source );
+
+		}
+		
+		if ( typeof( target ) === "string" ) {
+
+			target = board.getObjectByName( target );
+
+		}
+
+		// Update tower positions
+		towers.splice( towers.indexOf( source ), 1, target );
+
+		// Move pieces
+		for ( let i = 0; i < source.squares.length; i++ ) {
+
+			movePiece( source.squares[ i ], target.squares[ i ] );		
+
+		}
+
+	}
+
 
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
@@ -506,10 +564,20 @@ var Tridchessboard = function( canvasId ) {
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
 	
+	this.move = function( source, target ) {
+
+		movePiece( source, target );
+
+	}
+	
 
 	// DEBUG
 	var square = board.getObjectByName( 'b4_4', true );
-	square.setPiece( 'k' );
+	square.setPiece( new Piece( 'k' ) );
+	movePiece( 'b4_4', 'c3_1' );
+	movePiece( 'c3_1', square );
+	var square2 = board.getObjectByName( 'f5_2', true );
+	movePiece( square, square2 );
 	//square.unhighlight();
 	//console.log( square );
 	//console.log( square.getPiece() );
@@ -517,5 +585,7 @@ var Tridchessboard = function( canvasId ) {
 	//tower.position.set(4.5, 4.5, 4.5);
 	//tower.deactivate();
 	tower.highlight();
+	var tower2 = board.getObjectByName( 'T8', true );
+	moveTower( tower, tower2 ); 
 
 }
