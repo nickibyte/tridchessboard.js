@@ -120,6 +120,13 @@ var Tridchessboard = function( canvasId ) {
 	// ----------------------------------------------------------------
 	
 	// ----------------------------------------------------------------
+	// Defaults and config
+	// ----------------------------------------------------------------
+	
+	var DEFAULT_STARTING_FEN = "12bc R/P///////p/r/N/PB/P/2/2/2/2/p/pb/n//Q/P/2/2/2/2/p/q///K/P/2/2/2/2/p/k//N/PB/P/2/2/2/2/p/pb/n/R/P///////p/r w KQkq - 0 1";
+
+
+	// ----------------------------------------------------------------
 	// Globals and helper functions
 	// ----------------------------------------------------------------
 		
@@ -220,6 +227,9 @@ var Tridchessboard = function( canvasId ) {
 	// Squares
 	// ----------------------------------------------------------------
 	
+	var squares = [];
+
+
 	// Defaults
 	var DEFAULT_SQU_IND_COLOR = 0xfafcb8;
 	var DEFAULT_SQU_IND_OPACITY = 0.85;
@@ -236,6 +246,7 @@ var Tridchessboard = function( canvasId ) {
 	squIndMat.side = THREE.DoubleSide;
 
 
+	// Square object
 	var Square = function( name, pos ) {
 
 		// Object3D constructor
@@ -245,6 +256,8 @@ var Tridchessboard = function( canvasId ) {
 		this.type = 'square';
 		this.name = name;
 		this.pos = pos;
+
+		squares.push( this );
 
 		// Position
 		var vec = posToVector3( pos );
@@ -351,7 +364,9 @@ var Tridchessboard = function( canvasId ) {
 		// Properties
 		this.type = 'tower';
 		this.name = name;
-		this.pos = pos;    // Integer
+		this.pos = pos;    // Integer position (e.g. 1 for T1)
+
+		towers.push( this );
 
 		// Position
 		var vec = posToVector3( TOWER_POSITIONS[ pos -1 ] );
@@ -391,10 +406,7 @@ var Tridchessboard = function( canvasId ) {
 
 		for ( let squ = 0; squ < this.squares.length; squ++ ) {
 
-			this.add( this.squares[ squ ] );
-
-			// Convert Square position to Tower space
-			this.squares[ squ ].position.sub( this.position );
+			this.attach( this.squares[ squ ] );
 
 			// DEBUG
 			this.squares[ squ ].highlight();
@@ -449,8 +461,10 @@ var Tridchessboard = function( canvasId ) {
 	// Pieces
 	// ----------------------------------------------------------------
 
-	// TODO: Add real piece models
 	var pieces = [];
+
+
+	// TODO: Add real piece models
 	var pieHeight = 1.25;
 
 	function pieGeo( height ) {
@@ -498,8 +512,7 @@ var Tridchessboard = function( canvasId ) {
 		this.type = 'piece';
 		this.name = name;
 
-		// Make draggable
-		draggable.push( this );
+		pieces.push( this );
 		
 	}
 
@@ -547,6 +560,8 @@ var Tridchessboard = function( canvasId ) {
 
 		// Update tower positions
 		towers.splice( towers.indexOf( source ), 1, target );
+		source.deactivate();
+		target.activate();
 
 		// Move pieces
 		for ( let i = 0; i < source.squares.length; i++ ) {
@@ -559,6 +574,84 @@ var Tridchessboard = function( canvasId ) {
 
 
 	// ----------------------------------------------------------------
+	// Loading Position
+	// ----------------------------------------------------------------
+	
+	function loadFen( fen ) {
+
+		// Reset board
+		for ( let i = 0; i < towers.length; i++ ) { towers[i].deactivate(); }
+
+		for ( let i = 0; i < pieces.length; i++ ) { 
+
+			pieces[ i ].parent.setPiece( null );    // Remove piece from square
+			pieces.splice( i, 1 );    // Remove piece from pieces array
+
+		}
+
+
+		var fields = fen.split( ' ' );
+
+
+		// Get tower positions
+		var towerPos = fields[ 0 ].split( '' );
+
+		// Activate towers
+		for ( let i = 0; i < towerPos.length; i++ ) {
+
+			// Convert 12-base positions to integer
+			towerPos[ i ] = parseInt( towerPos[ i ], 13 );
+
+			let name = 'T' + towerPos[ i ];
+			let tower = board.getObjectByName( name, true );
+			tower.activate();
+
+		}
+
+
+		// Get piece positions
+
+		// Remove slashes
+		var position = fields[ 1 ].split( '/' );
+		position = position.join( '' );
+
+		// Expand empty squares
+		for ( let i = 0; i < position.length; i++ ) {
+
+			if ( '0123456789'.indexOf( position[ i ] ) !== -1 ) { // Is number
+				
+				// Replace number with number of spaces (3 ->    )
+				let num = parseInt( position[ i ], 10 );
+				let str = new Array( num + 1 ).join( ' ' );
+				position = position.replace( position[ i ], str );
+
+			}
+
+		}
+
+/*
+		// Place pieces
+		var i = 0;
+
+		for ( let f = 0; f < 6; f++ ) {
+			for (var r = 0; r < 10; r++ ) {
+				for (var l = 0; l < 6; l++) {
+
+					if (board[f][r][l] === ' ') {
+
+						board[f][r][l] = position[i];
+						i++;
+
+					}
+
+				}
+			}
+		}
+*/
+	}
+
+
+	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
 	// Public functions
 	// ----------------------------------------------------------------
@@ -566,7 +659,7 @@ var Tridchessboard = function( canvasId ) {
 	
 	this.move = function( source, target ) {
 
-		movePiece( source, target );
+		moveTower( source, target );
 
 	}
 	
@@ -587,5 +680,7 @@ var Tridchessboard = function( canvasId ) {
 	tower.highlight();
 	var tower2 = board.getObjectByName( 'T8', true );
 	moveTower( tower, tower2 ); 
+
+	loadFen( DEFAULT_STARTING_FEN );
 
 }
