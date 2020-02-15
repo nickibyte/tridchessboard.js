@@ -123,7 +123,8 @@ var Tridchessboard = function( canvasId ) {
 	// Defaults and config
 	// ----------------------------------------------------------------
 	
-	var DEFAULT_STARTING_FEN = "12bc R/P///////p/r/N/PB/P/2/2/2/2/p/pb/n//Q/P/2/2/2/2/p/q///K/P/2/2/2/2/p/k//N/PB/P/2/2/2/2/p/pb/n/R/P///////p/r w KQkq - 0 1";
+	//var DEFAULT_STARTING_FEN = "12bc R/P///////p/r/N/PB/P/2/2/2/2/p/pb/n//Q/P/2/2/2/2/p/q///K/P/2/2/2/2/p/k//N/PB/P/2/2/2/2/p/pb/n/R/P///////p/r w KQkq - 0 1";
+	var DEFAULT_STARTING_FEN = "12bc rnnr/pbbp/pqkp/pppp/4/4/4/4/4/4/PBBP/RNNR/44PPPPPQKP w KQkq - 0 1";
 
 
 	// ----------------------------------------------------------------
@@ -142,6 +143,33 @@ var Tridchessboard = function( canvasId ) {
 	function posToVector3( pos ) {
 
 		return new THREE.Vector3( pos.r, pos.l * 2, pos.f );
+
+	}
+
+	function getObjectByPos( obj, pos ) {
+
+		if ( obj.hasOwnProperty( 'pos' ) && obj.pos.f === pos.f &&
+											obj.pos.r === pos.r &&
+			 								obj.pos.l === pos.l ) {
+
+			return obj
+
+		}
+
+		for ( let i = 0; i < obj.children.length; i++ ) {
+
+			let child = obj.children[ i ];
+			let object = getObjectByPos( child, pos );
+
+			if ( object !== undefined ) {
+
+				return object;
+
+			}
+
+		}
+
+		return undefined;
 
 	}
 
@@ -513,13 +541,16 @@ var Tridchessboard = function( canvasId ) {
 		this.name = name;
 
 		pieces.push( this );
+
+		// DEBUG
+		draggable.push( this );
 		
 	}
 
 	Piece.prototype = Object.create( THREE.Mesh.prototype );
 	Piece.prototype.constructor = Piece;
-	
 
+	
 	// ----------------------------------------------------------------
 	// Moving
 	// ----------------------------------------------------------------
@@ -594,16 +625,15 @@ var Tridchessboard = function( canvasId ) {
 
 
 		// Get tower positions
-		var towerPos = fields[ 0 ].split( '' );
+		var towPos = fields[ 0 ].split( '' );
 
 		// Activate towers
-		for ( let i = 0; i < towerPos.length; i++ ) {
+		for ( let i = 0; i < towPos.length; i++ ) {
 
 			// Convert 12-base positions to integer
-			towerPos[ i ] = parseInt( towerPos[ i ], 13 );
+			towPos[ i ] = parseInt( towPos[ i ], 13 );
 
-			let name = 'T' + towerPos[ i ];
-			let tower = board.getObjectByName( name, true );
+			let tower = board.getObjectByProperty( 'pos', towPos[ i ] );
 			tower.activate();
 
 		}
@@ -629,25 +659,114 @@ var Tridchessboard = function( canvasId ) {
 
 		}
 
-/*
 		// Place pieces
 		var i = 0;
 
-		for ( let f = 0; f < 6; f++ ) {
-			for (var r = 0; r < 10; r++ ) {
-				for (var l = 0; l < 6; l++) {
+		for ( let l = 5; l >= 0; l-- ) {
+			
+			for ( let r = 9; r >= 0; r-- ) {
 
-					if (board[f][r][l] === ' ') {
+				for ( let f = 0; f <= 5; f++ ) {
 
-						board[f][r][l] = position[i];
+					let piece = position[ i ];
+					let pos = new Pos( f, r, l );
+					let square = getObjectByPos( board, pos );
+
+					// If a square exists and it is not on a inactive tower
+					if ( square !== undefined  && square.parent.active !== false ) {
+
+						// If the square is not supposed to be empty
+						if ( piece !== ' ' ) {
+
+							// Add piece to square
+							square.setPiece( new Piece( piece ) );
+
+						}
+
 						i++;
 
 					}
 
 				}
+				
 			}
+
 		}
-*/
+
+	}
+
+
+	function generateFen() {
+
+		// Get tower positions
+		var towPos = '';
+
+		for ( let i = 0; i < towers.length; i++ ) { 
+
+			if ( towers[i].active ) {
+
+				// Convert integer to 12-base position 
+				let pos = towers[ i ].pos.toString( 13 );
+
+				// Add to tower positions
+				towPos += pos;
+				
+			}
+
+		}
+
+
+		// Get piece positions
+		var piePos = '';
+
+		for ( let l = 5; l >= 0; l-- ) {
+			
+			for ( let r = 9; r >= 0; r-- ) {
+
+				let emptySqu = 0;
+
+				for ( let f = 0; f <= 5; f++ ) {
+
+					let pos = new Pos( f, r, l );
+					let square = getObjectByPos( board, pos );
+
+					// If a square exists and it is not on a inactive tower
+					if ( square !== undefined  && square.parent.active !== false ) {
+
+						let piece = square.getPiece();
+
+						// If the square is not empty
+						if ( piece ) {
+
+							// Add piece or empty squares to piece positions
+							if ( emptySqu > 0) { piePos += emptySqu; }
+							piePos += piece.name;
+							emptySqu = 0;
+
+						} else {
+
+							emptySqu++;
+
+						}
+
+					}
+
+				}
+
+				if ( emptySqu > 0) { piePos += emptySqu; }
+
+				// Only add row separator if row is now empty or last row
+				if ( !( piePos.endsWith('/') ) && l !== 0 ) { piePos += '/'; }
+				
+			}
+
+		}
+
+		// Compose fen string
+		var fen = towPos + ' ' + piePos;
+
+		return fen;
+
 	}
 
 
@@ -665,22 +784,27 @@ var Tridchessboard = function( canvasId ) {
 	
 
 	// DEBUG
-	var square = board.getObjectByName( 'b4_4', true );
+	var square = board.getObjectByName( 'b4_4' );
 	square.setPiece( new Piece( 'k' ) );
 	movePiece( 'b4_4', 'c3_1' );
 	movePiece( 'c3_1', square );
-	var square2 = board.getObjectByName( 'f5_2', true );
+	var square2 = board.getObjectByName( 'f5_2' );
 	movePiece( square, square2 );
 	//square.unhighlight();
 	//console.log( square );
 	//console.log( square.getPiece() );
-	var tower = board.getObjectByName( 'T4', true );
+	var tower = board.getObjectByName( 'T4' );
 	//tower.position.set(4.5, 4.5, 4.5);
 	//tower.deactivate();
 	tower.highlight();
-	var tower2 = board.getObjectByName( 'T8', true );
+	var tower2 = board.getObjectByName( 'T8' );
 	moveTower( tower, tower2 ); 
 
 	loadFen( DEFAULT_STARTING_FEN );
+	console.log( generateFen() );
+
+	//var pos = square.pos;
+	//var test = getObjectByPos( board, pos );
+	//console.log(test);
 
 }
