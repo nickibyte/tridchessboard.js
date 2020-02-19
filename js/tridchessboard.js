@@ -124,7 +124,7 @@ var Tridchessboard = function( canvasId ) {
 	// ----------------------------------------------------------------
 	
 	//var DEFAULT_STARTING_FEN = "12bc R/P///////p/r/N/PB/P/2/2/2/2/p/pb/n//Q/P/2/2/2/2/p/q///K/P/2/2/2/2/p/k//N/PB/P/2/2/2/2/p/pb/n/R/P///////p/r w KQkq - 0 1";
-	var DEFAULT_STARTING_FEN = "12bc rnnr/pbbp/pqkp/pppp/4/4/4/4/4/4/PBBP/RNNR/44PPPPPQKP w KQkq - 0 1";
+	var DEFAULT_STARTING_FEN = "12bc rnnr/pbbp/pqkp/pppp/4/4/4/4/4/4/PBBP/RNNR/4/4/PPPP/PQKP w KQkq - 0 1";
 
 
 	// ----------------------------------------------------------------
@@ -330,7 +330,12 @@ var Tridchessboard = function( canvasId ) {
 
 		}
 
-		this.unhighlight = function() { ind.material.visible = false; }
+		this.unhighlight = function() {
+
+			ind.material.visible = false;
+			// TODO: Unhighlight piece
+
+		}
 
 	}
 
@@ -421,7 +426,8 @@ var Tridchessboard = function( canvasId ) {
 		var model = new THREE.Mesh( towGeo, towMat );
 		this.add( model );
 
-		// TODO: Make draggable
+		// Make draggable
+		draggable.push( model );
 
 		// Tower Indicator
 		var mat = towIndMat.clone();
@@ -542,15 +548,15 @@ var Tridchessboard = function( canvasId ) {
 
 		pieces.push( this );
 
-		// DEBUG
+		// Make draggable
 		draggable.push( this );
-		
+
 	}
 
 	Piece.prototype = Object.create( THREE.Mesh.prototype );
 	Piece.prototype.constructor = Piece;
 
-	
+
 	// ----------------------------------------------------------------
 	// Moving
 	// ----------------------------------------------------------------
@@ -756,7 +762,11 @@ var Tridchessboard = function( canvasId ) {
 				if ( emptySqu > 0) { piePos += emptySqu; }
 
 				// Only add row separator if row is now empty or last row
-				if ( !( piePos.endsWith('/') ) && l !== 0 ) { piePos += '/'; }
+				if ( !( piePos.endsWith('/') ) && !( l === 0 && r <= 1 ) ) {
+
+					piePos += '/';
+
+				}
 				
 			}
 
