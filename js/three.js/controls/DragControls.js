@@ -2,9 +2,12 @@
  * @author zz85 / https://github.com/zz85
  * @author mrdoob / http://mrdoob.com
  * Running this will allow you to drag three.js objects around the screen.
+ *
+ * Edited by nickibyte / https://github.com/nickibyte
+ * Added _recursive parameter to enable/disable checks with descendants
  */
 
-THREE.DragControls = function ( _objects, _camera, _domElement ) {
+THREE.DragControls = function ( _objects, _recursive, _camera, _domElement ) {
 
 	var _plane = new THREE.Plane();
 	var _raycaster = new THREE.Raycaster();
@@ -86,7 +89,7 @@ THREE.DragControls = function ( _objects, _camera, _domElement ) {
 		_intersections.length = 0;
 
 		_raycaster.setFromCamera( _mouse, _camera );
-		_raycaster.intersectObjects( _objects, _intersections );
+		_raycaster.intersectObjects( _objects, _recursive, _intersections );
 
 		if ( _intersections.length > 0 ) {
 
@@ -125,7 +128,7 @@ THREE.DragControls = function ( _objects, _camera, _domElement ) {
 		_intersections.length = 0;
 
 		_raycaster.setFromCamera( _mouse, _camera );
-		_raycaster.intersectObjects( _objects, _intersections );
+		_raycaster.intersectObjects( _objects, _recursive, _intersections );
 
 		if ( _intersections.length > 0 ) {
 
@@ -204,7 +207,7 @@ THREE.DragControls = function ( _objects, _camera, _domElement ) {
 		_intersections.length = 0;
 
 		_raycaster.setFromCamera( _mouse, _camera );
-		 _raycaster.intersectObjects( _objects, _intersections );
+		 _raycaster.intersectObjects( _objects, _recursive, _intersections );
 
 		if ( _intersections.length > 0 ) {
 
