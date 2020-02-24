@@ -8,7 +8,7 @@ var Tridchessboard = function( canvasId ) {
 	// Three.js
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
-	
+
 	// Canvas element
 	var canvas = document.getElementById( canvasId );
 	var width = canvas.offsetWidth;
@@ -28,7 +28,7 @@ var Tridchessboard = function( canvasId ) {
 	renderer.setClearColor( 0xafafaf, 1 );
 	document.getElementById( canvasId ).appendChild( renderer.domElement );
 
-	
+
 	// Orbit controls
 	var orbitControls = new THREE.OrbitControls( camera, renderer.domElement );
 	orbitControls.minDistance = 2;
@@ -43,13 +43,14 @@ var Tridchessboard = function( canvasId ) {
 	// Drag controls
 	var draggable = [];
 	var selected, target = null;
+	var snap_pos = new THREE.Vector3();
 
 	var mouse = new THREE.Vector2();
 	var raycaster = new THREE.Raycaster();
 
-	var dragControls = new THREE.DragControls(draggable, camera, renderer.domElement);
+	var dragControls = new THREE.DragControls( draggable, false, camera, renderer.domElement );
 
-	renderer.domElement.addEventListener( 'mousemove', function( event ) { 
+	renderer.domElement.addEventListener( 'mousemove', function( event ) {
 
 		event.preventDefault();
 
@@ -57,21 +58,25 @@ var Tridchessboard = function( canvasId ) {
 		mouse.x = ( ( event.clientX - rect.left ) / rect.width ) * 2 - 1;
 		mouse.y = - ( ( event.clientY - rect.top ) / rect.height ) * 2 + 1;
 
-		// DEBUG
-		console.log("MouseMove");
-
 	} );
 
 	dragControls.addEventListener( 'dragstart', function( event ) {
 
 		orbitControls.enabled = false;
 
-		// Get selected object
-		selected = event.object;
+		if ( event.object !== undefined ) {
 
-		// DEBUG
-		console.log( "Selected: " );
-		console.log( selected );
+			// Get selected object
+			selected = event.object;
+
+			// DEBUG
+			console.log( "Selected: ");
+			console.log( selected );
+
+			// Store position for snapback
+			snap_pos = selected.position.clone();
+
+		}
 
 	} );
 
@@ -79,64 +84,55 @@ var Tridchessboard = function( canvasId ) {
 
 		orbitControls.enabled = true;
 
-		if ( event.object.type === 'piece' ) {
+		if ( selected !== null ) {
 
-			let selectable = squareIndicators.concat( pieces );
+			let selectable = [];
+			if ( event.object.type === 'piece' ) { selectable = squares; }
+			if ( event.object.type === 'tower' ) { selectable = towerIndicators; }
 
 			// DEBUG
-			console.log( "Selectable:" );
-			console.log( selectable );
+			let sel_string = "";
+			for ( let k = 0; k < selectable.length; k++ ) {
+				sel_string += ", " + selectable[ k ].name;
+			}
+			console.log( sel_string );
 
 			raycaster.setFromCamera( mouse, camera );
-			let intersects = raycaster.intersectObjects( selectable );
-			
+			let intersects = raycaster.intersectObjects( selectable, true );
+
 			for ( let i = 0; i < intersects.length; i++ ) {
 
-				if ( intersects[ i ].object !== event.object ) {
-					
-					target = intersects[ i ].object;
+				let intObj = intersects[ i ].object;
+
+				// Ignore selected object to prevent moving to itself
+				if ( intObj !== event.object && intObj.parent !== event.object ) {
+
+					target = intObj.parent;
 
 					// DEBUG
+					console.log( "Hit: " + intersects[ i ].object.name );
 					console.log( "Target: " + target.name );
 					console.log( target );
-					console.log( event.object );
+
+					break;
 
 				}
 
 			}
-			
-		} else if ( event.object.type === 'tower' ) {
 
-			let selectable = towerIndicators;
-			raycaster.setFromCamera( mouse, camera );
-			let intersects = raycaster.intersectObjects( selectable );
-			
-			for ( let i = 0; i < intersects.length; i++ ) {
+			if ( target !== null ) {
 
-				if ( intersects[ i ].object !== event.object ) {
-					
-					target = intersects[ i ].object;
-				
-					// DEBUG
-					console.log( "Target: " + target.name );
-					console.log( target );
-					console.log( event.object );
+				move( selected, target );
 
-				}
+			} else {
+
+				// Snapback piece
+				selected.position.set( snap_pos.x , snap_pos.y, snap_pos.z );
 
 			}
-			
-		}
 
-		if ( target !== null ) {
-
-			movePiece( selected.parent, target.parent );
-			selected.position.set( 0, 0, 0 );
-
-		} else {
-
-			// Snapback piece
-			selected.position.set( 0, 0, 0 );
+			selected = null;
+			target = null;
 
 		}
 
@@ -144,9 +140,9 @@ var Tridchessboard = function( canvasId ) {
 
 
 	// DEBUG
-	var axesHelper = new THREE.AxesHelper(10);
-	scene.add(axesHelper);
-	
+	var axesHelper = new THREE.AxesHelper( 10 );
+	scene.add( axesHelper );
+
 
 	// Window Resizing
 	function onWindowResize() {
@@ -180,18 +176,18 @@ var Tridchessboard = function( canvasId ) {
 	// Tri-D-Chess
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
-	
+
 	// ----------------------------------------------------------------
 	// Defaults and config
 	// ----------------------------------------------------------------
-	
+
 	var DEFAULT_STARTING_FEN = "12bc rnnr/pbbp/pqkp/pppp/4/4/4/4/4/4/PBBP/RNNR/4/4/PPPP/PQKP w KQkq - 0 1";
 
 
 	// ----------------------------------------------------------------
 	// Globals and helper functions
 	// ----------------------------------------------------------------
-		
+
 	// Position object: Specifies a certain square on the board
 	var Pos = function( file, row, level ) {
 
@@ -200,7 +196,7 @@ var Tridchessboard = function( canvasId ) {
 		this.l = level;
 
 	}
-	
+
 	function posToVector3( pos ) {
 
 		return new THREE.Vector3( pos.r, pos.l * 2, pos.f );
@@ -236,8 +232,8 @@ var Tridchessboard = function( canvasId ) {
 
 
 	// Squares
-	var MAIN_SQUARES = [ 
-		// Low board 
+	var MAIN_SQUARES = [
+		// Low board
 		new Pos(1,1,0), new Pos(2,1,0), new Pos(3,1,0), new Pos(4,1,0),
 		new Pos(1,2,0), new Pos(2,2,0), new Pos(3,2,0), new Pos(4,2,0),
 		new Pos(1,3,0), new Pos(2,3,0), new Pos(3,3,0), new Pos(4,3,0),
@@ -257,7 +253,7 @@ var Tridchessboard = function( canvasId ) {
 	];
 
 	var TOWER_SQUARES = [
-		// Low board 
+		// Low board
 		[ new Pos(0,0,1), new Pos(1,0,1), new Pos(0,1,1), new Pos(1,1,1) ],
 		[ new Pos(4,0,1), new Pos(5,0,1), new Pos(4,1,1), new Pos(5,1,1) ],
 		[ new Pos(0,4,1), new Pos(1,4,1), new Pos(0,5,1), new Pos(1,5,1) ],
@@ -276,7 +272,7 @@ var Tridchessboard = function( canvasId ) {
 		[ new Pos(4,8,5), new Pos(5,8,5), new Pos(4,9,5), new Pos(5,9,5) ]
 	];
 
-	var TOWER_POSITIONS = [ 
+	var TOWER_POSITIONS = [
 		new Pos(0.5,0.5,0),
 		new Pos(4.5,0.5,0),
 		new Pos(0.5,4.5,0),
@@ -290,7 +286,7 @@ var Tridchessboard = function( canvasId ) {
 		new Pos(0.5,8.5,4),
 		new Pos(4.5,8.5,4)
 	];
-							
+
 	// ----------------------------------------------------------------
 	// Board
 	// ----------------------------------------------------------------
@@ -315,7 +311,7 @@ var Tridchessboard = function( canvasId ) {
 	// ----------------------------------------------------------------
 	// Squares
 	// ----------------------------------------------------------------
-	
+
 	var squares = [];
 	var squareIndicators = [];
 
@@ -342,7 +338,7 @@ var Tridchessboard = function( canvasId ) {
 
 		// Object3D constructor
 		THREE.Object3D.apply( this );
-		
+
 		// Properties
 		this.type = 'square';
 		this.name = name;
@@ -357,9 +353,9 @@ var Tridchessboard = function( canvasId ) {
 		// Active/inactive
 		this.active = false;    // TODO: Make private somehow
 
-		this.activate = function() { 
+		this.activate = function() {
 
-			this.active = true; 
+			this.active = true;
 
 			// Add to squares array if it doesn't exist yet
 			if ( squares.indexOf( this ) === -1 ) {
@@ -370,7 +366,7 @@ var Tridchessboard = function( canvasId ) {
 
 		}
 
-		this.deactivate = function() { 
+		this.deactivate = function() {
 
 			this.active = false;
 
@@ -388,6 +384,7 @@ var Tridchessboard = function( canvasId ) {
 		var ind = new THREE.Mesh( squIndGeo, mat );
 		ind.rotateX( - Math.PI / 2 );    // Rotate upright
 		ind.material.visible = false;
+		ind.name = "ind: " + this.name;
 		this.add( ind );
 		squareIndicators.push( ind );
 
@@ -399,15 +396,32 @@ var Tridchessboard = function( canvasId ) {
 
 			if ( pie !== null ) {
 
-				piece = pie;
+				// Remove old piece
+				this.setPiece( null );
+				scene.remove( piece );
 
+				// Add new piece
+				piece = pie;
 				this.add( piece );
+
 				piece.position.set( 0, 0, 0 );    // Move to relative origin
 
 				// Add to pieces array if it doesn't exist yet
-				if ( pieces.indexOf( this ) === -1 ) {
+				if ( pieces.indexOf( piece ) === -1 ) {
 
 					pieces.push( piece );
+
+					// TODO: Better way to update draggable?
+					// Update draggable
+					draggable.push( piece );
+
+					// DEBUG
+					console.log( "Added " + piece.name + " to pieces." );
+					let sel_string = "";
+					for ( let k = 0; k < draggable.length; k++ ) {
+						sel_string += ", " + draggable[ k ].name;
+					}
+					console.log( sel_string );
 
 				}
 
@@ -416,9 +430,21 @@ var Tridchessboard = function( canvasId ) {
 				this.remove( piece );
 
 				// Remove from pieces array if it exists
-				if ( pieces.indexOf( this ) !== -1 ) {
+				if ( pieces.indexOf( piece ) !== -1 ) {
 
-					pieces.splice( pieces.indexOf( this ), 1 );
+					pieces.splice( pieces.indexOf( piece ), 1 );
+
+					// TODO: Better way to update draggable?
+					// Update draggable
+					draggable.splice( draggable.indexOf( piece ), 1 );
+
+					// DEBUG
+					console.log( "Removed " + piece.name + " from pieces." );
+					let sel_string = "";
+					for ( let k = 0; k < draggable.length; k++ ) {
+						sel_string += ", " + draggable[ k ].name;
+					}
+					console.log( sel_string );
 
 				}
 
@@ -429,7 +455,7 @@ var Tridchessboard = function( canvasId ) {
 
 		// Highlight
 		this.highlight = function( color = DEFAULT_SQU_IND_COLOR ) {
-		
+
 			// Highlight indicator
 			ind.material.visible = true;
 			color = new THREE.Color( color );
@@ -442,6 +468,7 @@ var Tridchessboard = function( canvasId ) {
 		this.unhighlight = function() {
 
 			ind.material.visible = false;
+
 			// TODO: Unhighlight piece
 
 		}
@@ -458,17 +485,17 @@ var Tridchessboard = function( canvasId ) {
 		// Get position
 		let pos = MAIN_SQUARES[ squ ];
 		let name = 'abcdef'.charAt(pos.f) + (pos.r + 1) + '_' + (pos.l + 1);
-	 
+
 		// Add square
 		let square = new Square( name, pos );
 		board.add( square );
 
 		// DEBUG
 		square.highlight();
-		
+
 	}
 
-	
+
 	// ----------------------------------------------------------------
 	// Towers
 	// ----------------------------------------------------------------
@@ -498,13 +525,12 @@ var Tridchessboard = function( canvasId ) {
 	towIndMat.opacity = DEFAULT_TOW_IND_OPACITY;
 
 
-	// TODO: Convert to Mesh (model)
 	// Tower object
 	var Tower = function( name, pos, squares ) {
 
-		// Object3D constructor
-		THREE.Object3D.apply( this );
-		
+		// Mesh constructor
+		THREE.Mesh.apply( this, [ towGeo, towMat ] );
+
 		// Properties
 		this.type = 'tower';
 		this.name = name;
@@ -517,40 +543,59 @@ var Tridchessboard = function( canvasId ) {
 		// Active/inactive
 		this.active = false;    // TODO: Make private somehow
 
-		this.activate = function() { 
+		this.activate = function() {
 
-			this.active = true; 
-			this.visible = true; 
+			this.active = true;
+			this.visible = true;
 
 			// Add to towers array if it doesn't exist yet
 			if ( towers.indexOf( this ) === -1 ) {
 
 				towers.push( this );
 
+				// TODO: Better way to update draggable?
+				// Update draggable
+				draggable.push( this );
+
+			}
+
+			// Activate squares
+			for ( let i = 0; i < this.squares.length; i++ ) {
+
+				this.squares[ i ].activate();
+
 			}
 
 		}
 
-		this.deactivate = function() { 
+		this.deactivate = function() {
 
 			this.active = false;
-			this.visible = false; 
+			this.visible = false;
+
+			// Reset position
+			var vec = posToVector3( TOWER_POSITIONS[ pos -1 ] );
+			this.position.set( vec.x, vec.y, vec.z );
 
 			// Remove from towers array if it exists
 			if ( towers.indexOf( this ) !== -1 ) {
 
 				towers.splice( towers.indexOf( this ), 1 );
 
+				// TODO: Better way to update draggable?
+				// Update draggable
+				draggable.splice( draggable.indexOf( this ), 1 );
+
+			}
+
+			// Activate squares
+			for ( let i = 0; i < this.squares.length; i++ ) {
+
+				this.squares[ i ].deactivate();
+
 			}
 
 		}
-
-		// Tower model
-		var model = new THREE.Mesh( towGeo, towMat );
-		this.add( model );
-
-		// Make draggable
-		draggable.push( model );
 
 		// Tower Indicator
 		var mat = towIndMat.clone();
@@ -572,7 +617,7 @@ var Tridchessboard = function( canvasId ) {
 
 		// Highlight
 		this.highlight = function( color = DEFAULT_TOW_IND_COLOR ) {
-		
+
 			// Highlight indicator
 			ind.material.visible = true;
 			color = new THREE.Color( color );
@@ -584,7 +629,7 @@ var Tridchessboard = function( canvasId ) {
 
 	}
 
-	Tower.prototype = Object.create( THREE.Object3D.prototype );
+	Tower.prototype = Object.create( THREE.Mesh.prototype );
 	Tower.prototype.constructor = Tower;
 
 
@@ -598,13 +643,13 @@ var Tridchessboard = function( canvasId ) {
 			// Get position
 			let pos = TOWER_SQUARES[ tow ][ squ ];
 			let name = 'abcdef'.charAt(pos.f) + (pos.r + 1) + '_' + (pos.l + 1);
-		 
+
 			// Add square
 			let square = new Square( name, pos );
 			squares.push( square );
-			
+
 		}
-		
+
 		let pos = tow + 1;
 		let name = 'T' + pos;
 
@@ -654,7 +699,7 @@ var Tridchessboard = function( canvasId ) {
 		b: [ pieGeo( 1.00 ), pieMatBlack ],
 		r: [ pieGeo( 0.80 ), pieMatBlack ],
 		q: [ pieGeo( 1.20 ), pieMatBlack ],
-		k: [ pieGeo( 1.25 ), pieMatBlack ] 
+		k: [ pieGeo( 1.25 ), pieMatBlack ]
 
 	};
 
@@ -667,13 +712,10 @@ var Tridchessboard = function( canvasId ) {
 		var geo = pieModels[ name ][ 0 ];
 		var mat = pieModels[ name ][ 1 ];
 		THREE.Mesh.apply( this, [ geo, mat ] );
-		
+
 		// Properties
 		this.type = 'piece';
 		this.name = name;
-
-		// Make draggable
-		draggable.push( this );
 
 	}
 
@@ -684,41 +726,30 @@ var Tridchessboard = function( canvasId ) {
 	// ----------------------------------------------------------------
 	// Moving
 	// ----------------------------------------------------------------
-	
+
 	function movePiece( source, target ) {
 
-		if ( typeof( source ) === "string" ) {
+		// Convert pieces to squares
+		if ( source.type === 'piece' ) { source = source.parent; }
+		if ( target.type === 'piece' ) { target = target.parent; }
 
-			source = board.getObjectByName( source );
+		// Move piece while overwriting target piece
+		if ( source !== target ) {
+
+			let piece = source.getPiece()
+			source.setPiece( null );
+			target.setPiece( piece );
+
+		} else {
+
+			// Move to self (resets relative position)
+			target.setPiece( source.getPiece() );
 
 		}
-		
-		if ( typeof( target ) === "string" ) {
-
-			target = board.getObjectByName( target );
-
-		}
-
-		// Move piece
-		target.setPiece( null );
-		target.setPiece( source.getPiece() );
-		source.setPiece( null );
 
 	}
 
 	function moveTower( source, target ) {
-
-		if ( typeof( source ) === "string" ) {
-
-			source = board.getObjectByName( source );
-
-		}
-		
-		if ( typeof( target ) === "string" ) {
-
-			target = board.getObjectByName( target );
-
-		}
 
 		// Update tower positions
 		source.deactivate();
@@ -727,7 +758,35 @@ var Tridchessboard = function( canvasId ) {
 		// Move pieces
 		for ( let i = 0; i < source.squares.length; i++ ) {
 
-			movePiece( source.squares[ i ], target.squares[ i ] );		
+			movePiece( source.squares[ i ], target.squares[ i ] );
+
+		}
+
+	}
+
+	function move( source, target ) {
+
+		// Convert string-names to objects (squares, pieces, towers)
+		if ( typeof( source ) === 'string' ) {
+
+			source = board.getObjectByName( source );
+
+		}
+
+		if ( typeof( target ) === 'string' ) {
+
+			target = board.getObjectByName( target );
+
+		}
+
+		// Move tower or piece
+		if ( source.type === 'tower' && target.type === 'tower' ) {
+
+			moveTower( source, target );
+
+		} else {
+
+			movePiece( source, target );
 
 		}
 
@@ -735,9 +794,9 @@ var Tridchessboard = function( canvasId ) {
 
 
 	// ----------------------------------------------------------------
-	// Loading Position
+	// Position loading
 	// ----------------------------------------------------------------
-	
+
 	function loadFen( fen ) {
 
 		// Reset board
@@ -745,7 +804,7 @@ var Tridchessboard = function( canvasId ) {
 		for ( let i = 0; i < length; i++ ) { towers[ 0 ].deactivate(); }
 
 		length = pieces.length;    // Needed, as loop removes elements
-		for ( let i = 0; i < length; i++ ) { 
+		for ( let i = 0; i < length; i++ ) {
 
 			pieces[ 0 ].parent.setPiece( null );    // Remove piece from square
 
@@ -780,7 +839,7 @@ var Tridchessboard = function( canvasId ) {
 		for ( let i = 0; i < position.length; i++ ) {
 
 			if ( '0123456789'.indexOf( position[ i ] ) !== -1 ) { // Is number
-				
+
 				// Replace number with number of spaces (3 ->    )
 				let num = parseInt( position[ i ], 10 );
 				let str = new Array( num + 1 ).join( ' ' );
@@ -794,7 +853,7 @@ var Tridchessboard = function( canvasId ) {
 		var i = 0;
 
 		for ( let l = 5; l >= 0; l-- ) {
-			
+
 			for ( let r = 9; r >= 0; r-- ) {
 
 				for ( let f = 0; f <= 5; f++ ) {
@@ -819,7 +878,7 @@ var Tridchessboard = function( canvasId ) {
 					}
 
 				}
-				
+
 			}
 
 		}
@@ -832,16 +891,16 @@ var Tridchessboard = function( canvasId ) {
 		// Get tower positions
 		var towPos = '';
 
-		for ( let i = 0; i < towers.length; i++ ) { 
+		for ( let i = 0; i < towers.length; i++ ) {
 
 			if ( towers[i].active ) {
 
-				// Convert integer to 12-base position 
+				// Convert integer to 12-base position
 				let pos = towers[ i ].pos.toString( 13 );
 
 				// Add to tower positions
 				towPos += pos;
-				
+
 			}
 
 		}
@@ -851,7 +910,7 @@ var Tridchessboard = function( canvasId ) {
 		var piePos = '';
 
 		for ( let l = 5; l >= 0; l-- ) {
-			
+
 			for ( let r = 9; r >= 0; r-- ) {
 
 				let emptySqu = 0;
@@ -892,7 +951,7 @@ var Tridchessboard = function( canvasId ) {
 					piePos += '/';
 
 				}
-				
+
 			}
 
 		}
@@ -910,13 +969,12 @@ var Tridchessboard = function( canvasId ) {
 	// Public functions
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
-	
+
 	this.move = function( source, target ) {
 
-		moveTower( source, target );
+		move( source, target );
 
 	}
-	
 
 	// DEBUG
 	loadFen( DEFAULT_STARTING_FEN );
