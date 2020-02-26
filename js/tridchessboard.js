@@ -64,20 +64,13 @@ var Tridchessboard = function( canvasId ) {
 
 			let selectable = [];
 			if ( selected.type === 'piece' ) { selectable = squares; }
-			if ( selected.type === 'tower' ) { selectable = towerIndicators; }
-
-			// DEBUG
-			//let sel_string = "";
-			//for ( let k = 0; k < selectable.length; k++ ) {
-			//	sel_string += ", " + selectable[ k ].name;
-			//}
-			//console.log( sel_string );
+			if ( selected.parent.type === 'tower' ) { selectable = towerIndicators; }
 
 			raycaster.setFromCamera( mouse, camera );
 			let intersects = raycaster.intersectObjects( selectable, true );
 
 			// At least one object apart from the selected one has been hit
-			if ( intersects.length > 1 ) {
+			if ( intersects.length > 0 ) {
 
 				for ( let i = 0; i < intersects.length; i++ ) {
 
@@ -95,12 +88,13 @@ var Tridchessboard = function( canvasId ) {
 
 						}
 
-						// DEBUG
-						//console.log( "Hit: " + intersects[ i ].object.name );
-						//console.log( "Target: " + target.name );
-						//console.log( target );
-
 						break;
+
+					} else {
+
+						// TODO: Better way to stop squares from staying highlighted?
+						if ( target !== null ) { target.unhighlight(); }
+						target = null;
 
 					}
 
@@ -114,9 +108,6 @@ var Tridchessboard = function( canvasId ) {
 			}
 
 		}
-
-		// DEBUG
-		//console.log( target.name );
 
 	} );
 
@@ -552,11 +543,10 @@ var Tridchessboard = function( canvasId ) {
 
 
 	// Tower object
-	// TODO: Separate towerIndicator from Tower model (visibility)
 	var Tower = function( name, pos, squares ) {
 
-		// Mesh constructor
-		THREE.Mesh.apply( this, [ towGeo, towMat ] );
+		// Object3D constructor
+		THREE.Object3D.apply( this );
 
 		// Properties
 		this.type = 'tower';
@@ -573,7 +563,7 @@ var Tridchessboard = function( canvasId ) {
 		this.activate = function() {
 
 			this.active = true;
-			this.visible = true;
+			model.visible = true;
 
 			// Add to towers array if it doesn't exist yet
 			if ( towers.indexOf( this ) === -1 ) {
@@ -582,7 +572,7 @@ var Tridchessboard = function( canvasId ) {
 
 				// Update draggable
 				// TODO: Better way to update draggable?
-				draggable.push( this );
+				draggable.push( model );
 
 			}
 
@@ -598,11 +588,10 @@ var Tridchessboard = function( canvasId ) {
 		this.deactivate = function() {
 
 			this.active = false;
-			this.visible = false;
+			model.visible = false;
 
-			// Reset position
-			var vec = posToVector3( TOWER_POSITIONS[ pos -1 ] );
-			this.position.set( vec.x, vec.y, vec.z );
+			// Reset position to relativ origin
+			model.position.set( 0, 0, 0 );
 
 			// Remove from towers array if it exists
 			if ( towers.indexOf( this ) !== -1 ) {
@@ -611,7 +600,7 @@ var Tridchessboard = function( canvasId ) {
 
 				// Update draggable
 				// TODO: Better way to update draggable?
-				draggable.splice( draggable.indexOf( this ), 1 );
+				draggable.splice( draggable.indexOf( model ), 1 );
 
 			}
 
@@ -623,6 +612,10 @@ var Tridchessboard = function( canvasId ) {
 			}
 
 		}
+
+		// Tower model
+		var model = new THREE.Mesh( towGeo, towMat );
+		this.add( model );
 
 		// Tower Indicator
 		var mat = towIndMat.clone();
@@ -636,7 +629,7 @@ var Tridchessboard = function( canvasId ) {
 
 		for ( let squ = 0; squ < this.squares.length; squ++ ) {
 
-			this.attach( this.squares[ squ ] );
+			model.attach( this.squares[ squ ] );
 
 			// DEBUG
 			this.squares[ squ ].highlight();
@@ -645,9 +638,6 @@ var Tridchessboard = function( canvasId ) {
 		// Highlight
 		this.highlight = function( color = DEFAULT_TOW_IND_COLOR ) {
 
-			// Make tower visible
-			this.visible = true;
-
 			// Highlight indicator
 			ind.material.visible = true;
 			color = new THREE.Color( color );
@@ -655,16 +645,11 @@ var Tridchessboard = function( canvasId ) {
 
 		}
 
-		this.unhighlight = function() {
-
-			// Reset visibility
-			this.visible = this.active;
-
-			ind.material.visible = false; }
+		this.unhighlight = function() { ind.material.visible = false; }
 
 	}
 
-	Tower.prototype = Object.create( THREE.Mesh.prototype );
+	Tower.prototype = Object.create( THREE.Object3D.prototype );
 	Tower.prototype.constructor = Tower;
 
 
@@ -786,6 +771,10 @@ var Tridchessboard = function( canvasId ) {
 
 	function moveTower( source, target ) {
 
+		// Convert towerModels to towers
+		if ( source.type === 'Mesh' ) { source = source.parent; }
+		if ( target.type === 'Mesh' ) { target = target.parent; }
+
 		// Update tower positions
 		source.deactivate();
 		target.activate();
@@ -815,13 +804,14 @@ var Tridchessboard = function( canvasId ) {
 		}
 
 		// Move tower or piece
-		if ( source.type === 'tower' && target.type === 'tower' ) {
+		if ( ( source.type === 'square' || source.type === 'piece' ) &&
+			 ( target.type === 'square' || target.type === 'piece' ) ) {
 
-			moveTower( source, target );
+			movePiece( source, target );
 
 		} else {
 
-			movePiece( source, target );
+			moveTower( source, target );
 
 		}
 
@@ -898,7 +888,7 @@ var Tridchessboard = function( canvasId ) {
 					let square = getObjectByPos( board, pos );
 
 					// If a square exists and it is not on a inactive tower
-					if ( square !== undefined  && square.parent.active !== false ) {
+					if ( square !== undefined  && square.parent.parent.active !== false ) {
 
 						// If the square is not supposed to be empty
 						if ( piece !== ' ' ) {
@@ -956,7 +946,7 @@ var Tridchessboard = function( canvasId ) {
 					let square = getObjectByPos( board, pos );
 
 					// If a square exists and it is not on a inactive tower
-					if ( square !== undefined  && square.parent.active !== false ) {
+					if ( square !== undefined  && square.parent.parent.active !== false ) {
 
 						let piece = square.getPiece();
 
