@@ -42,7 +42,7 @@ var Tridchessboard = function( canvasId ) {
 
 	// Drag controls
 	var draggable = [];
-	var selected, target = null;
+	var selected = null, target = null;
 	var snap_pos = new THREE.Vector3();
 
 	var mouse = new THREE.Vector2();
@@ -54,9 +54,69 @@ var Tridchessboard = function( canvasId ) {
 
 		event.preventDefault();
 
+		// Get mouse position
 		var rect = renderer.domElement.getBoundingClientRect();
 		mouse.x = ( ( event.clientX - rect.left ) / rect.width ) * 2 - 1;
 		mouse.y = - ( ( event.clientY - rect.top ) / rect.height ) * 2 + 1;
+
+		// Hightlight hovered squares
+		if ( selected !== null ) {
+
+			let selectable = [];
+			if ( selected.type === 'piece' ) { selectable = squares; }
+			if ( selected.type === 'tower' ) { selectable = towerIndicators; }
+
+			// DEBUG
+			//let sel_string = "";
+			//for ( let k = 0; k < selectable.length; k++ ) {
+			//	sel_string += ", " + selectable[ k ].name;
+			//}
+			//console.log( sel_string );
+
+			raycaster.setFromCamera( mouse, camera );
+			let intersects = raycaster.intersectObjects( selectable, true );
+
+			// At least one object apart from the selected one has been hit
+			if ( intersects.length > 1 ) {
+
+				for ( let i = 0; i < intersects.length; i++ ) {
+
+					let intObj = intersects[ i ].object;
+
+					// Ignore selected object to prevent moving to itself
+					if ( intObj !== selected && intObj.parent !== selected ) {
+
+						// If target changed
+						if ( target !== intObj.parent ) {
+
+							if ( target !== null ) { target.unhighlight(); }
+							target = intObj.parent;
+							target.highlight( 0xe01111 );
+
+						}
+
+						// DEBUG
+						//console.log( "Hit: " + intersects[ i ].object.name );
+						//console.log( "Target: " + target.name );
+						//console.log( target );
+
+						break;
+
+					}
+
+				}
+
+			} else {
+
+				if ( target !== null ) { target.unhighlight(); }
+				target = null;
+
+			}
+
+		}
+
+		// DEBUG
+		//console.log( target.name );
 
 	} );
 
@@ -86,43 +146,10 @@ var Tridchessboard = function( canvasId ) {
 
 		if ( selected !== null ) {
 
-			let selectable = [];
-			if ( event.object.type === 'piece' ) { selectable = squares; }
-			if ( event.object.type === 'tower' ) { selectable = towerIndicators; }
-
-			// DEBUG
-			let sel_string = "";
-			for ( let k = 0; k < selectable.length; k++ ) {
-				sel_string += ", " + selectable[ k ].name;
-			}
-			console.log( sel_string );
-
-			raycaster.setFromCamera( mouse, camera );
-			let intersects = raycaster.intersectObjects( selectable, true );
-
-			for ( let i = 0; i < intersects.length; i++ ) {
-
-				let intObj = intersects[ i ].object;
-
-				// Ignore selected object to prevent moving to itself
-				if ( intObj !== event.object && intObj.parent !== event.object ) {
-
-					target = intObj.parent;
-
-					// DEBUG
-					console.log( "Hit: " + intersects[ i ].object.name );
-					console.log( "Target: " + target.name );
-					console.log( target );
-
-					break;
-
-				}
-
-			}
-
 			if ( target !== null ) {
 
 				move( selected, target );
+				target.unhighlight();
 
 			} else {
 
@@ -332,7 +359,6 @@ var Tridchessboard = function( canvasId ) {
 	squIndMat.side = THREE.DoubleSide;
 
 
-	// TODO: Convert to Mesh (Square Indicator)
 	// Square object
 	var Square = function( name, pos ) {
 
@@ -411,8 +437,8 @@ var Tridchessboard = function( canvasId ) {
 
 					pieces.push( piece );
 
-					// TODO: Better way to update draggable?
 					// Update draggable
+					// TODO: Better way to update draggable?
 					draggable.push( piece );
 
 					// DEBUG
@@ -434,8 +460,8 @@ var Tridchessboard = function( canvasId ) {
 
 					pieces.splice( pieces.indexOf( piece ), 1 );
 
-					// TODO: Better way to update draggable?
 					// Update draggable
+					// TODO: Better way to update draggable?
 					draggable.splice( draggable.indexOf( piece ), 1 );
 
 					// DEBUG
@@ -526,6 +552,7 @@ var Tridchessboard = function( canvasId ) {
 
 
 	// Tower object
+	// TODO: Separate towerIndicator from Tower model (visibility)
 	var Tower = function( name, pos, squares ) {
 
 		// Mesh constructor
@@ -553,8 +580,8 @@ var Tridchessboard = function( canvasId ) {
 
 				towers.push( this );
 
-				// TODO: Better way to update draggable?
 				// Update draggable
+				// TODO: Better way to update draggable?
 				draggable.push( this );
 
 			}
@@ -582,8 +609,8 @@ var Tridchessboard = function( canvasId ) {
 
 				towers.splice( towers.indexOf( this ), 1 );
 
-				// TODO: Better way to update draggable?
 				// Update draggable
+				// TODO: Better way to update draggable?
 				draggable.splice( draggable.indexOf( this ), 1 );
 
 			}
@@ -618,6 +645,9 @@ var Tridchessboard = function( canvasId ) {
 		// Highlight
 		this.highlight = function( color = DEFAULT_TOW_IND_COLOR ) {
 
+			// Make tower visible
+			this.visible = true;
+
 			// Highlight indicator
 			ind.material.visible = true;
 			color = new THREE.Color( color );
@@ -625,7 +655,12 @@ var Tridchessboard = function( canvasId ) {
 
 		}
 
-		this.unhighlight = function() { ind.material.visible = false; }
+		this.unhighlight = function() {
+
+			// Reset visibility
+			this.visible = this.active;
+
+			ind.material.visible = false; }
 
 	}
 
