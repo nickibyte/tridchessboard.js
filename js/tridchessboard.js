@@ -432,14 +432,6 @@ var Tridchessboard = function( canvasId ) {
 					// TODO: Better way to update draggable?
 					draggable.push( piece );
 
-					// DEBUG
-					console.log( "Added " + piece.name + " to pieces." );
-					let sel_string = "";
-					for ( let k = 0; k < draggable.length; k++ ) {
-						sel_string += ", " + draggable[ k ].name;
-					}
-					console.log( sel_string );
-
 				}
 
 			} else {
@@ -454,14 +446,6 @@ var Tridchessboard = function( canvasId ) {
 					// Update draggable
 					// TODO: Better way to update draggable?
 					draggable.splice( draggable.indexOf( piece ), 1 );
-
-					// DEBUG
-					console.log( "Removed " + piece.name + " from pieces." );
-					let sel_string = "";
-					for ( let k = 0; k < draggable.length; k++ ) {
-						sel_string += ", " + draggable[ k ].name;
-					}
-					console.log( sel_string );
 
 				}
 
