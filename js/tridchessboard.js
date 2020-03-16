@@ -1,7 +1,7 @@
 // TODO: Import three.js and OrbitControls here instead of in index.html
 
-
-var Tridchessboard = function( canvasId ) {
+// TODO: Clean up ugly async code (maybe)
+var Tridchessboard = async function( canvasId ) {
 
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
@@ -27,6 +27,35 @@ var Tridchessboard = function( canvasId ) {
 	renderer.setSize( width, height );
 	renderer.setClearColor( 0xafafaf, 1 );
 	document.getElementById( canvasId ).appendChild( renderer.domElement );
+
+
+	// GLTFLoader for model loading
+	var loader = new THREE.GLTFLoader();
+
+	// TODO: Use async as intended instead of circumventing it
+	// Function to handle async model loading synchronously
+	function loadModel( path, offset = new THREE.Vector3( 0, 0, 0 ) ) {
+
+		return new Promise( function ( resolve, reject ) {
+
+			loader.load( path, function ( gltf ) {
+
+				var mesh = gltf.scene.children[ 0 ];
+				mesh.position.set( offset.x, offset.y, offset.z );
+
+				resolve( mesh );
+
+			}, undefined, function ( error ) { reject( error ); } );
+
+		} );
+
+	}
+
+
+	// Lighting
+	var light = new THREE.AmbientLight( 0x404040 );    // Flat lighting
+	light.intensity = 10.5;
+	scene.add( light );
 
 
 	// Orbit controls
@@ -316,15 +345,20 @@ var Tridchessboard = function( canvasId ) {
 
 
 	// Add board model
-	// TODO: Add real board model
-	var boardGeo = new THREE.BoxGeometry();
-	boardGeo.translate( 0, -0.5, 0 );    // Set origin at top
-	var boardMat = new THREE.MeshBasicMaterial( { color: 0x92b4ce } );
-
-	var boardMod = new THREE.Mesh( boardGeo, boardMat );
-	boardMod.position.set( 4.5, 4, 2.5 );
-
+	var offset = new THREE.Vector3( 4.5, 4, 2.5 );
+	var boardMod = await loadModel( '../assets/board/boards.glb', offset );
 	board.add( boardMod );
+	var standMod = await loadModel( '../assets/board/stand.glb', offset );
+	board.add( standMod );
+
+	//var boardGeo = new THREE.BoxGeometry();
+	//boardGeo.translate( 0, -0.5, 0 );    // Set origin at top
+	//var boardMat = new THREE.MeshBasicMaterial( { color: 0x92b4ce } );
+
+	//var boardMod = new THREE.Mesh( boardGeo, boardMat );
+	//boardMod.position.set( 4.5, 4, 2.5 );
+
+	//board.add( boardMod );
 
 	// ----------------------------------------------------------------
 	// Squares
@@ -511,10 +545,11 @@ var Tridchessboard = function( canvasId ) {
 
 
 	// Tower model
-	// TODO: Add real tower model
-	var towGeo = new THREE.BoxGeometry( 0.25, 2, 0.25 );
-	towGeo.translate( 0, 1, 0 );    // Set origin at bottom
-	var towMat = new THREE.MeshBasicMaterial( { color: 0xff000 } );
+	var towMod = await loadModel( '../assets/board/towers/tower.glb' );
+
+	//var towGeo = new THREE.BoxGeometry( 0.25, 2, 0.25 );
+	//towGeo.translate( 0, 1, 0 );    // Set origin at bottom
+	//var towMat = new THREE.MeshBasicMaterial( { color: 0xff000 } );
 
 
 	// Tower indicator
@@ -598,7 +633,7 @@ var Tridchessboard = function( canvasId ) {
 		}
 
 		// Tower model
-		var model = new THREE.Mesh( towGeo, towMat );
+		var model = towMod.clone();
 		this.add( model );
 
 		// Tower Indicator
