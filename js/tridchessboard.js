@@ -1,6 +1,6 @@
 // TODO: Import three.js and OrbitControls here instead of in index.html
 
-// TODO: Clean up ugly async code (maybe)
+// TODO: Clean up (maybe) ugly async code
 var Tridchessboard = async function( canvasId ) {
 
 	// ----------------------------------------------------------------
@@ -61,7 +61,7 @@ var Tridchessboard = async function( canvasId ) {
 	// Orbit controls
 	var orbitControls = new THREE.OrbitControls( camera, renderer.domElement );
 	orbitControls.minDistance = 2;
-	orbitControls.maxDistance = 100;
+	orbitControls.maxDistance = 30;
 	orbitControls.enablePan = false;
 	orbitControls.zoomSpeed = 1.0;
 	orbitControls.rotateSpeed = 1.0;
@@ -71,119 +71,12 @@ var Tridchessboard = async function( canvasId ) {
 
 	// Drag controls
 	var draggable = [];
-	var selected = null, target = null;
-	var snap_pos = new THREE.Vector3();
-
-	var mouse = new THREE.Vector2();
-	var raycaster = new THREE.Raycaster();
 
 	var dragControls = new THREE.DragControls( draggable, false, camera, renderer.domElement );
 
-	renderer.domElement.addEventListener( 'mousemove', function( event ) {
-
-		event.preventDefault();
-
-		// Get mouse position
-		var rect = renderer.domElement.getBoundingClientRect();
-		mouse.x = ( ( event.clientX - rect.left ) / rect.width ) * 2 - 1;
-		mouse.y = - ( ( event.clientY - rect.top ) / rect.height ) * 2 + 1;
-
-		// Hightlight hovered squares
-		if ( selected !== null ) {
-
-			let selectable = [];
-			if ( selected.type === 'piece' ) { selectable = squares; }
-			if ( selected.parent.type === 'tower' ) { selectable = towerIndicators; }
-
-			raycaster.setFromCamera( mouse, camera );
-			let intersects = raycaster.intersectObjects( selectable, true );
-
-			// At least one object apart from the selected one has been hit
-			if ( intersects.length > 0 ) {
-
-				for ( let i = 0; i < intersects.length; i++ ) {
-
-					let intObj = intersects[ i ].object;
-
-					// Ignore selected object to prevent moving to itself
-					if ( intObj !== selected && intObj.parent !== selected ) {
-
-						// If target changed
-						if ( target !== intObj.parent ) {
-
-							if ( target !== null ) { target.unhighlight(); }
-							target = intObj.parent;
-							target.highlight( 0xe01111 );
-
-						}
-
-						break;
-
-					} else {
-
-						// TODO: Better way to stop squares from staying highlighted?
-						if ( target !== null ) { target.unhighlight(); }
-						target = null;
-
-					}
-
-				}
-
-			} else {
-
-				if ( target !== null ) { target.unhighlight(); }
-				target = null;
-
-			}
-
-		}
-
-	} );
-
-	dragControls.addEventListener( 'dragstart', function( event ) {
-
-		orbitControls.enabled = false;
-
-		if ( event.object !== undefined ) {
-
-			// Get selected object
-			selected = event.object;
-
-			// DEBUG
-			console.log( "Selected: ");
-			console.log( selected );
-
-			// Store position for snapback
-			snap_pos = selected.position.clone();
-
-		}
-
-	} );
-
-	dragControls.addEventListener( 'dragend', function( event ) {
-
-		orbitControls.enabled = true;
-
-		if ( selected !== null ) {
-
-			if ( target !== null ) {
-
-				move( selected, target );
-				target.unhighlight();
-
-			} else {
-
-				// Snapback piece
-				selected.position.set( snap_pos.x , snap_pos.y, snap_pos.z );
-
-			}
-
-			selected = null;
-			target = null;
-
-		}
-
-	} );
+	renderer.domElement.addEventListener( 'mousemove', onMouseMove );
+	dragControls.addEventListener( 'dragstart', onDragStart );
+	dragControls.addEventListener( 'dragend', onDragEnd );
 
 
 	// DEBUG
@@ -525,9 +418,6 @@ var Tridchessboard = async function( canvasId ) {
 		let square = new Square( name, pos );
 		board.add( square );
 
-		// DEBUG
-		square.highlight();
-
 	}
 
 
@@ -650,8 +540,6 @@ var Tridchessboard = async function( canvasId ) {
 
 			model.attach( this.squares[ squ ] );
 
-			// DEBUG
-			this.squares[ squ ].highlight();
 		}
 
 		// Highlight
@@ -831,6 +719,125 @@ var Tridchessboard = async function( canvasId ) {
 		} else {
 
 			moveTower( source, target );
+
+		}
+
+	}
+
+
+	// ----------------------------------------------------------------
+	// Movement callbacks
+	// ----------------------------------------------------------------
+
+	var selected = null, target = null;
+	var snap_pos = new THREE.Vector3();
+
+	var mouse = new THREE.Vector2();
+	var raycaster = new THREE.Raycaster();
+
+	function onMouseMove( event ) {
+
+		event.preventDefault();
+
+		// Get mouse position
+		var rect = renderer.domElement.getBoundingClientRect();
+		mouse.x = ( ( event.clientX - rect.left ) / rect.width ) * 2 - 1;
+		mouse.y = - ( ( event.clientY - rect.top ) / rect.height ) * 2 + 1;
+
+		// Hightlight hovered squares
+		if ( selected !== null ) {
+
+			let selectable = [];
+			if ( selected.type === 'piece' ) { selectable = squares; }
+			if ( selected.parent.type === 'tower' ) { selectable = towerIndicators; }
+
+			raycaster.setFromCamera( mouse, camera );
+			let intersects = raycaster.intersectObjects( selectable, true );
+
+			// At least one object apart from the selected one has been hit
+			if ( intersects.length > 0 ) {
+
+				for ( let i = 0; i < intersects.length; i++ ) {
+
+					let intObj = intersects[ i ].object;
+
+					// Ignore selected object to prevent moving to itself
+					if ( intObj !== selected && intObj.parent !== selected ) {
+
+						// If target changed
+						if ( target !== intObj.parent ) {
+
+							if ( target !== null ) { target.unhighlight(); }
+							target = intObj.parent;
+							target.highlight();
+
+						}
+
+						break;
+
+					} else {
+
+						// TODO: Better way to stop squares from staying highlighted?
+						if ( target !== null ) { target.unhighlight(); }
+						target = null;
+
+					}
+
+				}
+
+			} else {
+
+				if ( target !== null ) { target.unhighlight(); }
+				target = null;
+
+			}
+
+		}
+
+	}
+
+
+	function onDragStart( event ) {
+
+		orbitControls.enabled = false;
+
+		if ( event.object !== undefined ) {
+
+			// Get selected object
+			selected = event.object;
+
+			// DEBUG
+			console.log( "Selected: ");
+			console.log( selected );
+
+			// Store position for snapback
+			snap_pos = selected.position.clone();
+
+		}
+
+	}
+
+
+	function onDragEnd( event ) {
+
+		orbitControls.enabled = true;
+
+		if ( selected !== null ) {
+
+			if ( target !== null ) {
+
+				move( selected, target );
+				target.unhighlight();
+
+			} else {
+
+				// Snapback piece
+				selected.position.set( snap_pos.x , snap_pos.y, snap_pos.z );
+
+			}
+
+			selected = null;
+			target = null;
 
 		}
 
