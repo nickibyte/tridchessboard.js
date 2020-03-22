@@ -244,6 +244,10 @@ var Tridchessboard = async function( canvasId ) {
 	var standMod = await loadModel( '../assets/board/stand.glb', offset );
 	board.add( standMod );
 
+	// DEBUG
+	// TODO: Make toggleable
+	standMod.visible = false;
+
 	//var boardGeo = new THREE.BoxGeometry();
 	//boardGeo.translate( 0, -0.5, 0 );    // Set origin at top
 	//var boardMat = new THREE.MeshBasicMaterial( { color: 0x92b4ce } );
@@ -602,7 +606,7 @@ var Tridchessboard = async function( canvasId ) {
 	function pieGeo( height ) {
 
 		var pieGeo = new THREE.BoxGeometry( 0.5, height, 0.5 );
-		pieGeo.translate( 0, height / 2, 0 );    // Set Origin at bottom
+		pieGeo.translate( 0, height / 2 + 0.01, 0 );    // Set Origin at bottom
 
 		return pieGeo;
 
