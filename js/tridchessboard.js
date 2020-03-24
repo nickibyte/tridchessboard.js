@@ -80,8 +80,8 @@ var Tridchessboard = async function( canvasId ) {
 
 
 	// DEBUG
-	var axesHelper = new THREE.AxesHelper( 10 );
-	scene.add( axesHelper );
+	//var axesHelper = new THREE.AxesHelper( 10 );
+	//scene.add( axesHelper );
 
 
 	// Window Resizing
@@ -246,7 +246,7 @@ var Tridchessboard = async function( canvasId ) {
 
 	// DEBUG
 	// TODO: Make toggleable
-	standMod.visible = false;
+	//standMod.visible = false;
 
 	//var boardGeo = new THREE.BoxGeometry();
 	//boardGeo.translate( 0, -0.5, 0 );    // Set origin at top
