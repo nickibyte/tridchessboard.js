@@ -601,36 +601,43 @@ var Tridchessboard = async function( canvasId ) {
 
 
 	// TODO: Add real piece models
-	var pieHeight = 1.25;
+	//var pieHeight = 1.25;
 
-	function pieGeo( height ) {
+	//function pieGeo( height ) {
 
-		var pieGeo = new THREE.BoxGeometry( 0.5, height, 0.5 );
-		pieGeo.translate( 0, height / 2 + 0.01, 0 );    // Set Origin at bottom
+	//	var pieGeo = new THREE.BoxGeometry( 0.5, height, 0.5 );
+	//	pieGeo.translate( 0, height / 2 + 0.01, 0 );    // Set Origin at bottom
 
-		return pieGeo;
+	//	return pieGeo;
 
-	}
+	//}
+
+	var pawnMod = await loadModel( '../assets/pieces/pawn.glb' );
+	var rookMod = await loadModel( '../assets/pieces/rook.glb' );
+	var knightMod = await loadModel( '../assets/pieces/knight.glb' );
+	var bishopMod = await loadModel( '../assets/pieces/bishop.glb' );
+	var queenMod = await loadModel( '../assets/pieces/queen.glb' );
+	var kingMod = await loadModel( '../assets/pieces/king.glb' );
 
 	var pieMatWhite = new THREE.MeshBasicMaterial( { color: 0xededed } );
-	var pieMatBlack = new THREE.MeshBasicMaterial( { color: 0x0c0c0c } );
+	var pieMatBlack = new THREE.MeshBasicMaterial( { color: 0x2b2b2b } );
 
 	// Pieces: Pawn, Knight, Bishop, Rook, Queen, King
 	// White: uppercase, Black: lowercase
 	var pieModels = {
 
-		P: [ pieGeo( 0.60 ), pieMatWhite ],
-		N: [ pieGeo( 0.90 ), pieMatWhite ],
-		B: [ pieGeo( 1.00 ), pieMatWhite ],
-		R: [ pieGeo( 0.80 ), pieMatWhite ],
-		Q: [ pieGeo( 1.20 ), pieMatWhite ],
-		K: [ pieGeo( 1.25 ), pieMatWhite ],
-		p: [ pieGeo( 0.60 ), pieMatBlack ],
-		n: [ pieGeo( 0.90 ), pieMatBlack ],
-		b: [ pieGeo( 1.00 ), pieMatBlack ],
-		r: [ pieGeo( 0.80 ), pieMatBlack ],
-		q: [ pieGeo( 1.20 ), pieMatBlack ],
-		k: [ pieGeo( 1.25 ), pieMatBlack ]
+		P: [ pawnMod.geometry, pieMatWhite ],
+		N: [ knightMod.geometry, pieMatWhite ],
+		B: [ bishopMod.geometry, pieMatWhite ],
+		R: [ rookMod.geometry, pieMatWhite ],
+		Q: [ queenMod.geometry, pieMatWhite ],
+		K: [ kingMod.geometry, pieMatWhite ],
+		p: [ pawnMod.geometry, pieMatBlack ],
+		n: [ knightMod.geometry, pieMatBlack ],
+		b: [ bishopMod.geometry, pieMatBlack ],
+		r: [ rookMod.geometry, pieMatBlack ],
+		q: [ queenMod.geometry, pieMatBlack ],
+		k: [ kingMod.geometry, pieMatBlack ]
 
 	};
 
@@ -639,8 +646,8 @@ var Tridchessboard = async function( canvasId ) {
 	var Piece = function( name ) {
 
 		// Mesh constructor
-		// TODO: Load real models
 		var geo = pieModels[ name ][ 0 ];
+		geo.translate( 0, 0.001, 0 );    // Set Origin at bottom
 		var mat = pieModels[ name ][ 1 ];
 		THREE.Mesh.apply( this, [ geo, mat ] );
 
