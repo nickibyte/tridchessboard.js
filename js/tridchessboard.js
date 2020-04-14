@@ -1193,8 +1193,104 @@ var Tridchessboard = async function( canvasId, config ) {
 
 	}
 
+	this.clear = function() { resetBoard(); }
+
+	this.position = function( arg ) {
+
+		if ( arguments.length === 0 ) { return generatePos(); }
+
+		if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'fen' ) {
+
+			return generateFen();
+
+		}
+
+		if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'start' ) {
+
+			loadFen( DEFAULT_STARTING_FEN );
+
+		}
+
+		// TODO: Check if valid position object/fen string
+		if ( typeof( arg ) === 'object' ) { loadPos( arg ); }
+
+		if ( typeof( arg ) === 'string' ) { loadFen( arg ); }
+
+	}
+
+	this.fen = function() { return this.position( 'fen' ) }
+
+	this.start = function() { return this.position( 'start' ) }
+
+	this.orientation = function( arg ) {
+
+		if ( arguments.length === 0 ) {
+
+			return { x: Number ( camera.position.x.toFixed(2) ),
+					 y: Number ( camera.position.y.toFixed(2) ),
+					 z: Number ( camera.position.z.toFixed(2) ) }
+
+		}
+
+		if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'white' ) {
+
+			camera.position.set( ORIENTATION_WHITE.x,
+								 ORIENTATION_WHITE.y,
+								 ORIENTATION_WHITE.z );
+
+			camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
+
+			currentOrientation = 'white';
+
+		}
+
+		if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'black' ) {
+
+			camera.position.set( ORIENTATION_BLACK.x,
+								 ORIENTATION_BLACK.y,
+								 ORIENTATION_BLACK.z );
+
+			camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
+
+			currentOrientation = 'black';
+
+		}
+
+		if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'flip' ) {
+
+			if ( currentOrientation == 'white' ) {
+
+				this.orientation( 'black' );
+
+			} else if ( currentOrientation == 'black' ) {
+
+				this.orientation( 'white' );
+
+			}
+
+		}
+
+		if ( typeof( arg ) === 'object' && ( typeof ( arg.x ) === 'number' ||
+											 typeof ( arg.y ) === 'number' ||
+											 typeof ( arg.z ) === 'number' ) ) {
+
+			camera.position.set( arg.x, arg.y, arg.z );
+			camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
+
+		}
+	}
+
+
 	// DEBUG
-	loadFen( DEFAULT_STARTING_FEN );
-	console.log( generateFen() );
+	this.position( DEFAULT_STARTING_FEN );
+	console.log( this.fen() );
+
+	console.log( this.orientation() );
+	this.orientation('blacK');
+	console.log( this.orientation() );
+	this.orientation('flIP');
+	console.log( this.orientation() );
+	this.orientation( { x: -10.1234, y: 7.1234, z: -10.1234 } );
+	console.log( this.orientation() );
 
 }
