@@ -944,12 +944,11 @@ var Tridchessboard = async function( canvasId, config ) {
 
 
 	// ----------------------------------------------------------------
-	// Position loading
+	// Fen and position loading
 	// ----------------------------------------------------------------
 
-	function loadFen( fen ) {
+	function resetBoard() {
 
-		// Reset board
 		var length = towers.length;    // Needed, as loop removes elements
 		for ( let i = 0; i < length; i++ ) { towers[ 0 ].deactivate(); }
 
@@ -960,6 +959,13 @@ var Tridchessboard = async function( canvasId, config ) {
 
 		}
 
+	}
+
+
+	function loadFen( fen ) {
+
+		// Reset board
+		resetBoard();
 
 		var fields = fen.split( ' ' );
 
@@ -1110,6 +1116,67 @@ var Tridchessboard = async function( canvasId, config ) {
 		var fen = towPos + ' ' + piePos;
 
 		return fen;
+
+	}
+
+
+	function loadPos( pos ) {
+
+		// Reset board
+		resetBoard();
+
+		// Iterate over position object (e.g. a3_1: 'P')
+		for ( let prop in pos ) {
+
+			if ( pos.hasOwnProperty( prop ) ) {
+
+				// Get square/tower
+				let obj = board.getObjectByName( prop );
+
+				if ( obj.type === 'square' ) {
+
+					// Add piece to square
+					obj.setPiece( new Piece( pos[ prop ] ) );
+
+				} else if ( obj.type === 'tower' && pos[ prop ] ) {
+
+					// Activate Tower
+					obj.activate();
+
+				}
+
+			}
+
+		}
+
+	}
+
+
+	function generatePos() {
+
+		var pos = {};
+
+		// Add towers to position object
+		for ( let i = 0; i < towers.length; i++ ) {
+
+			let tow = towers[ i ];
+
+			if ( tow.active ) { pos[ tow.name ] = true; }
+
+		}
+
+		// Add squares to position object
+		for ( let i = 0; i < squares.length; i++ ) {
+
+			let squ = squares[ i ];
+			let pie = squ.getPiece();
+
+			// If square is occupied
+			if ( pie !== null ) { pos[ squ.name ] = pie.name; }
+
+		}
+
+		return pos
 
 	}
 
