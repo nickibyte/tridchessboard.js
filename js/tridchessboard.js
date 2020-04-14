@@ -104,7 +104,7 @@ var Tridchessboard = async function( canvasId, config ) {
 	var renderer = new THREE.WebGLRenderer( { antialias: true } );
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize( width, height );
-	renderer.setClearColor( 0xafafaf, 1 );
+	renderer.setClearColor( 0xcccccc, 1 );
 	document.getElementById( canvasId ).appendChild( renderer.domElement );
 
 
@@ -330,7 +330,7 @@ var Tridchessboard = async function( canvasId, config ) {
 
 	// DEBUG
 	// TODO: Make toggleable
-	//standMod.visible = false;
+	standMod.visible = false;
 
 	//var boardGeo = new THREE.BoxGeometry();
 	//boardGeo.translate( 0, -0.5, 0 );    // Set origin at top
@@ -703,8 +703,8 @@ var Tridchessboard = async function( canvasId, config ) {
 	var queenMod = await loadModel( '../assets/pieces/queen.glb' );
 	var kingMod = await loadModel( '../assets/pieces/king.glb' );
 
-	var pieMatWhite = new THREE.MeshBasicMaterial( { color: 0xededed } );
-	var pieMatBlack = new THREE.MeshBasicMaterial( { color: 0x2b2b2b } );
+	var pieMatWhite = new THREE.MeshBasicMaterial( { color: 0xf7f7f7 } );
+	var pieMatBlack = new THREE.MeshBasicMaterial( { color: 0x3a3a3a } );
 
 	// Pieces: Pawn, Knight, Bishop, Rook, Queen, King
 	// White: uppercase, Black: lowercase
