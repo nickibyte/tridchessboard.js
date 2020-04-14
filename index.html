@@ -63,7 +63,33 @@
 
 		<script>
 
-			var board = Tridchessboard('canvas');
+			var config = {
+
+				draggable: true,
+				dropOffBoard: 'snapback',
+				/*orientation: {
+					x: -1,
+					y: 15,
+					z: 0
+				}*/
+
+			}
+
+			var board = Tridchessboard( 'canvas', config );
+
+			var pos = {
+				c3_1: 'K',
+				e5_3: 'p',
+				T1: true,
+				T2: false,
+				T3: false,
+				T4: true
+			}
+			//board.position( pos );
+			//var pos2 = board.position();
+			//console.log( pos2 );
+
+			//console.log( board.orientation() );
 
 		</script>
 

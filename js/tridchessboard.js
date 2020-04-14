@@ -1,7 +1,84 @@
-// TODO: Import three.js and OrbitControls here instead of in index.html
+// TODO: Import three.js and controls here instead of in index.html
 
 // TODO: Clean up (maybe) ugly async code
-var Tridchessboard = async function( canvasId ) {
+var Tridchessboard = async function( canvasId, config ) {
+
+	// ----------------------------------------------------------------
+	// ----------------------------------------------------------------
+	// Defaults and config
+	// ----------------------------------------------------------------
+	// ----------------------------------------------------------------
+
+	// Defaults
+	var DEFAULT_CONFIG = {
+
+		draggable: false,
+		dropOffBoard: 'snapback',
+		position: null,
+		onChange: null,
+		onDragStart: null,
+		onDragMove: null,
+		onDrop: null,
+		//onMouseoutSquare,
+		//onMouseoverSquare,
+		onMoveEnd: null,
+		onSnapbackEnd: null,
+		onSnapEnd: null,
+		// TODO: orientation,
+		// TODO: showNotation: true,
+		sparePieces: false,
+		// TODO: showErrors,
+		// TODO: pieceTheme: '',
+		// TODO: boardTheme: ''
+		//appearSpeed: 200,
+		//moveSpeed: 200,
+		//snapbackSpeed: 50,
+		//snapSpeed: 25,
+		//trashSpeed: 100,
+
+	};
+
+
+	// Orientation (camera position)
+	var ORIENTATION_WHITE = new THREE.Vector3( -12, 10, 0 );
+	var ORIENTATION_BLACK = new THREE.Vector3( 5, 15, 0 );
+	var DEFAULT_ORIENTATION = new THREE.Vector3( -10, 7, 10 );
+	var currentOrientation = null;
+
+
+	// Load config and apply defaults
+	if ( config.draggable !== true ) { config.draggable = false }
+	if ( config.dropOffBoard !== 'trash' ) { config.dropOffBoard = 'snapback' }
+	if ( config.sparePieces !== true ) { config.sparePieces = false }
+
+	if ( config.orientation !== undefined ) {
+
+		if ( typeof ( config.orientation ) === 'string' &&
+			 config.orientation.toLowerCase() === 'white' ) {
+
+			config.orientation = ORIENTATION_WHITE;
+			currentOrientation = 'white';
+
+		} else if ( typeof ( config.orientation ) === 'string' &&
+					config.orientation.toLowerCase() === 'black' ) {
+
+			config.orientation = ORIENTATION_BLACK;
+			currentOrientation = 'black';
+
+		} else if ( typeof ( config.orientation.x ) !== 'number' ||
+					typeof ( config.orientation.y ) !== 'number' ||
+					typeof ( config.orientation.z ) !== 'number' ) {
+
+			config.orientation = DEFAULT_ORIENTATION;
+
+		}
+
+	} else { config.orientation = DEFAULT_ORIENTATION; }
+
+	// TODO: Piece and board Themes
+
+	// TODO: Validate position
+
 
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
@@ -18,7 +95,9 @@ var Tridchessboard = async function( canvasId ) {
 	// Scene
 	var scene = new THREE.Scene();
 	var camera = new THREE.PerspectiveCamera( 60, width / height, 1, 1000 );
-	camera.position.set( -10, 7, 10 );
+	camera.position.set( config.orientation.x,
+						 config.orientation.y,
+						 config.orientation.z );
 
 
 	// Renderer
@@ -72,11 +151,16 @@ var Tridchessboard = async function( canvasId ) {
 	// Drag controls
 	var draggable = [];
 
-	var dragControls = new THREE.DragControls( draggable, false, camera, renderer.domElement );
+	if ( config.draggable ) {
+
+		var dragControls = new THREE.DragControls( draggable, false, camera, renderer.domElement );
+
+		dragControls.addEventListener( 'dragstart', onDragStart );
+		dragControls.addEventListener( 'dragend', onDragEnd );
+
+	}
 
 	renderer.domElement.addEventListener( 'mousemove', onMouseMove );
-	dragControls.addEventListener( 'dragstart', onDragStart );
-	dragControls.addEventListener( 'dragend', onDragEnd );
 
 
 	// DEBUG
@@ -843,7 +927,11 @@ var Tridchessboard = async function( canvasId ) {
 			} else {
 
 				// Snapback piece
-				selected.position.set( snap_pos.x , snap_pos.y, snap_pos.z );
+				if ( config.dropOffBoard == 'snapback' ) {
+
+					selected.position.set( snap_pos.x , snap_pos.y, snap_pos.z );
+
+				}
 
 			}
 
