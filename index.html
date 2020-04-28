@@ -77,6 +77,14 @@
 
 			var board = Tridchessboard( 'canvas', config );
 
+			board.then(function(result) {
+
+			var board = result;
+			board.start();
+			var EMPTY_BOARD_FEN = "12bc 4/4/4/4/4/4/4/4/4/4/4/4/4/4/4/4 w KQkq - 0 1";
+			//board.position( EMPTY_BOARD_FEN );
+			console.log( board.fen() );
+
 			var pos = {
 				c3_1: 'K',
 				e5_3: 'p',
@@ -90,6 +98,15 @@
 			//console.log( pos2 );
 
 			//console.log( board.orientation() );
+
+			//board.orientation('blacK');
+			//console.log( board.orientation() );
+			//board.orientation('flIP');
+			//console.log( board.orientation() );
+			//board.orientation( { x: -10.1234, y: 7.1234, z: -10.1234 } );
+			//console.log( board.orientation() );
+
+			});
 
 		</script>
 

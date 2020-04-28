@@ -1,6 +1,6 @@
 // TODO: Import three.js and controls here instead of in index.html
 
-// TODO: Clean up (maybe) ugly async code
+// TODO: Clean up ugly (async) code
 var Tridchessboard = async function( canvasId, config ) {
 
 	// ----------------------------------------------------------------
@@ -206,6 +206,7 @@ var Tridchessboard = async function( canvasId, config ) {
 	// ----------------------------------------------------------------
 
 	var DEFAULT_STARTING_FEN = "12bc rnnr/pbbp/pqkp/pppp/4/4/4/4/4/4/PBBP/RNNR/4/4/PPPP/PQKP w KQkq - 0 1";
+	var EMPTY_BOARD_FEN = "12bc 4/4/4/4/4/4/4/4/4/4/4/4/4/4/4/4 w KQkq - 0 1";
 
 
 	// ----------------------------------------------------------------
@@ -670,7 +671,7 @@ var Tridchessboard = async function( canvasId, config ) {
 
 		// Add tower
 		let tower = new Tower( name, pos, squares );
-		tower.activate();
+		tower.deactivate();
 
 		board.add( tower );
 
@@ -1187,42 +1188,45 @@ var Tridchessboard = async function( canvasId, config ) {
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
 
-	this.move = function( source, target ) {
+return {
+
+	move: function( source, target ) {
 
 		move( source, target );
 
-	}
+	},
 
-	this.clear = function() { resetBoard(); }
+	// TODO: clear( 'pieces' ) --> only remove pieces ???
+	clear: function() { resetBoard(); },
 
-	this.position = function( arg ) {
+	position: function( arg ) {
 
 		if ( arguments.length === 0 ) { return generatePos(); }
 
-		if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'fen' ) {
+		else if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'fen' ) {
 
 			return generateFen();
 
 		}
 
-		if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'start' ) {
+		else if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'start' ) {
 
 			loadFen( DEFAULT_STARTING_FEN );
 
 		}
 
 		// TODO: Check if valid position object/fen string
-		if ( typeof( arg ) === 'object' ) { loadPos( arg ); }
+		else if ( typeof( arg ) === 'object' ) { loadPos( arg ); }
 
-		if ( typeof( arg ) === 'string' ) { loadFen( arg ); }
+		else if ( typeof( arg ) === 'string' ) { loadFen( arg ); }
 
-	}
+	},
 
-	this.fen = function() { return this.position( 'fen' ) }
+	fen: function() { return this.position( 'fen' ) },
 
-	this.start = function() { return this.position( 'start' ) }
+	start: function() { this.position( 'start' ) },
 
-	this.orientation = function( arg ) {
+	orientation: function( arg ) {
 
 		if ( arguments.length === 0 ) {
 
@@ -1280,17 +1284,7 @@ var Tridchessboard = async function( canvasId, config ) {
 		}
 	}
 
+}
 
-	// DEBUG
-	this.position( DEFAULT_STARTING_FEN );
-	console.log( this.fen() );
-
-	console.log( this.orientation() );
-	this.orientation('blacK');
-	console.log( this.orientation() );
-	this.orientation('flIP');
-	console.log( this.orientation() );
-	this.orientation( { x: -10.1234, y: 7.1234, z: -10.1234 } );
-	console.log( this.orientation() );
 
 }
