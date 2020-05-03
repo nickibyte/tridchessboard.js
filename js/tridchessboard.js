@@ -1,7 +1,6 @@
 // TODO: Import three.js and controls here instead of in index.html
 
-// TODO: Clean up ugly (async) code
-var Tridchessboard = async function( canvasId, config ) {
+var Tridchessboard = function( canvasId, config ) {
 
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
@@ -111,17 +110,14 @@ var Tridchessboard = async function( canvasId, config ) {
 	// GLTFLoader for model loading
 	var loader = new THREE.GLTFLoader();
 
-	// TODO: Use async as intended instead of circumventing it
-	// Function to handle async model loading synchronously
-	function loadModel( path, offset = new THREE.Vector3( 0, 0, 0 ) ) {
+	// Function to handle async model loading
+	function loadModel( path ) {
 
 		return new Promise( function ( resolve, reject ) {
 
 			loader.load( path, function ( gltf ) {
 
 				var mesh = gltf.scene.children[ 0 ];
-				mesh.position.set( offset.x, offset.y, offset.z );
-
 				resolve( mesh );
 
 			}, undefined, function ( error ) { reject( error ); } );
@@ -324,10 +320,26 @@ var Tridchessboard = async function( canvasId, config ) {
 
 	// Add board model
 	var offset = new THREE.Vector3( 4.5, 4, 2.5 );
-	var boardMod = await loadModel( '../assets/board/boards.glb', offset );
+
+	var boardMod = new THREE.Mesh();
+	boardMod.position.set( offset.x, offset.y, offset.z );
 	board.add( boardMod );
-	var standMod = await loadModel( '../assets/board/stand.glb', offset );
+	loadModel( '../assets/board/boards.glb' ).then( function( model ) {
+
+		boardMod.geometry = model.geometry;
+		boardMod.material = model.material;
+
+	} );
+
+	var standMod = new THREE.Mesh();
+	standMod.position.set( offset.x, offset.y, offset.z );
 	board.add( standMod );
+	loadModel( '../assets/board/stand.glb' ).then( function( model ) {
+
+		standMod.geometry = model.geometry;
+		standMod.material = model.material;
+
+	} );
 
 	// DEBUG
 	// TODO: Make toggleable
@@ -515,6 +527,7 @@ var Tridchessboard = async function( canvasId, config ) {
 	// ----------------------------------------------------------------
 
 	var towers = [];
+	var towerObjs = [];
 	var towerIndicators = [];
 
 
@@ -524,7 +537,18 @@ var Tridchessboard = async function( canvasId, config ) {
 
 
 	// Tower model
-	var towMod = await loadModel( '../assets/board/towers/tower.glb' );
+	var towMod = loadModel( '../assets/board/towers/tower.glb' );
+	towMod.then( function( model ) {
+
+		for ( let i = 0; i < towerObjs.length; i++ ) {
+
+			let tow = towerObjs[ i ];
+			tow.loadModel( model );
+
+		}
+
+	} );
+
 
 	//var towGeo = new THREE.BoxGeometry( 0.25, 2, 0.25 );
 	//towGeo.translate( 0, 1, 0 );    // Set origin at bottom
@@ -612,8 +636,16 @@ var Tridchessboard = async function( canvasId, config ) {
 		}
 
 		// Tower model
-		var model = towMod.clone();
+		var model = new THREE.Mesh(); // Geo + mat set once model is loaded
 		this.add( model );
+
+		this.loadModel = function( mod ) {
+
+			model.geometry = mod.geometry;
+			model.material = mod.material;
+
+		}
+
 
 		// Tower Indicator
 		var mat = towIndMat.clone();
@@ -671,6 +703,7 @@ var Tridchessboard = async function( canvasId, config ) {
 
 		// Add tower
 		let tower = new Tower( name, pos, squares );
+		towerObjs.push( tower );
 		tower.deactivate();
 
 		board.add( tower );
@@ -685,7 +718,6 @@ var Tridchessboard = async function( canvasId, config ) {
 	var pieces = [];
 
 
-	// TODO: Add real piece models
 	//var pieHeight = 1.25;
 
 	//function pieGeo( height ) {
@@ -697,48 +729,69 @@ var Tridchessboard = async function( canvasId, config ) {
 
 	//}
 
-	var pawnMod = await loadModel( '../assets/pieces/pawn.glb' );
-	var rookMod = await loadModel( '../assets/pieces/rook.glb' );
-	var knightMod = await loadModel( '../assets/pieces/knight.glb' );
-	var bishopMod = await loadModel( '../assets/pieces/bishop.glb' );
-	var queenMod = await loadModel( '../assets/pieces/queen.glb' );
-	var kingMod = await loadModel( '../assets/pieces/king.glb' );
+	var pieModels;
+
+	var promises = [ loadModel( '../assets/pieces/pawn.glb' ),
+					 loadModel( '../assets/pieces/rook.glb' ),
+					 loadModel( '../assets/pieces/knight.glb' ),
+					 loadModel( '../assets/pieces/bishop.glb' ),
+					 loadModel( '../assets/pieces/queen.glb' ),
+					 loadModel( '../assets/pieces/king.glb' ) ];
+
+	Promise.all( promises ).then( function( models ) {
+
+		// Pieces: Pawn, Knight, Bishop, Rook, Queen, King
+		// White: uppercase, Black: lowercase
+		pieModels = {
+
+			P: new THREE.Mesh( models[ 0 ].geometry, pieMatWhite ),
+			N: new THREE.Mesh( models[ 1 ].geometry, pieMatWhite ),
+			B: new THREE.Mesh( models[ 2 ].geometry, pieMatWhite ),
+			R: new THREE.Mesh( models[ 3 ].geometry, pieMatWhite ),
+			Q: new THREE.Mesh( models[ 4 ].geometry, pieMatWhite ),
+			K: new THREE.Mesh( models[ 5 ].geometry, pieMatWhite ),
+			p: new THREE.Mesh( models[ 0 ].geometry, pieMatBlack ),
+			n: new THREE.Mesh( models[ 1 ].geometry, pieMatBlack ),
+			b: new THREE.Mesh( models[ 2 ].geometry, pieMatBlack ),
+			r: new THREE.Mesh( models[ 3 ].geometry, pieMatBlack ),
+			q: new THREE.Mesh( models[ 4 ].geometry, pieMatBlack ),
+			k: new THREE.Mesh( models[ 5 ].geometry, pieMatBlack )
+
+		};
+
+		for ( let i = 0; i < pieces.length; i++ ) {
+
+			let pie = pieces[ i ];
+			pie.loadModel( pieModels[ pie.name ] );
+
+		}
+
+	} );
+
 
 	var pieMatWhite = new THREE.MeshBasicMaterial( { color: 0xf7f7f7 } );
 	var pieMatBlack = new THREE.MeshBasicMaterial( { color: 0x3a3a3a } );
-
-	// Pieces: Pawn, Knight, Bishop, Rook, Queen, King
-	// White: uppercase, Black: lowercase
-	var pieModels = {
-
-		P: [ pawnMod.geometry, pieMatWhite ],
-		N: [ knightMod.geometry, pieMatWhite ],
-		B: [ bishopMod.geometry, pieMatWhite ],
-		R: [ rookMod.geometry, pieMatWhite ],
-		Q: [ queenMod.geometry, pieMatWhite ],
-		K: [ kingMod.geometry, pieMatWhite ],
-		p: [ pawnMod.geometry, pieMatBlack ],
-		n: [ knightMod.geometry, pieMatBlack ],
-		b: [ bishopMod.geometry, pieMatBlack ],
-		r: [ rookMod.geometry, pieMatBlack ],
-		q: [ queenMod.geometry, pieMatBlack ],
-		k: [ kingMod.geometry, pieMatBlack ]
-
-	};
-
 
 	// Piece object
 	var Piece = function( name ) {
 
 		// Mesh constructor
-		var geo = pieModels[ name ][ 0 ];
-		geo.translate( 0, 0.001, 0 );    // Set Origin at bottom
-		var mat = pieModels[ name ][ 1 ];
-		THREE.Mesh.apply( this, [ geo, mat ] );
+		THREE.Mesh.apply( this );
+		if ( pieModels !== undefined ) { this.loadModel( pieModels[ name ] ); }
 
 		// Properties
 		this.type = 'piece';
 		this.name = name;
+
+		// Piece model
+		this.loadModel = function( mod ) {
+
+			this.geometry = mod.geometry;
+			this.material = mod.material;
+
+			this.geometry.translate( 0, 0.001, 0 );    // Set Origin at bottom
+
+		}
 
 	}
 
@@ -1184,107 +1237,113 @@ var Tridchessboard = async function( canvasId, config ) {
 
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
-	// Public functions
+	// API
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
 
-return {
+	// Load default position
+	loadFen( EMPTY_BOARD_FEN );
 
-	move: function( source, target ) {
+	// Return object with API methods
+	return {
 
-		move( source, target );
 
-	},
+		move: function( source, target ) {
 
-	// TODO: clear( 'pieces' ) --> only remove pieces ???
-	clear: function() { resetBoard(); },
+			move( source, target );
 
-	position: function( arg ) {
+		},
 
-		if ( arguments.length === 0 ) { return generatePos(); }
+		// TODO: clear( 'pieces' ) --> only remove pieces ???
+		clear: function() { resetBoard(); },
 
-		else if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'fen' ) {
+		position: function( arg ) {
 
-			return generateFen();
+			if ( arguments.length === 0 ) { return generatePos(); }
 
-		}
+			else if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'fen' ) {
 
-		else if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'start' ) {
-
-			loadFen( DEFAULT_STARTING_FEN );
-
-		}
-
-		// TODO: Check if valid position object/fen string
-		else if ( typeof( arg ) === 'object' ) { loadPos( arg ); }
-
-		else if ( typeof( arg ) === 'string' ) { loadFen( arg ); }
-
-	},
-
-	fen: function() { return this.position( 'fen' ) },
-
-	start: function() { this.position( 'start' ) },
-
-	orientation: function( arg ) {
-
-		if ( arguments.length === 0 ) {
-
-			return { x: Number ( camera.position.x.toFixed(2) ),
-					 y: Number ( camera.position.y.toFixed(2) ),
-					 z: Number ( camera.position.z.toFixed(2) ) }
-
-		}
-
-		if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'white' ) {
-
-			camera.position.set( ORIENTATION_WHITE.x,
-								 ORIENTATION_WHITE.y,
-								 ORIENTATION_WHITE.z );
-
-			camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
-
-			currentOrientation = 'white';
-
-		}
-
-		if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'black' ) {
-
-			camera.position.set( ORIENTATION_BLACK.x,
-								 ORIENTATION_BLACK.y,
-								 ORIENTATION_BLACK.z );
-
-			camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
-
-			currentOrientation = 'black';
-
-		}
-
-		if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'flip' ) {
-
-			if ( currentOrientation == 'white' ) {
-
-				this.orientation( 'black' );
-
-			} else if ( currentOrientation == 'black' ) {
-
-				this.orientation( 'white' );
+				return generateFen();
 
 			}
 
+			else if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'start' ) {
+
+				loadFen( DEFAULT_STARTING_FEN );
+
+			}
+
+			// TODO: Check if valid position object/fen string
+			else if ( typeof( arg ) === 'object' ) { loadPos( arg ); }
+
+			else if ( typeof( arg ) === 'string' ) { loadFen( arg ); }
+
+		},
+
+		fen: function() { return this.position( 'fen' ) },
+
+		start: function() { this.position( 'start' ) },
+
+		orientation: function( arg ) {
+
+			if ( arguments.length === 0 ) {
+
+				return { x: Number ( camera.position.x.toFixed(2) ),
+						 y: Number ( camera.position.y.toFixed(2) ),
+						 z: Number ( camera.position.z.toFixed(2) ) }
+
+			}
+
+			if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'white' ) {
+
+				camera.position.set( ORIENTATION_WHITE.x,
+									 ORIENTATION_WHITE.y,
+									 ORIENTATION_WHITE.z );
+
+				camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
+
+				currentOrientation = 'white';
+
+			}
+
+			if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'black' ) {
+
+				camera.position.set( ORIENTATION_BLACK.x,
+									 ORIENTATION_BLACK.y,
+									 ORIENTATION_BLACK.z );
+
+				camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
+
+				currentOrientation = 'black';
+
+			}
+
+			if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'flip' ) {
+
+				if ( currentOrientation == 'white' ) {
+
+					this.orientation( 'black' );
+
+				} else if ( currentOrientation == 'black' ) {
+
+					this.orientation( 'white' );
+
+				}
+
+			}
+
+			if ( typeof( arg ) === 'object' && ( typeof ( arg.x ) === 'number' ||
+												 typeof ( arg.y ) === 'number' ||
+												 typeof ( arg.z ) === 'number' ) ) {
+
+				camera.position.set( arg.x, arg.y, arg.z );
+				camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
+
+			}
 		}
 
-		if ( typeof( arg ) === 'object' && ( typeof ( arg.x ) === 'number' ||
-											 typeof ( arg.y ) === 'number' ||
-											 typeof ( arg.z ) === 'number' ) ) {
 
-			camera.position.set( arg.x, arg.y, arg.z );
-			camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
-
-		}
 	}
-
-}
 
 
 }
