@@ -777,7 +777,6 @@ var Tridchessboard = function( canvasId, config ) {
 
 		// Mesh constructor
 		THREE.Mesh.apply( this );
-		if ( pieModels !== undefined ) { this.loadModel( pieModels[ name ] ); }
 
 		// Properties
 		this.type = 'piece';
@@ -792,6 +791,8 @@ var Tridchessboard = function( canvasId, config ) {
 			this.geometry.translate( 0, 0.001, 0 );    // Set Origin at bottom
 
 		}
+
+		if ( pieModels !== undefined ) { this.loadModel( pieModels[ name ] ); }
 
 	}
 
