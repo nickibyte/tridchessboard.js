@@ -1255,8 +1255,14 @@ var Tridchessboard = function( canvasId, config ) {
 
 		},
 
-		// TODO: clear( 'pieces' ) --> only remove pieces ???
-		clear: function() { resetBoard(); },
+		// TODO: Reset towers + remove pieces, remove towers + pieces or only remove pieces?
+		clear: function() {
+
+			loadFen( EMPTY_BOARD_FEN );
+			//resetBoard();
+			// foreach square in squares: setPiece(null)
+
+		},
 
 		position: function( arg ) {
 
