@@ -9,7 +9,7 @@ var Tridchessboard = function( canvasId, config ) {
 	// ----------------------------------------------------------------
 
 	// Defaults
-	var DEFAULT_CONFIG = {
+	/*var DEFAULT_CONFIG = {
 
 		draggable: false,
 		dropOffBoard: 'snapback',
@@ -23,19 +23,19 @@ var Tridchessboard = function( canvasId, config ) {
 		onMoveEnd: null,
 		onSnapbackEnd: null,
 		onSnapEnd: null,
-		// TODO: orientation,
-		// TODO: showNotation: true,
+		orientation,
+		showNotation: true,
 		sparePieces: false,
-		// TODO: showErrors,
-		// TODO: pieceTheme: '',
-		// TODO: boardTheme: ''
+		showErrors,
+		pieceTheme: '',
+		boardTheme: '',
 		//appearSpeed: 200,
 		//moveSpeed: 200,
 		//snapbackSpeed: 50,
 		//snapSpeed: 25,
 		//trashSpeed: 100,
 
-	};
+	};*/
 
 
 	// Orientation (camera position)
@@ -74,9 +74,12 @@ var Tridchessboard = function( canvasId, config ) {
 
 	} else { config.orientation = DEFAULT_ORIENTATION; }
 
-	// TODO: Piece and board Themes
-
-	// TODO: Validate position
+	// TODO: Config - postition (+ validate position)
+	// TODO: Config - callback methods (onMove, ...)
+	// TODO: Config - piece and board themes
+	// TODO: Config - stand (toggle)
+	// TODO: Config - sparce pieces
+	// TODO: Config - notation
 
 
 	// ----------------------------------------------------------------
@@ -987,6 +990,8 @@ var Tridchessboard = function( canvasId, config ) {
 					selected.position.set( snap_pos.x , snap_pos.y, snap_pos.z );
 
 				}
+
+				// TODO: Implement dropOffBoard -> 'trash'
 
 			}
 
