@@ -1249,9 +1249,30 @@ var Tridchessboard = function( canvasId, config ) {
 	return {
 
 
-		move: function( source, target ) {
+		move: function( args ) {
 
-			move( source, target );
+			// If no moves exist, do nothing
+			if ( arguments.length === 0 ) { return; }
+
+			for ( let i = 0; i < arguments.length; i++ ) {
+
+				if ( typeof( arguments[ i ] ) !== 'string' ) { continue; }
+
+				let mov = arguments[ i ];
+
+				// Remove whitespace
+				mov = mov.replace( /\s/g, '' );
+
+				// TODO: Validate move
+
+				// Perform move
+				mov = mov.split( '-' );
+				console.log( mov );
+				move( mov[ 0 ], mov[ 1 ] );
+
+			}
+
+			return generatePos();
 
 		},
 
