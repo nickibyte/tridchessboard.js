@@ -77,7 +77,8 @@ var Tridchessboard = function( canvasId, config ) {
 	// TODO: Config - callback methods (onMove, ...)
 	// TODO: Config - piece and board themes
 	// TODO: Config - stand (toggle)
-	// TODO: Config - sparce pieces
+	// TODO: Config - show errors
+	// TODO: Config - spare pieces
 	// TODO: Config - notation
 
 
