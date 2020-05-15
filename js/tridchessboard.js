@@ -74,7 +74,6 @@ var Tridchessboard = function( canvasId, config ) {
 
 	} else { config.orientation = DEFAULT_ORIENTATION; }
 
-	// TODO: Config - postition (+ validate position)
 	// TODO: Config - callback methods (onMove, ...)
 	// TODO: Config - piece and board themes
 	// TODO: Config - stand (toggle)
@@ -1241,14 +1240,42 @@ var Tridchessboard = function( canvasId, config ) {
 	}
 
 
+	function position( arg ) {
+
+		if ( arg === undefined ) { return generatePos(); }
+
+		else if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'fen' ) {
+
+			return generateFen();
+
+		}
+
+		else if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'start' ) {
+
+			loadFen( DEFAULT_STARTING_FEN );
+
+		}
+
+		// TODO: Check if valid position object/fen string
+		else if ( typeof( arg ) === 'object' ) { loadPos( arg ); }
+
+		else if ( typeof( arg ) === 'string' ) { loadFen( arg ); }
+
+	}
+
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
 	// API
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
 
-	// Load default position
-	loadFen( EMPTY_BOARD_FEN );
+	// TODO: Validate position
+	// Load position
+	if ( config.position !== undefined ) {
+
+		loadPos( config.position );
+
+	} else { loadFen( EMPTY_BOARD_FEN ); }
 
 	// Return object with API methods
 	return {
@@ -1290,32 +1317,11 @@ var Tridchessboard = function( canvasId, config ) {
 
 		},
 
-		position: function( arg ) {
+		position: function( arg ) { return position( arg ); },
 
-			if ( arguments.length === 0 ) { return generatePos(); }
+		fen: function() { return position( 'fen' ); },
 
-			else if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'fen' ) {
-
-				return generateFen();
-
-			}
-
-			else if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'start' ) {
-
-				loadFen( DEFAULT_STARTING_FEN );
-
-			}
-
-			// TODO: Check if valid position object/fen string
-			else if ( typeof( arg ) === 'object' ) { loadPos( arg ); }
-
-			else if ( typeof( arg ) === 'string' ) { loadFen( arg ); }
-
-		},
-
-		fen: function() { return this.position( 'fen' ) },
-
-		start: function() { this.position( 'start' ) },
+		start: function() { position( 'start' ); },
 
 		orientation: function( arg ) {
 
