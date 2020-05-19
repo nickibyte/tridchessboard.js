@@ -629,7 +629,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 			}
 
-			// Activate squares
+			// Deactivate squares
 			for ( let i = 0; i < this.squares.length; i++ ) {
 
 				this.squares[ i ].deactivate();
@@ -807,6 +807,86 @@ var Tridchessboard = function( canvasId, config ) {
 	// Moving
 	// ----------------------------------------------------------------
 
+	function addPiece( square, piece ) {
+
+		square.setPiece( new Piece( piece ) );
+
+	}
+
+	function addTower( tower ) { tower.activate(); }
+
+	function add( target, piece ) {
+
+		if ( typeof( target ) === 'string' ) {
+
+			target = board.getObjectByName( target );
+
+		}
+
+		// Add tower or piece
+		if ( target.type === 'square' ) {
+
+			addPiece( target, piece );
+
+		} else {
+
+			addTower( target );
+
+		}
+
+	}
+
+	function removePiece( square ) {
+
+		// Convert pieces to squares
+		if ( square.type === 'piece' ) { square = square.parent; }
+
+		square.setPiece( null );
+
+	}
+
+	function removeTower( tower ) {
+
+		// Convert towerModels to towers
+		if ( tower.type === 'Mesh' ) { tower = tower.parent; }
+
+		tower.deactivate();
+
+		// TODO: Shouldn't this be done in square.deactivate method?
+		// Remove pieces
+		for ( let i = 0; i < tower.squares.length; i++ ) {
+
+			tower.squares[ i ].setPiece( null );
+
+		}
+
+	}
+
+	function remove( target ) {
+
+		if ( typeof( target ) === 'string' ) {
+
+			target = board.getObjectByName( target );
+
+		}
+
+		// remove tower or piece
+		if ( target.type === 'square' || target.type === 'piece' ) {
+
+			removePiece( target );
+
+		} else {
+
+			// This must be else and not else if type === 'tower'
+			// Because the dragged tower is of type Mesh
+			// removeTower handles this
+			removeTower( target );
+
+		}
+
+	}
+
+
 	function movePiece( source, target ) {
 
 		// Convert pieces to squares
@@ -835,16 +915,17 @@ var Tridchessboard = function( canvasId, config ) {
 		if ( source.type === 'Mesh' ) { source = source.parent; }
 		if ( target.type === 'Mesh' ) { target = target.parent; }
 
-		// Update tower positions
-		source.deactivate();
-		target.activate();
-
 		// Move pieces
 		for ( let i = 0; i < source.squares.length; i++ ) {
 
 			movePiece( source.squares[ i ], target.squares[ i ] );
 
 		}
+
+		// Update tower positions
+		// Needs to be done after moving, as deactivating removes pieces
+		source.deactivate();
+		target.activate();
 
 	}
 
@@ -871,6 +952,9 @@ var Tridchessboard = function( canvasId, config ) {
 
 		} else {
 
+			// This must be else and not else if type === 'tower'
+			// because the dragged tower is of type Mesh
+			// moveTower handles this
 			moveTower( source, target );
 
 		}
@@ -879,7 +963,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	// ----------------------------------------------------------------
-	// Movement callbacks
+	// Dragging
 	// ----------------------------------------------------------------
 
 	var selected = null, target = null;
@@ -984,14 +1068,17 @@ var Tridchessboard = function( canvasId, config ) {
 
 			} else {
 
-				// Snapback piece
-				if ( config.dropOffBoard == 'snapback' ) {
+				if ( config.dropOffBoard == 'trash' ) {
 
+					// Trash piece/tower
+					remove( selected );
+
+				} else {
+
+					// Snapback piece/tower
 					selected.position.set( snap_pos.x , snap_pos.y, snap_pos.z );
 
 				}
-
-				// TODO: Implement dropOffBoard -> 'trash'
 
 			}
 
@@ -1281,6 +1368,10 @@ var Tridchessboard = function( canvasId, config ) {
 	// Return object with API methods
 	return {
 
+
+		add: function( target, piece ) { add( target, piece ); },
+
+		remove: function( target ) { remove( target ); },
 
 		move: function( args ) {
 
