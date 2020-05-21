@@ -769,9 +769,9 @@ var Tridchessboard = function( canvasId, config ) {
 	var pieModels;
 
 	var promises = [ loadModel( '../assets/pieces/pawn.glb' ),
-					 loadModel( '../assets/pieces/rook.glb' ),
 					 loadModel( '../assets/pieces/knight.glb' ),
 					 loadModel( '../assets/pieces/bishop.glb' ),
+					 loadModel( '../assets/pieces/rook.glb' ),
 					 loadModel( '../assets/pieces/queen.glb' ),
 					 loadModel( '../assets/pieces/king.glb' ) ];
 
@@ -1484,6 +1484,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 			if ( arguments.length === 0 ) {
 
+				// TODO: Check if currentOrientation is set and return that instead
 				return { x: Number ( camera.position.x.toFixed(2) ),
 						 y: Number ( camera.position.y.toFixed(2) ),
 						 z: Number ( camera.position.z.toFixed(2) ) }
