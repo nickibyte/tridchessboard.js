@@ -72,14 +72,32 @@
 					y: 15,
 					z: 0
 				},*/
-				position: {
+				onChange: function( oldPos, newPos ) {
+					console.log("OnChange");
+					console.log("Old position:");
+					console.log(oldPos);
+					console.log("New position:");
+					console.log(newPos);
+				},
+				onDragStart: function( source, piece, pos, orient ) {
+					console.log("OnDragStart");
+					console.log("Source");
+					console.log(source);
+					console.log("Piece");
+					console.log(piece);
+					console.log("Position");
+					console.log(pos);
+					console.log("Orientation:");
+					console.log(orient);
+				}
+				/*position: {
 					c3_1: 'K',
 					e5_3: 'p',
 					T1: true,
 					T2: false,
 					T3: false,
 					T4: true
-				}
+				}*/
 
 			}
 

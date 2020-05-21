@@ -74,6 +74,40 @@ var Tridchessboard = function( canvasId, config ) {
 
 	} else { config.orientation = DEFAULT_ORIENTATION; }
 
+
+	// Callback methods
+
+	// TODO: Find way to not call this on internal moves
+	function callOnChange( oldPos ) {
+
+		if ( typeof ( config.onChange ) === 'function' ) {
+
+			var newPos = generatePos();
+
+			config.onChange( oldPos, newPos );
+
+		}
+
+	}
+
+	function callOnDragStart( obj ) {
+
+		if ( typeof ( config.onDragStart ) === 'function' ) {
+
+			var source = obj.parent.name;
+
+			// Tower or piece (for towers source and piece are the same)
+			var piece = obj.parent.name;
+			if ( obj.type === 'piece' ) { piece = obj.name; }
+
+			var pos = position();
+
+			return config.onDragStart( source, piece, pos, currentOrientation );
+
+		}
+
+	}
+
 	// TODO: Config - callback methods (onMove, ...)
 	// TODO: Config - piece and board themes
 	// TODO: Config - stand (toggle)
@@ -817,6 +851,8 @@ var Tridchessboard = function( canvasId, config ) {
 
 	function add( target, piece ) {
 
+		var oldPos = generatePos();
+
 		if ( typeof( target ) === 'string' ) {
 
 			target = board.getObjectByName( target );
@@ -833,6 +869,8 @@ var Tridchessboard = function( canvasId, config ) {
 			addTower( target );
 
 		}
+
+		callOnChange( oldPos );
 
 	}
 
@@ -864,6 +902,8 @@ var Tridchessboard = function( canvasId, config ) {
 
 	function remove( target ) {
 
+		var oldPos = generatePos();
+
 		if ( typeof( target ) === 'string' ) {
 
 			target = board.getObjectByName( target );
@@ -883,6 +923,8 @@ var Tridchessboard = function( canvasId, config ) {
 			removeTower( target );
 
 		}
+
+		callOnChange( oldPos );
 
 	}
 
@@ -931,6 +973,8 @@ var Tridchessboard = function( canvasId, config ) {
 
 	function move( source, target ) {
 
+		var oldPos = generatePos();
+
 		// Convert string-names to objects (squares, pieces, towers)
 		if ( typeof( source ) === 'string' ) {
 
@@ -958,6 +1002,10 @@ var Tridchessboard = function( canvasId, config ) {
 			moveTower( source, target );
 
 		}
+
+		callOnChange( oldPos );
+		// TODO: Call onMoveEnd ?
+		// TODO: Call onSnapEnd ?
 
 	}
 
@@ -1008,6 +1056,8 @@ var Tridchessboard = function( canvasId, config ) {
 							target = intObj.parent;
 							target.highlight();
 
+							// TODO: Call onDragMove
+
 						}
 
 						break;
@@ -1050,6 +1100,9 @@ var Tridchessboard = function( canvasId, config ) {
 			// Store position for snapback
 			snap_pos = selected.position.clone();
 
+			// TODO: If this returns false, cancel drag (How?)
+			callOnDragStart( event.object );
+
 		}
 
 	}
@@ -1078,12 +1131,16 @@ var Tridchessboard = function( canvasId, config ) {
 					// Snapback piece/tower
 					selected.position.set( snap_pos.x , snap_pos.y, snap_pos.z );
 
+					// TODO: Call on SnapbackEnd
+
 				}
 
 			}
 
 			selected = null;
 			target = null;
+
+			// TODO: Call onDrop
 
 		}
 
@@ -1110,6 +1167,8 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	function loadFen( fen ) {
+
+		var oldPos = generatePos();
 
 		// Reset board
 		resetBoard();
@@ -1185,6 +1244,8 @@ var Tridchessboard = function( canvasId, config ) {
 			}
 
 		}
+
+		callOnChange( oldPos );
 
 	}
 
@@ -1269,6 +1330,8 @@ var Tridchessboard = function( canvasId, config ) {
 
 	function loadPos( pos ) {
 
+		var oldPos = generatePos();
+
 		// Reset board
 		resetBoard();
 
@@ -1295,6 +1358,8 @@ var Tridchessboard = function( canvasId, config ) {
 			}
 
 		}
+
+		callOnChange( oldPos );
 
 	}
 
