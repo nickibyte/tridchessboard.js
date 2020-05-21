@@ -73,6 +73,7 @@
 					z: 0
 				},*/
 				onChange: function( oldPos, newPos ) {
+					console.log("--------------------------------------------");
 					console.log("OnChange");
 					console.log("Old position:");
 					console.log(oldPos);
@@ -80,17 +81,34 @@
 					console.log(newPos);
 				},
 				onDragStart: function( source, piece, pos, orient ) {
+					console.log("--------------------------------------------");
 					console.log("OnDragStart");
-					console.log("Source");
+					console.log("Source:");
 					console.log(source);
-					console.log("Piece");
+					console.log("Piece:");
 					console.log(piece);
-					console.log("Position");
+					console.log("Position:");
 					console.log(pos);
 					console.log("Orientation:");
 					console.log(orient);
-				}
-				/*position: {
+				},
+				onDragMove: function( newObj, oldObj, source, piece, pos, orient ) {
+					console.log("--------------------------------------------");
+					console.log("OnDragMove");
+					console.log("New:");
+					console.log(newObj);
+					console.log("Old:");
+					console.log(oldObj);
+					console.log("Source:");
+					console.log(source);
+					console.log("Piece:");
+					console.log(piece);
+					console.log("Position:");
+					console.log(pos);
+					console.log("Orientation:");
+					console.log(orient);
+				},
+				position: 'start'/*{
 					c3_1: 'K',
 					e5_3: 'p',
 					T1: true,

@@ -84,6 +84,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 			var newPos = generatePos();
 
+			// TODO: Only call if the position was changed
 			config.onChange( oldPos, newPos );
 
 		}
@@ -103,6 +104,31 @@ var Tridchessboard = function( canvasId, config ) {
 			var pos = position();
 
 			return config.onDragStart( source, piece, pos, currentOrientation );
+
+		}
+
+	}
+
+	function callOnDragMove( newObj, oldObj, obj ) {
+
+		if ( typeof ( config.onDragMove ) === 'function' ) {
+
+			newObj = newObj.name;
+			oldObj = oldObj.name;
+			var source = obj.parent.name;
+
+			// Tower or piece (for towers source and piece are the same)
+			var piece = obj.parent.name;
+			if ( obj.type === 'piece' ) { piece = obj.name; }
+
+			var pos = position();
+
+			// Only call if the square/tower position was changed
+			if ( newObj !== oldObj ) {
+
+				config.onDragMove( newObj, oldObj, source, piece, pos, currentOrientation );
+
+			}
 
 		}
 
@@ -1014,7 +1040,7 @@ var Tridchessboard = function( canvasId, config ) {
 	// Dragging
 	// ----------------------------------------------------------------
 
-	var selected = null, target = null;
+	var selected = null, target = null, oldTar = null;
 	var snap_pos = new THREE.Vector3();
 
 	var mouse = new THREE.Vector2();
@@ -1056,7 +1082,12 @@ var Tridchessboard = function( canvasId, config ) {
 							target = intObj.parent;
 							target.highlight();
 
-							// TODO: Call onDragMove
+							if ( oldTar !== null ) {
+
+								callOnDragMove( target, oldTar, selected );
+
+							}
+							oldTar = target;
 
 						}
 
@@ -1094,8 +1125,8 @@ var Tridchessboard = function( canvasId, config ) {
 			selected = event.object;
 
 			// DEBUG
-			console.log( "Selected: ");
-			console.log( selected );
+			//console.log( "Selected: ");
+			//console.log( selected );
 
 			// Store position for snapback
 			snap_pos = selected.position.clone();
@@ -1426,7 +1457,7 @@ var Tridchessboard = function( canvasId, config ) {
 	// Load position
 	if ( config.position !== undefined ) {
 
-		loadPos( config.position );
+		position( config.position );
 
 	} else { loadFen( EMPTY_BOARD_FEN ); }
 
@@ -1456,7 +1487,6 @@ var Tridchessboard = function( canvasId, config ) {
 
 				// Perform move
 				mov = mov.split( '-' );
-				console.log( mov );
 				move( mov[ 0 ], mov[ 1 ] );
 
 			}
