@@ -91,6 +91,8 @@
 					console.log(pos);
 					console.log("Orientation:");
 					console.log(orient);
+
+					//return false;
 				},
 				onDragMove: function( newObj, oldObj, source, piece, pos, orient ) {
 					console.log("--------------------------------------------");
@@ -107,6 +109,54 @@
 					console.log(pos);
 					console.log("Orientation:");
 					console.log(orient);
+				},
+				onDrop: function( source, target, piece, newPos, oldPos, orient ) {
+					console.log("--------------------------------------------");
+					console.log("OnDrop");
+					console.log("Source:");
+					console.log(source);
+					console.log("Target:");
+					console.log(target);
+					console.log("Piece:");
+					console.log(piece);
+					console.log("New Position:");
+					console.log(newPos);
+					console.log("Old Position:");
+					console.log(oldPos);
+					console.log("Orientation:");
+					console.log(orient);
+
+					//return 'snapback';
+				},
+				onMoveEnd: function( oldPos, newPos ) {
+					console.log("--------------------------------------------");
+					console.log("OnMoveEnd");
+					console.log("Old Position:");
+					console.log(oldPos);
+					console.log("New Position:");
+					console.log(newPos);
+				},
+				onSnapbackEnd: function( piece, source, pos, orient ) {
+					console.log("--------------------------------------------");
+					console.log("OnSnapbackEnd");
+					console.log("Piece:");
+					console.log(piece);
+					console.log("Source:");
+					console.log(source);
+					console.log("Position:");
+					console.log(pos);
+					console.log("Orientation:");
+					console.log(orient);
+				},
+				onSnapEnd: function( source, target, piece ) {
+					console.log("--------------------------------------------");
+					console.log("OnSnapEnd");
+					console.log("Source:");
+					console.log(source);
+					console.log("Target:");
+					console.log(target);
+					console.log("Piece:");
+					console.log(piece);
 				},
 				position: 'start'/*{
 					c3_1: 'K',

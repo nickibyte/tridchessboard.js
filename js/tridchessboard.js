@@ -134,8 +134,76 @@ var Tridchessboard = function( canvasId, config ) {
 
 	}
 
-	// TODO: Config - callback methods (onMove, ...)
-	// TODO: Config - piece and board themes
+	function callOnDrop( source, target, obj, oldPos ) {
+
+		if ( typeof ( config.onDrop ) === 'function' ) {
+
+			source = source.name;
+			if ( target !== 'offboard' ) { target = target.name; }
+
+			// Tower or piece (for towers source and piece are the same)
+			var piece = obj.parent.name;
+			if ( obj.type === 'piece' ) { piece = obj.name; }
+
+			var newPos = position();
+
+			return config.onDrop( source, target, piece, newPos, oldPos, currentOrientation );
+
+		}
+	}
+
+	// TODO: Same as callOnChange, combine somehow
+	function callOnMoveEnd( oldPos ) {
+
+		if ( typeof ( config.onMoveEnd ) === 'function' ) {
+
+			var newPos = generatePos();
+
+			// TODO: Only call if the position was changed
+			config.onMoveEnd( oldPos, newPos );
+
+		}
+
+	}
+
+	function callOnSnapbackEnd( obj, source ) {
+
+		if ( typeof ( config.onSnapbackEnd ) === 'function' ) {
+
+			source = source.name;
+
+			// Tower or piece (for towers source and piece are the same)
+			var piece = obj.parent.name;
+			if ( obj.type === 'piece' ) { piece = obj.name; }
+
+			var pos = position();
+
+			config.onSnapbackEnd( piece, source, pos, currentOrientation );
+
+		}
+	}
+
+	function callOnSnapEnd( source, target ) {
+
+		if ( typeof ( config.onSnapEnd ) === 'function' ) {
+
+			// Convert pieces/towerModels to squares/towers
+			if ( source.type === 'piece' || source.type === 'Mesh' ) { source = source.parent; }
+			if ( target.type === 'piece' || target.type === 'Mesh' ) { target = target.parent; }
+
+			// Tower or piece (for towers source and piece are the same)
+			var piece = source.name;
+			if ( target.type === 'square' ) { piece = target.getPiece().name; }
+
+			source = source.name;
+			target = target.name;
+
+			config.onSnapEnd( source, target, piece );
+
+		}
+
+	}
+
 	// TODO: Config - stand (toggle)
 	// TODO: Config - show errors
 	// TODO: Config - spare pieces
@@ -1029,9 +1097,9 @@ var Tridchessboard = function( canvasId, config ) {
 
 		}
 
+		callOnMoveEnd( oldPos );
+		callOnSnapEnd( source, target );
 		callOnChange( oldPos );
-		// TODO: Call onMoveEnd ?
-		// TODO: Call onSnapEnd ?
 
 	}
 
@@ -1124,15 +1192,18 @@ var Tridchessboard = function( canvasId, config ) {
 			// Get selected object
 			selected = event.object;
 
-			// DEBUG
-			//console.log( "Selected: ");
-			//console.log( selected );
-
 			// Store position for snapback
 			snap_pos = selected.position.clone();
 
-			// TODO: If this returns false, cancel drag (How?)
-			callOnDragStart( event.object );
+			var onDragStart = callOnDragStart( event.object );
+
+			if ( onDragStart === false ) {
+
+				// Cancel Drag
+				dragControls.enabled = false;
+				onDragEnd();
+
+			}
 
 		}
 
@@ -1145,33 +1216,48 @@ var Tridchessboard = function( canvasId, config ) {
 
 		if ( selected !== null ) {
 
-			if ( target !== null ) {
+			var action = 'move';
+
+			// Save position for onDrop
+			var oldPos = position();
+
+			if ( target !== null ) { target.unhighlight(); }
+			else {
+
+				target = 'offboard';
+
+				if( config.dropOffBoard === 'trash' ) { action = 'trash'; }
+				else { action = 'snapback' }
+
+			}
+
+			// TODO: new Pos is always the same as oldPos because move() is called after onDrop
+			var onDrop = callOnDrop( selected.parent, target, selected, oldPos );
+
+			// Overwrite onDrop action
+			if ( onDrop === 'trash' ) { action = 'trash'; }
+			else if ( onDrop === 'snapback' ) { action = 'snapback'; }
+
+			if ( action === 'trash' ) {
+
+				// Trash piece/tower
+				remove( selected );
+
+			} else if ( action === 'snapback' ) {
+
+				// Snapback piece/tower
+				selected.position.set( snap_pos.x , snap_pos.y, snap_pos.z );
+
+				callOnSnapbackEnd( selected, selected.parent );
+
+			} else if ( action === 'move' ) {
 
 				move( selected, target );
-				target.unhighlight();
-
-			} else {
-
-				if ( config.dropOffBoard == 'trash' ) {
-
-					// Trash piece/tower
-					remove( selected );
-
-				} else {
-
-					// Snapback piece/tower
-					selected.position.set( snap_pos.x , snap_pos.y, snap_pos.z );
-
-					// TODO: Call on SnapbackEnd
-
-				}
 
 			}
 
 			selected = null;
 			target = null;
-
-			// TODO: Call onDrop
 
 		}
 
