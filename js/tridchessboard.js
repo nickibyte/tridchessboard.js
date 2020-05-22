@@ -44,13 +44,38 @@ var Tridchessboard = function( canvasId, config ) {
 	var DEFAULT_ORIENTATION = new THREE.Vector3( -10, 7, 10 );
 	var currentOrientation = null;
 
+	// PieceTheme
+	PIECE_THEME = {
+
+		pawn: '../assets/pieces/pawn.glb',
+		knight: '../assets/pieces/knight.glb',
+		bishop: '../assets/pieces/bishop.glb',
+		rook: '../assets/pieces/rook.glb',
+		queen: '../assets/pieces/queen.glb',
+		king: '../assets/pieces/king.glb'
+
+	};
+
+	// TowerTheme
+	TOWER_THEME = '../assets/board/towers/tower.glb';
+
+	// BoardTheme
+	BOARD_THEME = '../assets/board/boards.glb';
+	STAND_THEME = '../assets/board/stand.glb';
+
 
 	// Load config and apply defaults
 	if ( config.draggable !== true ) { config.draggable = false }
 	if ( config.dropOffBoard !== 'trash' ) { config.dropOffBoard = 'snapback' }
 	if ( config.sparePieces !== true ) { config.sparePieces = false }
 
-	if ( config.orientation !== undefined ) {
+	// TODO: Validate themes
+	if ( !config.hasOwnProperty( 'pieceTheme' ) ) { config.pieceTheme = PIECE_THEME; }
+	if ( !config.hasOwnProperty( 'towerTheme' ) ) { config.towerTheme = TOWER_THEME; }
+	if ( !config.hasOwnProperty( 'boardTheme' ) ) { config.boardTheme = BOARD_THEME; }
+	if ( !config.hasOwnProperty( 'standTheme' ) ) { config.standTheme = STAND_THEME; }
+
+	if ( config.hasOwnProperty( 'orientation' ) ) {
 
 		if ( typeof ( config.orientation ) === 'string' &&
 			 config.orientation.toLowerCase() === 'white' ) {
@@ -455,7 +480,7 @@ var Tridchessboard = function( canvasId, config ) {
 	var boardMod = new THREE.Mesh();
 	boardMod.position.set( offset.x, offset.y, offset.z );
 	board.add( boardMod );
-	loadModel( '../assets/board/boards.glb' ).then( function( model ) {
+	loadModel( config.boardTheme ).then( function( model ) {
 
 		boardMod.geometry = model.geometry;
 		boardMod.material = model.material;
@@ -465,25 +490,16 @@ var Tridchessboard = function( canvasId, config ) {
 	var standMod = new THREE.Mesh();
 	standMod.position.set( offset.x, offset.y, offset.z );
 	board.add( standMod );
-	loadModel( '../assets/board/stand.glb' ).then( function( model ) {
+	loadModel( config.standTheme ).then( function( model ) {
 
 		standMod.geometry = model.geometry;
 		standMod.material = model.material;
 
 	} );
 
-	// DEBUG
 	// TODO: Make toggleable
 	standMod.visible = false;
 
-	//var boardGeo = new THREE.BoxGeometry();
-	//boardGeo.translate( 0, -0.5, 0 );    // Set origin at top
-	//var boardMat = new THREE.MeshBasicMaterial( { color: 0x92b4ce } );
-
-	//var boardMod = new THREE.Mesh( boardGeo, boardMat );
-	//boardMod.position.set( 4.5, 4, 2.5 );
-
-	//board.add( boardMod );
 
 	// ----------------------------------------------------------------
 	// Squares
@@ -668,7 +684,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	// Tower model
-	var towMod = loadModel( '../assets/board/towers/tower.glb' );
+	var towMod = loadModel( config.towerTheme );
 	towMod.then( function( model ) {
 
 		for ( let i = 0; i < towerObjs.length; i++ ) {
@@ -862,12 +878,12 @@ var Tridchessboard = function( canvasId, config ) {
 
 	var pieModels;
 
-	var promises = [ loadModel( '../assets/pieces/pawn.glb' ),
-					 loadModel( '../assets/pieces/knight.glb' ),
-					 loadModel( '../assets/pieces/bishop.glb' ),
-					 loadModel( '../assets/pieces/rook.glb' ),
-					 loadModel( '../assets/pieces/queen.glb' ),
-					 loadModel( '../assets/pieces/king.glb' ) ];
+	var promises = [ loadModel( config.pieceTheme.pawn ),
+					 loadModel( config.pieceTheme.knight ),
+					 loadModel( config.pieceTheme.bishop ),
+					 loadModel( config.pieceTheme.rook ),
+					 loadModel( config.pieceTheme.queen ),
+					 loadModel( config.pieceTheme.king ) ];
 
 	Promise.all( promises ).then( function( models ) {
 
