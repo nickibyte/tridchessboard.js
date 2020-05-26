@@ -1,4 +1,8 @@
-// TODO: Import three.js and controls here instead of in index.html
+import * as THREE from './three.js/build/three.module.js';
+import { OrbitControls } from './three.js/examples/jsm/controls/OrbitControls.js';
+import { DragControls } from './three.js/examples/jsm/controls/DragControls.js';
+import { GLTFLoader } from './three.js/examples/jsm/loaders/GLTFLoader.js';
+
 
 var Tridchessboard = function( canvasId, config ) {
 
@@ -45,7 +49,7 @@ var Tridchessboard = function( canvasId, config ) {
 	var currentOrientation = null;
 
 	// PieceTheme
-	PIECE_THEME = {
+	var PIECE_THEME = {
 
 		pawn: '../assets/pieces/pawn.glb',
 		knight: '../assets/pieces/knight.glb',
@@ -57,11 +61,11 @@ var Tridchessboard = function( canvasId, config ) {
 	};
 
 	// TowerTheme
-	TOWER_THEME = '../assets/board/towers/tower.glb';
+	var TOWER_THEME = '../assets/board/towers/tower.glb';
 
 	// BoardTheme
-	BOARD_THEME = '../assets/board/boards.glb';
-	STAND_THEME = '../assets/board/stand.glb';
+	var BOARD_THEME = '../assets/board/boards.glb';
+	var STAND_THEME = '../assets/board/stand.glb';
 
 
 	// Load config and apply defaults
@@ -264,7 +268,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	// GLTFLoader for model loading
-	var loader = new THREE.GLTFLoader();
+	var loader = new GLTFLoader();
 
 	// Function to handle async model loading
 	function loadModel( path ) {
@@ -290,7 +294,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	// Orbit controls
-	var orbitControls = new THREE.OrbitControls( camera, renderer.domElement );
+	var orbitControls = new OrbitControls( camera, renderer.domElement );
 	orbitControls.minDistance = 2;
 	orbitControls.maxDistance = 30;
 	orbitControls.enablePan = false;
@@ -305,7 +309,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 	if ( config.draggable ) {
 
-		var dragControls = new THREE.DragControls( draggable, false, camera, renderer.domElement );
+		var dragControls = new DragControls( draggable, false, camera, renderer.domElement );
 
 		dragControls.addEventListener( 'dragstart', onDragStart );
 		dragControls.addEventListener( 'dragend', onDragEnd );
@@ -1676,3 +1680,6 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 }
+
+
+export { Tridchessboard };
