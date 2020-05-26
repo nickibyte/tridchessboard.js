@@ -42,9 +42,9 @@ tridchessboard.js does not:
 
 ## TODO
 
-[] Add spare pieces
-[] Add notation to board
-[] Build and test scripts (using node.js?)
+- [] Add spare pieces
+- [] Add notation to board
+- [] Build and test scripts (using node.js?)
 
 
 ## License
