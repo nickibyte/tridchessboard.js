@@ -641,15 +641,11 @@ var Tridchessboard = function( canvasId, config ) {
 			color = new THREE.Color( color );
 			ind.material.color = color;
 
-			// TODO: Highlight piece
-
 		}
 
 		this.unhighlight = function() {
 
 			ind.material.visible = false;
-
-			// TODO: Unhighlight piece
 
 		}
 
@@ -1085,6 +1081,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 	}
 
+	// TODO: Handle invalid moves (do nothing)
 	function move( source, target ) {
 
 		var oldPos = generatePos();
@@ -1588,8 +1585,6 @@ var Tridchessboard = function( canvasId, config ) {
 
 				// Remove whitespace
 				mov = mov.replace( /\s/g, '' );
-
-				// TODO: Validate move
 
 				// Perform move
 				mov = mov.split( '-' );
