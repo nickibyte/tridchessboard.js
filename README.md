@@ -41,7 +41,7 @@ Just copy [tridchessboard.min.js](build/tridchessboard.min.js) to the js/ direct
 The following code adds a new Tri-D chessboard to the 'chessboard' div, sets up the default starting position and enables dragging of pieces and towers.
 Ready for play.
 
-~~~javascript
+~~~html
 <!DOCTYPE html>
 <html>
 	<body>
@@ -60,7 +60,7 @@ Ready for play.
 </html>
 ~~~
 
-For further instruction on configuring the Tri-D chessboard and using the API, please see the [Docs and Examples].
+For further instruction on configuring the Tri-D chessboard and using the API, please see the [Docs and Examples](#docs-and-examples).
 
 
 ## Docs and Examples
