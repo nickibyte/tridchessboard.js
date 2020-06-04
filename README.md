@@ -38,7 +38,7 @@ Adding tridchessboard.js to your site is really simple:
 
 Just copy [tridchessboard.min.js](build/tridchessboard.min.js) to the js/ directory.
 
-The following code adds a new Tri-D chessboard to the 'chessboard' div, sets up the default starting position and enables dragging of pieces and towers.
+The following code then adds a new Tri-D chessboard to the 'chessboard' div, sets up the default starting position and enables dragging of pieces and towers.
 Ready for play.
 
 ~~~html
