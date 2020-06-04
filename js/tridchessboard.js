@@ -17,10 +17,12 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-import * as THREE from './three.js/build/three.module.js';
-import { OrbitControls } from './three.js/examples/jsm/controls/OrbitControls.js';
-import { DragControls } from './three.js/examples/jsm/controls/DragControls.js';
-import { GLTFLoader } from './three.js/examples/jsm/loaders/GLTFLoader.js';
+// Imports (will be handled by build script)
+//
+// import './three.js/build/three.min.js'
+// import './three.js/examples/js/controls/OrbitControls.js'
+// import './three.js/examples/js/controls/DragControls.js'
+// import './three.js/examples/js/loaders/GLTFLoader.js'
 
 
 var Tridchessboard = function( canvasId, config ) {
@@ -290,7 +292,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	// GLTFLoader for model loading
-	var loader = new GLTFLoader();
+	var loader = new THREE.GLTFLoader();
 
 	// Function to handle async model loading
 	function loadModel( path ) {
@@ -316,7 +318,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	// Orbit controls
-	var orbitControls = new OrbitControls( camera, renderer.domElement );
+	var orbitControls = new THREE.OrbitControls( camera, renderer.domElement );
 	orbitControls.minDistance = 2;
 	orbitControls.maxDistance = 30;
 	orbitControls.enablePan = false;
@@ -331,7 +333,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 	if ( config.draggable ) {
 
-		var dragControls = new DragControls( draggable, false, camera, renderer.domElement );
+		var dragControls = new THREE.DragControls( draggable, false, camera, renderer.domElement );
 
 		dragControls.addEventListener( 'dragstart', onDragStart );
 		dragControls.addEventListener( 'dragend', onDragEnd );
@@ -1697,6 +1699,3 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 }
-
-
-export { Tridchessboard };

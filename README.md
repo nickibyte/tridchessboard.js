@@ -74,7 +74,7 @@ For further instruction on configuring the Tri-D chessboard and using the API, p
 
 * [ ] Add spare pieces
 * [ ] Add notation to board
-* [ ] Build and test scripts (using node.js?)
+* [ ] Proper build and test scripts (using node.js?)
 
 
 ## License
