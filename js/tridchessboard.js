@@ -257,7 +257,8 @@ var Tridchessboard = function( canvasId, config ) {
 	// TODO: Config - show errors
 	// TODO: Config - spare pieces
 	// TODO: Config - notation
-	// TODO: Config - Shorthands (start, fen, position)
+	// TODO: Config - shorthands (start, fen, position)
+	// TODO: Config - configurable colors (background, pieces, squares?)
 
 
 	// ----------------------------------------------------------------
