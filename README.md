@@ -79,10 +79,10 @@ For further instruction on configuring the Tri-D chessboard and using the API, p
 
 ## License
 
-tridchessboard.js is licensed under the [LGPLv3](LICENSE).
+tridchessboard.js is licensed under the [LGPLv3](COPYING.LESSER).
 
 That means you may use it in your own (even proprietary) software.
-But if you change it you are required to release your modified version under this same license or the GPLv3.
+But if you change it you are required to release your modified version under this same license or the [GPLv3](COPYING).
 
 
 [chessboard.js]: https://github.com/oakmac/chessboardjs
