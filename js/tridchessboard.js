@@ -234,9 +234,11 @@ var Tridchessboard = function( canvasId, config ) {
 	}
 
 	// TODO: Config - stand (toggle)
+	// TODO: Config - user defined start position
 	// TODO: Config - show errors
 	// TODO: Config - spare pieces
 	// TODO: Config - notation
+	// TODO: Config - Shorthands (start, fen, position)
 
 
 	// ----------------------------------------------------------------
