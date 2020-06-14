@@ -37,6 +37,7 @@ You can use tridchessboard.js's API to connect it to other parts of your softwar
 Adding tridchessboard.js to your site is really simple:
 
 Just copy [tridchessboard.min.js](build/tridchessboard.min.js) to the js/ directory.
+Also make sure to grab a copy of the [assets/](assets) folder.
 
 The following code then adds a new Tri-D chessboard to the 'chessboard' div, sets up the default starting position and enables dragging of pieces and towers.
 Ready for play.
@@ -44,9 +45,12 @@ Ready for play.
 ~~~html
 <!DOCTYPE html>
 <html>
+	<head>
+		<meta charset="utf-8">
+	</head>
 	<body>
 
-		<div id="chessboard"></div>
+		<div id="chessboard" style="width: 600px; height: 600px;"></div>
 
 		<script src="js/tridchessboard.min.js"></script>
 
@@ -65,8 +69,10 @@ For further instruction on configuring the Tri-D chessboard and using the API, p
 
 ## Docs and Examples
 
+* [Getting started]
 * [Docs]
 * [Examples]
+
 * My own implementation
 
 
@@ -85,7 +91,8 @@ That means you may use it in your own (even proprietary) software.
 But if you change it you are required to release your modified version under this same license or the [GPLv3](COPYING).
 
 
-[chessboard.js]: https://github.com/oakmac/chessboardjs
 [three.js]: https://github.com/mrdoob/three.js
+[chessboard.js]: https://github.com/oakmac/chessboardjs
+[Getting started]:
 [Docs]:
 [Examples]:
