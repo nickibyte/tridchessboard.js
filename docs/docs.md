@@ -7,13 +7,13 @@ So if you can figure out how to do something using this documentation, chances a
 That said, there are some ways in which tridchessboard.js differs from [chessboard.js].
 Some methods and properties have been left out, added or changed.
 Either to work better with a Tri-D chessboard or because I was just to lazy to implement them.
-The most notable changes are the adaptation of the [Position Object](#position-object) and [FEN String](#fen-string) for Tri-D chess as well as the introduction of the [Notation Object](#notation-object), [Orientation Object](#orientation-object) and the `blackOrientation`, `whiteOrientation` and `boardTheme` config properties.
+The most notable changes are the adaptation of the [Position Object](#position-object) and [FEN String](#fen-string) for Tri-D chess and the introduction of the [Notation-](#notation-object) and [Orientation Object](#orientation-object) as well as the `blackOrientation`, `whiteOrientation` and `boardTheme` config properties.
 
 
 ## Config Properties
 
-| Property      | Type                                   | Default                 | Description                                                                                       |
-|---------------|----------------------------------------|-------------------------|---------------------------------------------------------------------------------------------------|
+| Property      | Type                                   | Default                 | Description                                                                                                         |
+|---------------|          --------------------          |        ---------        |---------------------------------------------------------------------------------------------------------------------|
 | draggable     | Boolean                                | false                   | Enables/disables dragging of pieces and towers
 | dropOffBoard  | 'snapback' or 'trash'                  | 'snapback'              | Specifies what happens when a piece/tower is dropped off the board. <br> If 'snapback', piece/tower moves back to original position. <br> If 'trash', piece/tower is removed.
 | position      | 'start', FEN String or Position Object | n/a                     | Sets initial board position.
