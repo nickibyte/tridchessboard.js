@@ -12,24 +12,24 @@ The most notable changes are the adaptation of the [Position Object](#position-o
 
 ## Config Properties
 
-| Property      | Type                                   | Default                 | Description                                                                                                         |
-|---------------|          --------------------          |        ---------        |---------------------------------------------------------------------------------------------------------------------|
+| Property      | Type                                   | Default                 | Description
+|---------------|--------------------                    |-----                    |------------------------------------------------------------
 | draggable     | Boolean                                | false                   | Enables/disables dragging of pieces and towers
 | dropOffBoard  | 'snapback' or 'trash'                  | 'snapback'              | Specifies what happens when a piece/tower is dropped off the board. <br> If 'snapback', piece/tower moves back to original position. <br> If 'trash', piece/tower is removed.
 | position      | 'start', FEN String or Position Object | n/a                     | Sets initial board position.
 | onChange      | Function                               | n/a                     | Called when board position changes. <br> Arguments: old position, new position.
-| onDragStart   | Function                               | n/a                     | Called when piece/tower is picked up. Arguments: source, piece/tower, current position, current orientation. If this returns false the drag is cancelled.
-| onDragMove    | Function                               | n/a                     | Called when dragged piece/tower changes location. Arguments: new location, old location, source, piece/tower, current position, current orientation
-| onDrop        | Function                               | n/a                     | Called when piece is dropped. Arguments: source, target, piece/tower, new position, old position, current orientation. If this returns 'snapback', piece/tower moves back to source. If this returns 'trash', piece/tower is removed. !!! The new position argument is currently broken and returns the old position instead !!!
-| onMoveEnd     | Function                               | n/a                     | Called at the end of a move, when the board position changes. Arguments: old position, new position. (Basically the same as onChange, kept for compatability to chessboard.js)
-| onSnapbackEnd | Function                               | n/a                     | Called when "snapback" of piece/tower is complete. Arguments: piece/tower, source, current position, current orientation.
-| onSnapEnd     | Function                               | n/a                     | Called at the end of a move, when board position changes. Arguments: source, target, piece/tower.
-| orientation   | 'white', 'black' or Orientation Object | { x: -10, y: 7, z: 10 } | Sets initial board orientation.
-| showNotation  | Boolean                                | false                   | Enable/disable board notation. !!! Not implemented yet. !!!
-| sparePieces   | Boolean                                | false                   | Enable/disable spare pieces that can be dragged onto the board. !!! Not implemented yet. !!!
-| showErrors    | false, String or Function              | n/a                     | Choose how errors are reported. If false, errors are ignored. If 'console', errors output to console.log(). If 'alert', errors output to window.alert(). If function, it is called with following arguments: error code, error string, data. !!! Not implemented yet. !!!
-| pieceTheme    | String or Function                     | ''                      | Source of piece models. !!! Not implemented yet. !!!
-| boardTheme    | String or Function                     | ''                      | Source of board models. !!! Not implemented yet. !!!
+| onDragStart   | Function                               | n/a                     | Called when piece/tower is picked up. <br> Arguments: source, piece/tower, current position, current orientation. <br> If this returns false the drag is cancelled.
+| onDragMove    | Function                               | n/a                     | Called when dragged piece/tower changes location. <br> Arguments: new location, old location, source, piece/tower, current position, current orientation
+| onDrop        | Function                               | n/a                     | Called when piece is dropped. <br> Arguments: source, target, piece/tower, new position, old position, current orientation. <br> If this returns 'snapback', piece/tower moves back to source. <br> If this returns 'trash', piece/tower is removed. <br> **!!! The new position argument is currently broken and returns the old position instead !!!**
+| onMoveEnd     | Function                               | n/a                     | Called at the end of a move, when the board position changes. <br> Arguments: old position, new position. <br> (Basically the same as onChange, kept for compatability to chessboard.js)
+| onSnapbackEnd | Function                               | n/a                     | Called when "snapback" of piece/tower is complete. <br> Arguments: piece/tower, source, current position, current orientation.
+| onSnapEnd     | Function                               | n/a                     | Called at the end of a move, when board position changes. <br> Arguments: source, target, piece/tower.
+| orientation   | 'white', 'black' or Orientation Object | { x: -10, <br>  y: 7, <br>  z: 10 } | Sets initial board orientation.
+| showNotation  | Boolean                                | false                   | Enable/disable board notation. <br> **!!! Not implemented yet. !!!**
+| sparePieces   | Boolean                                | false                   | Enable/disable spare pieces that can be dragged onto the board. <br> **!!! Not implemented yet. !!!**
+| showErrors    | false, String or Function              | n/a                     | Choose how errors are reported. <br> If false, errors are ignored. <br> If 'console', errors output to console.log(). <br> If 'alert', errors output to window.alert(). <br> If function, it is called with following arguments: error code, error string, data. <br> **!!! Not implemented yet. !!!**
+| pieceTheme    | String or Function                     | ''                      | Source of piece models. <br> **!!! Not implemented yet. !!!**
+| boardTheme    | String or Function                     | ''                      | Source of board models. <br> **!!! Not implemented yet. !!!**
 
 The following [chessboard.js] properties are not implemented:
 
