@@ -4,47 +4,80 @@ tridchessboard.js is heavily inspired by [chessboard.js] and its API is kept alm
 This enables you use most of the numerous examples that exist for [chessboard.js].
 So if you can figure out how to do something using this documentation, chances are you can find a working example for [chessboard.js] and apply it to your use case.
 
+
+## Differences to chessboard.js
+
 That said, there are some ways in which tridchessboard.js differs from [chessboard.js].
 Some methods and properties have been left out, added or changed.
 Either to work better with a Tri-D chessboard or because I was just to lazy to implement them.
 The most notable changes are the adaptation of the [Position Object](#position-object) and [FEN String](#fen-string) for Tri-D chess and the introduction of the [Notation-](#notation-object) and [Orientation Object](#orientation-object) as well as the `blackOrientation`, `whiteOrientation` and `boardTheme` config properties.
 
+Here is a list of all the changes/differences:
+
+* [Config Properties]
+	* Missing `onMouseoutSquare`
+	* Missing `onMouseoverSquare`
+	* Missing `appearSpeed` (pieces/towers appear instantly)
+	* Missing `moveSpeed` (no move animation, pieces/towers move instantly)
+	* Missing `snapbackSpeed` (no snapback animation, pieces/towers snapback instantly)
+	* Missing `snapSpeed` (no snap animation, pieces/towers snap instantly)
+	* Missing `trashSpeed` (no trash animation, pieces/towers disapear instantly)
+	* Added `boardTheme` (similar to `pieceTheme`, source for board, stand and tower models)
+	* Added `whiteOrientation` and `blackOrientation` ([Orientation Object]s for black/white camera positions)
+	* Changed `orientation` (can now be [Orientation Object] as well as 'white' or 'black')
+* [Methods]
+	* Changed `clear()` (no useAnimation argument)
+	* Changed `position( newPosition )` (no useAnimation argument)
+	* Changed `start()` (no useAnimation argument)
+* [Position Object]
+	* Adapted square names for three dimensions
+	* Added towers
+* [FEN String]
+	* Added Towers
+* Added [Orientation Object]
+
 
 ## Config Properties
 
-| Property      | Type                                   | Default                 | Description
-|---------------|--------------------                    |-----                    |------------------------------------------------------------
-| draggable     | Boolean                                | false                   | Enables/disables dragging of pieces and towers
-| dropOffBoard  | 'snapback' or 'trash'                  | 'snapback'              | Specifies what happens when a piece/tower is dropped off the board. <br> If 'snapback', piece/tower moves back to original position. <br> If 'trash', piece/tower is removed.
-| position      | 'start', FEN String or Position Object | n/a                     | Sets initial board position.
-| onChange      | Function                               | n/a                     | Called when board position changes. <br> Arguments: old position, new position.
-| onDragStart   | Function                               | n/a                     | Called when piece/tower is picked up. <br> Arguments: source, piece/tower, current position, current orientation. <br> If this returns false the drag is cancelled.
-| onDragMove    | Function                               | n/a                     | Called when dragged piece/tower changes location. <br> Arguments: new location, old location, source, piece/tower, current position, current orientation
-| onDrop        | Function                               | n/a                     | Called when piece is dropped. <br> Arguments: source, target, piece/tower, new position, old position, current orientation. <br> If this returns 'snapback', piece/tower moves back to source. <br> If this returns 'trash', piece/tower is removed. <br> **!!! The new position argument is currently broken and returns the old position instead !!!**
-| onMoveEnd     | Function                               | n/a                     | Called at the end of a move, when the board position changes. <br> Arguments: old position, new position. <br> (Basically the same as onChange, kept for compatability to chessboard.js)
-| onSnapbackEnd | Function                               | n/a                     | Called when "snapback" of piece/tower is complete. <br> Arguments: piece/tower, source, current position, current orientation.
-| onSnapEnd     | Function                               | n/a                     | Called at the end of a move, when board position changes. <br> Arguments: source, target, piece/tower.
+| Property      | Type                                   | Default                             | Description
+|---------------|--------------------                    |-----                                |------------------------------------------------------------
+| draggable     | Boolean                                | false                               | Enables/disables dragging of pieces and towers.
+| turnable      | Boolean                                | false                               | Enables/disables turning/zooming of board.
+| dropOffBoard  | 'snapback' or 'trash'                  | 'snapback'                          | Specifies what happens when a piece/tower is dropped off the board. <br> If 'snapback', piece/tower moves back to original position. <br> If 'trash', piece/tower is removed.
+| position      | 'start', FEN String or Position Object | n/a                                 | Sets initial board position.
+| onChange      | Function                               | n/a                                 | Called when board position changes. <br> Arguments: old position, new position.
+| onDragStart   | Function                               | n/a                                 | Called when piece/tower is picked up. <br> Arguments: source, piece/tower, current position, current orientation. <br> If this returns false the drag is cancelled.
+| onDragMove    | Function                               | n/a                                 | Called when dragged piece/tower changes location. <br> Arguments: new location, old location, source, piece/tower, current position, current orientation
+| onDrop        | Function                               | n/a                                 | Called when piece is dropped. <br> Arguments: source, target, piece/tower, new position, old position, current orientation. <br> If this returns 'snapback', piece/tower moves back to source. <br> If this returns 'trash', piece/tower is removed. <br> **!!! The new position argument is currently broken and returns the old position instead !!!**
+| onMoveEnd     | Function                               | n/a                                 | Called at the end of a move, when the board position changes. <br> Arguments: old position, new position. <br> (Basically the same as onChange, kept for compatability to chessboard.js)
+| onSnapbackEnd | Function                               | n/a                                 | Called when "snapback" of piece/tower is complete. <br> Arguments: piece/tower, source, current position, current orientation.
+| onSnapEnd     | Function                               | n/a                                 | Called at the end of a move, when board position changes. <br> Arguments: source, target, piece/tower.
 | orientation   | 'white', 'black' or Orientation Object | { x: -10, <br>  y: 7, <br>  z: 10 } | Sets initial board orientation.
-| showNotation  | Boolean                                | false                   | Enable/disable board notation. <br> **!!! Not implemented yet. !!!**
-| sparePieces   | Boolean                                | false                   | Enable/disable spare pieces that can be dragged onto the board. <br> **!!! Not implemented yet. !!!**
-| showErrors    | false, String or Function              | n/a                     | Choose how errors are reported. <br> If false, errors are ignored. <br> If 'console', errors output to console.log(). <br> If 'alert', errors output to window.alert(). <br> If function, it is called with following arguments: error code, error string, data. <br> **!!! Not implemented yet. !!!**
-| pieceTheme    | String or Function                     | ''                      | Source of piece models. <br> **!!! Not implemented yet. !!!**
-| boardTheme    | String or Function                     | ''                      | Source of board models. <br> **!!! Not implemented yet. !!!**
-
-The following [chessboard.js] properties are not implemented:
-
-* `onMouseoutSquare`
-* `onMouseoverSquare`
-* `appearSpeed` (pieces/towers appear instantly)
-* `moveSpeed` (no move animation, pieces/towers move instantly)
-* `snapbackSpeed` (no snapback animation, pieces/towers snapback instantly)
-* `snapSpeed` (no snap animation, pieces/towers snap instantly)
-* `trashSpeed` (no trash animation, pieces/towers disapear instantly)
+| showNotation  | Boolean                                | false                               | Enable/disable board notation. <br> **!!! Not implemented yet. !!!**
+| sparePieces   | Boolean                                | false                               | Enable/disable spare pieces that can be dragged onto the board. If enabled, enables draggable as well. <br> **!!! Not implemented yet. !!!**
+| showErrors    | false, String or Function              | n/a                                 | Choose how errors are reported. <br> If false, errors are ignored. <br> If 'console', errors output to console.log(). <br> If 'alert', errors output to window.alert(). <br> If function, it is called with following arguments: error code, error string, data. <br> **!!! Not implemented yet. !!!**
+| pieceTheme    | String or Function                     | ''                                  | Source of piece models. <br> **!!! Not implemented yet. !!!**
+| boardTheme    | String or Function                     | ''                                  | Source of board models. <br> **!!! Not implemented yet. !!!**
+| stand         | Boolean                                | true                                | Enable/disables visibility of stand model.
 
 
 ## Methods
 
-Work in progress.
+| Method                    | Arguments                              | Description
+|--------------------       |--------------------                    |------------------------------------------------------------
+| clear()                   | none                                   | Removes all pieces and towers from the board. <br> Same as position( {} )
+| destroy()                 | none                                   | Removes chessboard from the DOM. <br> **!!! Not implemented yet. !!!**
+| fen()                     | none                                   | Returns current position as FEN String. Same as position( 'fen' )
+| flip()                    | none                                   | Flips board orientation. Same as orientation( 'flip' )
+| move( move1, move2, ... ) | 'c3_1-c4_2', 'T1-T5', etc              | Performs the move(s) given as arguments. Returns the new board position.
+| position( fen )           | 'fen' (optional)                       | Returns the current board position. If 'fen', returns FEN String.
+| position( newPosition )   | Position Object, FEN String or 'start' | Sets the board position to the position given as argument.
+| orientation()             | none                                   | Returns the current board orientation.
+| orientation( side )       | 'white', 'black' or 'flip'             | If 'white' or 'black', sets orientation. <br> If 'flip', flips orientation.
+| resize()                  | none                                   | Resizes board based on size of parent DIV. <br> **!!! Not implemented yet. !!!**
+| start()                   | none                                   | Sets the board position to the start position. Same as position( 'start')
+| stand()                   | none                                   | Returns the current visibility of the stand model. Enabled (true) or disabled (false).
+| stand( enabled )          | true or false                          | Enables/disables visibility of stand model.
 
 
 ## Position Object
