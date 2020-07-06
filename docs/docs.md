@@ -14,7 +14,7 @@ The most notable changes are the adaptation of the [Position Object](#position-o
 
 Here is a list of all the changes/differences:
 
-* [Config Properties]
+* [Config Properties](#config-properties)
 	* Missing `onMouseoutSquare`
 	* Missing `onMouseoverSquare`
 	* Missing `appearSpeed` (pieces/towers appear instantly)
@@ -23,18 +23,18 @@ Here is a list of all the changes/differences:
 	* Missing `snapSpeed` (no snap animation, pieces/towers snap instantly)
 	* Missing `trashSpeed` (no trash animation, pieces/towers disapear instantly)
 	* Added `boardTheme` (similar to `pieceTheme`, source for board, stand and tower models)
-	* Added `whiteOrientation` and `blackOrientation` ([Orientation Object]s for black/white camera positions)
-	* Changed `orientation` (can now be [Orientation Object] as well as 'white' or 'black')
-* [Methods]
+	* Added `whiteOrientation` and `blackOrientation` ([Orientation Objects](#orientation-object) for black/white camera positions)
+	* Changed `orientation` (can now be [Orientation Object](#orientation-object) as well as 'white' or 'black')
+* [Methods](#methods)
 	* Changed `clear()` (no useAnimation argument)
 	* Changed `position( newPosition )` (no useAnimation argument)
 	* Changed `start()` (no useAnimation argument)
-* [Position Object]
+* [Position Object](#position-object)
 	* Adapted square names for three dimensions
 	* Added towers
-* [FEN String]
+* [FEN String](#fen-string)
 	* Added Towers
-* Added [Orientation Object]
+* Added [Orientation Object](#orientation-object)
 
 
 ## Config Properties
