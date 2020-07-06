@@ -22,13 +22,16 @@ Here is a list of all the changes/differences:
 	* Missing `snapbackSpeed` (no snapback animation, pieces/towers snapback instantly)
 	* Missing `snapSpeed` (no snap animation, pieces/towers snap instantly)
 	* Missing `trashSpeed` (no trash animation, pieces/towers disapear instantly)
-	* Added `boardTheme` (similar to `pieceTheme`, source for board, stand and tower models)
-	* Added `whiteOrientation` and `blackOrientation` ([Orientation Objects](#orientation-object) for black/white camera positions)
+	* Added `boardTheme`
+	* Added `whiteOrientation` and `blackOrientation`
+	* Added `stand`
+	* Added `turnable`
 	* Changed `orientation` (can now be [Orientation Object](#orientation-object) as well as 'white' or 'black')
 * [Methods](#methods)
-	* Changed `clear()` (no useAnimation argument)
-	* Changed `position( newPosition )` (no useAnimation argument)
-	* Changed `start()` (no useAnimation argument)
+	* Added `stand()` and `stand( enabled )`
+	* Changed `clear()` (no useAnimation argument, position changes instantly)
+	* Changed `position( newPosition )` (no useAnimation argument, position changes instantly)
+	* Changed `start()` (no useAnimation argument, position changes instantly)
 * [Position Object](#position-object)
 	* Adapted square names for three dimensions
 	* Added towers
@@ -39,26 +42,28 @@ Here is a list of all the changes/differences:
 
 ## Config Properties
 
-| Property      | Type                                   | Default                             | Description
-|---------------|--------------------                    |-----                                |------------------------------------------------------------
-| draggable     | Boolean                                | false                               | Enables/disables dragging of pieces and towers.
-| turnable      | Boolean                                | false                               | Enables/disables turning/zooming of board.
-| dropOffBoard  | 'snapback' or 'trash'                  | 'snapback'                          | Specifies what happens when a piece/tower is dropped off the board. <br> If 'snapback', piece/tower moves back to original position. <br> If 'trash', piece/tower is removed.
-| position      | 'start', FEN String or Position Object | n/a                                 | Sets initial board position.
-| onChange      | Function                               | n/a                                 | Called when board position changes. <br> Arguments: old position, new position.
-| onDragStart   | Function                               | n/a                                 | Called when piece/tower is picked up. <br> Arguments: source, piece/tower, current position, current orientation. <br> If this returns false the drag is cancelled.
-| onDragMove    | Function                               | n/a                                 | Called when dragged piece/tower changes location. <br> Arguments: new location, old location, source, piece/tower, current position, current orientation
-| onDrop        | Function                               | n/a                                 | Called when piece is dropped. <br> Arguments: source, target, piece/tower, new position, old position, current orientation. <br> If this returns 'snapback', piece/tower moves back to source. <br> If this returns 'trash', piece/tower is removed. <br> **!!! The new position argument is currently broken and returns the old position instead !!!**
-| onMoveEnd     | Function                               | n/a                                 | Called at the end of a move, when the board position changes. <br> Arguments: old position, new position. <br> (Basically the same as onChange, kept for compatability to chessboard.js)
-| onSnapbackEnd | Function                               | n/a                                 | Called when "snapback" of piece/tower is complete. <br> Arguments: piece/tower, source, current position, current orientation.
-| onSnapEnd     | Function                               | n/a                                 | Called at the end of a move, when board position changes. <br> Arguments: source, target, piece/tower.
-| orientation   | 'white', 'black' or Orientation Object | { x: -10, <br>  y: 7, <br>  z: 10 } | Sets initial board orientation.
-| showNotation  | Boolean                                | false                               | Enable/disable board notation. <br> **!!! Not implemented yet. !!!**
-| sparePieces   | Boolean                                | false                               | Enable/disable spare pieces that can be dragged onto the board. If enabled, enables draggable as well. <br> **!!! Not implemented yet. !!!**
-| showErrors    | false, String or Function              | n/a                                 | Choose how errors are reported. <br> If false, errors are ignored. <br> If 'console', errors output to console.log(). <br> If 'alert', errors output to window.alert(). <br> If function, it is called with following arguments: error code, error string, data. <br> **!!! Not implemented yet. !!!**
-| pieceTheme    | String or Function                     | ''                                  | Source of piece models. <br> **!!! Not implemented yet. !!!**
-| boardTheme    | String or Function                     | ''                                  | Source of board models. <br> **!!! Not implemented yet. !!!**
-| stand         | Boolean                                | true                                | Enable/disables visibility of stand model.
+| Property           | Type                                   | Default                             | Description
+|---------------     |--------------------                    |-----                                |------------------------------------------------------------
+| draggable          | Boolean                                | false                               | Enables/disables dragging of pieces and towers.
+| turnable           | Boolean                                | false                               | Enables/disables turning/zooming of board.
+| dropOffBoard       | 'snapback' or 'trash'                  | 'snapback'                          | Specifies what happens when a piece/tower is dropped off the board. <br> If 'snapback', piece/tower moves back to original position. <br> If 'trash', piece/tower is removed.
+| position           | 'start', FEN String or Position Object | n/a                                 | Sets initial board position.
+| onChange           | Function                               | n/a                                 | Called when board position changes. <br> Arguments: old position, new position.
+| onDragStart        | Function                               | n/a                                 | Called when piece/tower is picked up. <br> Arguments: source, piece/tower, current position, current orientation. <br> If this returns false the drag is cancelled.
+| onDragMove         | Function                               | n/a                                 | Called when dragged piece/tower changes location. <br> Arguments: new location, old location, source, piece/tower, current position, current orientation
+| onDrop             | Function                               | n/a                                 | Called when piece is dropped. <br> Arguments: source, target, piece/tower, new position, old position, current orientation. <br> If this returns 'snapback', piece/tower moves back to source. <br> If this returns 'trash', piece/tower is removed. <br> **!!! The new position argument is currently broken and returns the old position instead !!!**
+| onMoveEnd          | Function                               | n/a                                 | Called at the end of a move, when the board position changes. <br> Arguments: old position, new position. <br> (Basically the same as onChange, kept for compatability to chessboard.js)
+| onSnapbackEnd      | Function                               | n/a                                 | Called when "snapback" of piece/tower is complete. <br> Arguments: piece/tower, source, current position, current orientation.
+| onSnapEnd          | Function                               | n/a                                 | Called at the end of a move, when board position changes. <br> Arguments: source, target, piece/tower.
+| orientation        | 'white', 'black' or Orientation Object | { x: -10, <br>  y: 7, <br>  z: 10 } | Sets initial board orientation (camera position).
+| whiteOrientation   | Orientation Object                     | { x: -12, <br>  y: 10, <br>  z: 0 } | Sets 'white' board orientation (camera position).
+| blackOrientation   | Orientation Object                     | { x: 5, <br>  y: 15, <br>  z: 0 }   | Sets 'black' board orientation (camera position).
+| showNotation       | Boolean                                | false                               | Enable/disable board notation. <br> **!!! Not implemented yet. !!!**
+| sparePieces        | Boolean                                | false                               | Enable/disable spare pieces that can be dragged onto the board. If enabled, enables draggable as well. <br> **!!! Not implemented yet. !!!**
+| showErrors         | false, String or Function              | n/a                                 | Choose how errors are reported. <br> If false, errors are ignored. <br> If 'console', errors output to console.log(). <br> If 'alert', errors output to window.alert(). <br> If function, it is called with following arguments: error code, error string, data. <br> **!!! Not implemented yet. !!!**
+| pieceTheme         | String or Function                     | ''                                  | Source of piece models. <br> **!!! Not implemented yet. !!!**
+| boardTheme         | String or Function                     | ''                                  | Source of board models. <br> **!!! Not implemented yet. !!!**
+| stand              | Boolean                                | true                                | Enable/disables visibility of stand model.
 
 
 ## Methods
