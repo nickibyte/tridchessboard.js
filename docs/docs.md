@@ -38,6 +38,7 @@ Here is a list of all the changes/differences:
 * [FEN String](#fen-string)
 	* Added Towers
 * Added [Orientation Object](#orientation-object)
+* Highlighting of squares/pieces is handled differently (using [Config Properties](#config-properties) rather than CSS classes)
 
 
 ## Config Properties
@@ -83,11 +84,29 @@ Here is a list of all the changes/differences:
 | start()                   | none                                   | Sets the board position to the start position. Same as position( 'start')
 | stand()                   | none                                   | Returns the current visibility of the stand model. Enabled (true) or disabled (false).
 | stand( enabled )          | true or false                          | Enables/disables visibility of stand model.
+| objToFen( obj )           | Position Object                        | Takes a Position Object and returns the corresponding FEN String. <br> **!!! Not implemented yet. !!!**
+| fenToObj( fen )           | FEN String                             | Takes a FEN String and returns a corresponding Position Object. <br> **!!! Not implemented yet. !!!**
 
 
 ## Position Object
 
-Work in progress.
+The Position Object is a JavaScript object which contains a board position.
+
+The properties of the object can be:
+
+* squares (ie: c3_1, e7_5, etc) as property name and piece codes (ie: bP, wK, bR, etc) as values
+* tower positions (T1, T2, ..., T12) as property name and true/false as values (indicating that the tower at that position does/doesn't exist)
+
+The square names used by tridchessboard.js are algebraic (like in regular chess).
+However the files range from a-f and the rows from 1-10 (instead of a-h and 1-8).
+Additionally a suffix (underscore + number) is added to indicate the level 1-6.
+
+The twelve possible tower positions are labled T1 through T12.
+Starting with the front left tower on the bottom board (when looking at the board from the front) and then going **left to right** and **front to back** on each of the 3 main boards (**bottom to top**).
+
+See an example of using a Position Object [here].
+
+You can use Tridchessboard's `objToFen` method to convert a Position Object to a [FEN String](#fen-string).
 
 
 ## FEN String
