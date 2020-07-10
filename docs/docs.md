@@ -111,7 +111,16 @@ You can use Tridchessboard's `objToFen` method to convert a Position Object to a
 
 ## FEN String
 
-Work in progress.
+[Forsyth-Edwards Notation (FEN)] is a way of representing the current state of a chessgame using a simple string.
+
+> 12bc rnnr/pbbp/pqkp/pppp/4/4/4/4/4/4/PBBP/RNNR/4/4/PPPP/PQKP w KQkq - 0 1
+
+For tridchessboard.js the notation has been extended to include the tower positions as the first field of the FEN String.
+The tower positions (1-12) are converted to hexadecimal, so positions 1 to 9 remain the same while positions 10, 11 and 12 become a, b and c.
+This way each position only takes up one character in the string.
+In the example FEN String above the first field (12bc) tells us that there are four towers placed at positions 1, 2, 11 and 12.
+
+The second field of the FEN String holds the piece positions.
 
 
 ## Orientation Object
@@ -130,3 +139,4 @@ Work in progress.
 
 
 [chessboard.js]: https://github.com/oakmac/chessboardjs
+[Forsyth-Edwards Notation (FEN)]: https://en.wikipedia.org/wiki/Forsyth-Edwards_Notation

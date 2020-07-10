@@ -94,5 +94,5 @@ But if you change it you are required to release your modified version under thi
 [three.js]: https://github.com/mrdoob/three.js
 [chessboard.js]: https://github.com/oakmac/chessboardjs
 [Getting started]:
-[Docs]:
+[Docs]: docs/docs.md
 [Examples]:
