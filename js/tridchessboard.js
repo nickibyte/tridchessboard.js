@@ -72,12 +72,18 @@ var Tridchessboard = function( canvasId, config ) {
 	// PieceTheme
 	var PIECE_THEME = {
 
-		pawn: '../assets/pieces/pawn.glb',
-		knight: '../assets/pieces/knight.glb',
-		bishop: '../assets/pieces/bishop.glb',
-		rook: '../assets/pieces/rook.glb',
-		queen: '../assets/pieces/queen.glb',
-		king: '../assets/pieces/king.glb'
+		wP: '../assets/pieces/wP.glb',
+		wN: '../assets/pieces/wN.glb',
+		wB: '../assets/pieces/wB.glb',
+		wR: '../assets/pieces/wR.glb',
+		wQ: '../assets/pieces/wQ.glb',
+		wK: '../assets/pieces/wK.glb',
+		bP: '../assets/pieces/bP.glb',
+		bN: '../assets/pieces/bN.glb',
+		bB: '../assets/pieces/bB.glb',
+		bR: '../assets/pieces/bR.glb',
+		bQ: '../assets/pieces/bQ.glb',
+		bK: '../assets/pieces/bK.glb'
 
 	};
 
@@ -902,31 +908,38 @@ var Tridchessboard = function( canvasId, config ) {
 
 	var pieModels;
 
-	var promises = [ loadModel( config.pieceTheme.pawn ),
-					 loadModel( config.pieceTheme.knight ),
-					 loadModel( config.pieceTheme.bishop ),
-					 loadModel( config.pieceTheme.rook ),
-					 loadModel( config.pieceTheme.queen ),
-					 loadModel( config.pieceTheme.king ) ];
+	var promises = [ loadModel( config.pieceTheme.wP ),
+					 loadModel( config.pieceTheme.wN ),
+					 loadModel( config.pieceTheme.wB ),
+					 loadModel( config.pieceTheme.wR ),
+					 loadModel( config.pieceTheme.wQ ),
+					 loadModel( config.pieceTheme.wK ),
+					 loadModel( config.pieceTheme.bP ),
+					 loadModel( config.pieceTheme.bN ),
+					 loadModel( config.pieceTheme.bB ),
+					 loadModel( config.pieceTheme.bR ),
+					 loadModel( config.pieceTheme.bQ ),
+					 loadModel( config.pieceTheme.bK ) ];
+
 
 	Promise.all( promises ).then( function( models ) {
 
 		// Pieces: Pawn, Knight, Bishop, Rook, Queen, King
-		// White: uppercase, Black: lowercase
+		// white and black
 		pieModels = {
 
-			P: new THREE.Mesh( models[ 0 ].geometry, pieMatWhite ),
-			N: new THREE.Mesh( models[ 1 ].geometry, pieMatWhite ),
-			B: new THREE.Mesh( models[ 2 ].geometry, pieMatWhite ),
-			R: new THREE.Mesh( models[ 3 ].geometry, pieMatWhite ),
-			Q: new THREE.Mesh( models[ 4 ].geometry, pieMatWhite ),
-			K: new THREE.Mesh( models[ 5 ].geometry, pieMatWhite ),
-			p: new THREE.Mesh( models[ 0 ].geometry, pieMatBlack ),
-			n: new THREE.Mesh( models[ 1 ].geometry, pieMatBlack ),
-			b: new THREE.Mesh( models[ 2 ].geometry, pieMatBlack ),
-			r: new THREE.Mesh( models[ 3 ].geometry, pieMatBlack ),
-			q: new THREE.Mesh( models[ 4 ].geometry, pieMatBlack ),
-			k: new THREE.Mesh( models[ 5 ].geometry, pieMatBlack )
+			wP: models[ 0 ],
+			wN: models[ 1 ],
+			wB: models[ 2 ],
+			wR: models[ 3 ],
+			wQ: models[ 4 ],
+			wK: models[ 5 ],
+			bP: models[ 6 ],
+			bN: models[ 7 ],
+			bB: models[ 8 ],
+			bR: models[ 9 ],
+			bQ: models[ 10 ],
+			bK: models[ 11 ]
 
 		};
 
@@ -940,8 +953,8 @@ var Tridchessboard = function( canvasId, config ) {
 	} );
 
 
-	var pieMatWhite = new THREE.MeshBasicMaterial( { color: 0xf7f7f7 } );
-	var pieMatBlack = new THREE.MeshBasicMaterial( { color: 0x3a3a3a } );
+	//var pieMatWhite = new THREE.MeshBasicMaterial( { color: 0xf7f7f7 } );
+	//var pieMatBlack = new THREE.MeshBasicMaterial( { color: 0x3a3a3a } );
 
 	// Piece object
 	var Piece = function( name ) {
@@ -1388,6 +1401,18 @@ var Tridchessboard = function( canvasId, config ) {
 						// If the square is not supposed to be empty
 						if ( piece !== ' ' ) {
 
+							// Convert FEN piece to piece code (wP, bQ, ...)
+							if ( piece.toLowerCase() === piece ) {
+
+								piece = 'b' + piece.toUpperCase();
+
+							}
+							else {
+
+								piece = 'w' + piece.toUpperCase();
+
+							}
+
 							// Add piece to square
 							square.setPiece( new Piece( piece ) );
 
@@ -1452,7 +1477,21 @@ var Tridchessboard = function( canvasId, config ) {
 
 							// Add piece or empty squares to piece positions
 							if ( emptySqu > 0) { piePos += emptySqu; }
-							piePos += piece.name;
+
+							// Convert piece code to FEN piece
+							let pieCode = '';
+
+							if ( piece.name[ 0 ] === 'b' ) {
+
+								pieCode = piece.name[ 1 ].toLowerCase();
+
+							} else {
+
+								pieCode = piece.name[ 1 ].toUpperCase();
+
+							}
+
+							piePos += pieCode;
 							emptySqu = 0;
 
 						} else {
@@ -1493,7 +1532,7 @@ var Tridchessboard = function( canvasId, config ) {
 		// Reset board
 		resetBoard();
 
-		// Iterate over position object (e.g. a3_1: 'P')
+		// Iterate over position object (e.g. a3_1: 'wP')
 		for ( let prop in pos ) {
 
 			if ( pos.hasOwnProperty( prop ) ) {
