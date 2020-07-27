@@ -87,12 +87,14 @@ var Tridchessboard = function( canvasId, config ) {
 
 	};
 
-	// TowerTheme
-	var TOWER_THEME = '../assets/board/towers/tower.glb';
-
 	// BoardTheme
-	var BOARD_THEME = '../assets/board/boards.glb';
-	var STAND_THEME = '../assets/board/stand.glb';
+	var BOARD_THEME = {
+
+		board: '../assets/board/board.glb',
+		tower: '../assets/board/tower.glb',
+		stand: '../assets/board/stand.glb'
+
+	};
 
 
 	// Load config and apply defaults
@@ -101,10 +103,86 @@ var Tridchessboard = function( canvasId, config ) {
 	if ( config.sparePieces !== true ) { config.sparePieces = false }
 
 	// TODO: Validate themes
-	if ( !config.hasOwnProperty( 'pieceTheme' ) ) { config.pieceTheme = PIECE_THEME; }
-	if ( !config.hasOwnProperty( 'towerTheme' ) ) { config.towerTheme = TOWER_THEME; }
-	if ( !config.hasOwnProperty( 'boardTheme' ) ) { config.boardTheme = BOARD_THEME; }
-	if ( !config.hasOwnProperty( 'standTheme' ) ) { config.standTheme = STAND_THEME; }
+	if ( config.hasOwnProperty( 'pieceTheme' ) ) {
+
+		if ( typeof ( config.pieceTheme ) === 'string' ) {
+
+			// TODO: This can probably be done more efficently
+			// Create object from string
+			config.pieceTheme = {
+
+				wP: config.pieceTheme.replace( '{piece}', 'wP' ),
+				wN: config.pieceTheme.replace( '{piece}', 'wN' ),
+				wB: config.pieceTheme.replace( '{piece}', 'wB' ),
+				wR: config.pieceTheme.replace( '{piece}', 'wR' ),
+				wQ: config.pieceTheme.replace( '{piece}', 'wQ' ),
+				wK: config.pieceTheme.replace( '{piece}', 'wK' ),
+				bP: config.pieceTheme.replace( '{piece}', 'bP' ),
+				bN: config.pieceTheme.replace( '{piece}', 'bN' ),
+				bB: config.pieceTheme.replace( '{piece}', 'bB' ),
+				bR: config.pieceTheme.replace( '{piece}', 'bR' ),
+				bQ: config.pieceTheme.replace( '{piece}', 'bQ' ),
+				bK: config.pieceTheme.replace( '{piece}', 'bK' )
+
+			};
+
+		} else if ( typeof ( config.pieceTheme ) === 'function' ) {
+
+			// TODO: This can probably be done more efficently
+			// Create object from function
+			config.pieceTheme = {
+
+				wP: config.pieceTheme( 'wP' ),
+				wN: config.pieceTheme( 'wN' ),
+				wB: config.pieceTheme( 'wB' ),
+				wR: config.pieceTheme( 'wR' ),
+				wQ: config.pieceTheme( 'wQ' ),
+				wK: config.pieceTheme( 'wK' ),
+				bP: config.pieceTheme( 'bP' ),
+				bN: config.pieceTheme( 'bN' ),
+				bB: config.pieceTheme( 'bB' ),
+				bR: config.pieceTheme( 'bR' ),
+				bQ: config.pieceTheme( 'bQ' ),
+				bK: config.pieceTheme( 'bK' )
+
+			};
+
+		}
+
+	} else { config.pieceTheme = PIECE_THEME; }
+
+
+	// TODO: Validate themes
+	if ( config.hasOwnProperty( 'boardTheme' ) ) {
+
+		if ( typeof ( config.boardTheme ) === 'string' ) {
+
+			// TODO: This can probably be done more efficently
+			// Create object from string
+			config.boardTheme = {
+
+				board: config.boardTheme.replace( '{part}', 'board' ),
+				tower: config.boardTheme.replace( '{part}', 'tower' ),
+				stand: config.boardTheme.replace( '{part}', 'stand' )
+
+			};
+
+		} else if ( typeof ( config.boardTheme ) === 'function' ) {
+
+			// TODO: This can probably be done more efficently
+			// Create object from function
+			config.boardTheme = {
+
+				board: config.boardTheme( 'board' ),
+				tower: config.boardTheme( 'tower' ),
+				stand: config.boardTheme( 'stand' )
+
+			};
+
+		}
+
+	} else { config.boardTheme = BOARD_THEME; }
+
 
 	if ( config.hasOwnProperty( 'orientation' ) ) {
 
@@ -514,7 +592,7 @@ var Tridchessboard = function( canvasId, config ) {
 	var boardMod = new THREE.Mesh();
 	boardMod.position.set( offset.x, offset.y, offset.z );
 	board.add( boardMod );
-	loadModel( config.boardTheme ).then( function( model ) {
+	loadModel( config.boardTheme.board ).then( function( model ) {
 
 		boardMod.geometry = model.geometry;
 		boardMod.material = model.material;
@@ -524,7 +602,7 @@ var Tridchessboard = function( canvasId, config ) {
 	var standMod = new THREE.Mesh();
 	standMod.position.set( offset.x, offset.y, offset.z );
 	board.add( standMod );
-	loadModel( config.standTheme ).then( function( model ) {
+	loadModel( config.boardTheme.stand ).then( function( model ) {
 
 		standMod.geometry = model.geometry;
 		standMod.material = model.material;
@@ -714,7 +792,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	// Tower model
-	var towMod = loadModel( config.towerTheme );
+	var towMod = loadModel( config.boardTheme.tower );
 	towMod.then( function( model ) {
 
 		for ( let i = 0; i < towerObjs.length; i++ ) {
