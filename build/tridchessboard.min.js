@@ -5835,21 +5835,29 @@ var Tridchessboard = function( canvasId, config ) {
 	// PieceTheme
 	var PIECE_THEME = {
 
-		pawn: '../assets/pieces/pawn.glb',
-		knight: '../assets/pieces/knight.glb',
-		bishop: '../assets/pieces/bishop.glb',
-		rook: '../assets/pieces/rook.glb',
-		queen: '../assets/pieces/queen.glb',
-		king: '../assets/pieces/king.glb'
+		wP: '../assets/pieces/wP.glb',
+		wN: '../assets/pieces/wN.glb',
+		wB: '../assets/pieces/wB.glb',
+		wR: '../assets/pieces/wR.glb',
+		wQ: '../assets/pieces/wQ.glb',
+		wK: '../assets/pieces/wK.glb',
+		bP: '../assets/pieces/bP.glb',
+		bN: '../assets/pieces/bN.glb',
+		bB: '../assets/pieces/bB.glb',
+		bR: '../assets/pieces/bR.glb',
+		bQ: '../assets/pieces/bQ.glb',
+		bK: '../assets/pieces/bK.glb'
 
 	};
 
-	// TowerTheme
-	var TOWER_THEME = '../assets/board/towers/tower.glb';
-
 	// BoardTheme
-	var BOARD_THEME = '../assets/board/boards.glb';
-	var STAND_THEME = '../assets/board/stand.glb';
+	var BOARD_THEME = {
+
+		board: '../assets/board/board.glb',
+		tower: '../assets/board/tower.glb',
+		stand: '../assets/board/stand.glb'
+
+	};
 
 
 	// Load config and apply defaults
@@ -5858,10 +5866,86 @@ var Tridchessboard = function( canvasId, config ) {
 	if ( config.sparePieces !== true ) { config.sparePieces = false }
 
 	// TODO: Validate themes
-	if ( !config.hasOwnProperty( 'pieceTheme' ) ) { config.pieceTheme = PIECE_THEME; }
-	if ( !config.hasOwnProperty( 'towerTheme' ) ) { config.towerTheme = TOWER_THEME; }
-	if ( !config.hasOwnProperty( 'boardTheme' ) ) { config.boardTheme = BOARD_THEME; }
-	if ( !config.hasOwnProperty( 'standTheme' ) ) { config.standTheme = STAND_THEME; }
+	if ( config.hasOwnProperty( 'pieceTheme' ) ) {
+
+		if ( typeof ( config.pieceTheme ) === 'string' ) {
+
+			// TODO: This can probably be done more efficently
+			// Create object from string
+			config.pieceTheme = {
+
+				wP: config.pieceTheme.replace( '{piece}', 'wP' ),
+				wN: config.pieceTheme.replace( '{piece}', 'wN' ),
+				wB: config.pieceTheme.replace( '{piece}', 'wB' ),
+				wR: config.pieceTheme.replace( '{piece}', 'wR' ),
+				wQ: config.pieceTheme.replace( '{piece}', 'wQ' ),
+				wK: config.pieceTheme.replace( '{piece}', 'wK' ),
+				bP: config.pieceTheme.replace( '{piece}', 'bP' ),
+				bN: config.pieceTheme.replace( '{piece}', 'bN' ),
+				bB: config.pieceTheme.replace( '{piece}', 'bB' ),
+				bR: config.pieceTheme.replace( '{piece}', 'bR' ),
+				bQ: config.pieceTheme.replace( '{piece}', 'bQ' ),
+				bK: config.pieceTheme.replace( '{piece}', 'bK' )
+
+			};
+
+		} else if ( typeof ( config.pieceTheme ) === 'function' ) {
+
+			// TODO: This can probably be done more efficently
+			// Create object from function
+			config.pieceTheme = {
+
+				wP: config.pieceTheme( 'wP' ),
+				wN: config.pieceTheme( 'wN' ),
+				wB: config.pieceTheme( 'wB' ),
+				wR: config.pieceTheme( 'wR' ),
+				wQ: config.pieceTheme( 'wQ' ),
+				wK: config.pieceTheme( 'wK' ),
+				bP: config.pieceTheme( 'bP' ),
+				bN: config.pieceTheme( 'bN' ),
+				bB: config.pieceTheme( 'bB' ),
+				bR: config.pieceTheme( 'bR' ),
+				bQ: config.pieceTheme( 'bQ' ),
+				bK: config.pieceTheme( 'bK' )
+
+			};
+
+		}
+
+	} else { config.pieceTheme = PIECE_THEME; }
+
+
+	// TODO: Validate themes
+	if ( config.hasOwnProperty( 'boardTheme' ) ) {
+
+		if ( typeof ( config.boardTheme ) === 'string' ) {
+
+			// TODO: This can probably be done more efficently
+			// Create object from string
+			config.boardTheme = {
+
+				board: config.boardTheme.replace( '{part}', 'board' ),
+				tower: config.boardTheme.replace( '{part}', 'tower' ),
+				stand: config.boardTheme.replace( '{part}', 'stand' )
+
+			};
+
+		} else if ( typeof ( config.boardTheme ) === 'function' ) {
+
+			// TODO: This can probably be done more efficently
+			// Create object from function
+			config.boardTheme = {
+
+				board: config.boardTheme( 'board' ),
+				tower: config.boardTheme( 'tower' ),
+				stand: config.boardTheme( 'stand' )
+
+			};
+
+		}
+
+	} else { config.boardTheme = BOARD_THEME; }
+
 
 	if ( config.hasOwnProperty( 'orientation' ) ) {
 
@@ -6271,7 +6355,7 @@ var Tridchessboard = function( canvasId, config ) {
 	var boardMod = new THREE.Mesh();
 	boardMod.position.set( offset.x, offset.y, offset.z );
 	board.add( boardMod );
-	loadModel( config.boardTheme ).then( function( model ) {
+	loadModel( config.boardTheme.board ).then( function( model ) {
 
 		boardMod.geometry = model.geometry;
 		boardMod.material = model.material;
@@ -6281,7 +6365,7 @@ var Tridchessboard = function( canvasId, config ) {
 	var standMod = new THREE.Mesh();
 	standMod.position.set( offset.x, offset.y, offset.z );
 	board.add( standMod );
-	loadModel( config.standTheme ).then( function( model ) {
+	loadModel( config.boardTheme.stand ).then( function( model ) {
 
 		standMod.geometry = model.geometry;
 		standMod.material = model.material;
@@ -6471,7 +6555,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	// Tower model
-	var towMod = loadModel( config.towerTheme );
+	var towMod = loadModel( config.boardTheme.tower );
 	towMod.then( function( model ) {
 
 		for ( let i = 0; i < towerObjs.length; i++ ) {
@@ -6665,31 +6749,38 @@ var Tridchessboard = function( canvasId, config ) {
 
 	var pieModels;
 
-	var promises = [ loadModel( config.pieceTheme.pawn ),
-					 loadModel( config.pieceTheme.knight ),
-					 loadModel( config.pieceTheme.bishop ),
-					 loadModel( config.pieceTheme.rook ),
-					 loadModel( config.pieceTheme.queen ),
-					 loadModel( config.pieceTheme.king ) ];
+	var promises = [ loadModel( config.pieceTheme.wP ),
+					 loadModel( config.pieceTheme.wN ),
+					 loadModel( config.pieceTheme.wB ),
+					 loadModel( config.pieceTheme.wR ),
+					 loadModel( config.pieceTheme.wQ ),
+					 loadModel( config.pieceTheme.wK ),
+					 loadModel( config.pieceTheme.bP ),
+					 loadModel( config.pieceTheme.bN ),
+					 loadModel( config.pieceTheme.bB ),
+					 loadModel( config.pieceTheme.bR ),
+					 loadModel( config.pieceTheme.bQ ),
+					 loadModel( config.pieceTheme.bK ) ];
+
 
 	Promise.all( promises ).then( function( models ) {
 
 		// Pieces: Pawn, Knight, Bishop, Rook, Queen, King
-		// White: uppercase, Black: lowercase
+		// white and black
 		pieModels = {
 
-			P: new THREE.Mesh( models[ 0 ].geometry, pieMatWhite ),
-			N: new THREE.Mesh( models[ 1 ].geometry, pieMatWhite ),
-			B: new THREE.Mesh( models[ 2 ].geometry, pieMatWhite ),
-			R: new THREE.Mesh( models[ 3 ].geometry, pieMatWhite ),
-			Q: new THREE.Mesh( models[ 4 ].geometry, pieMatWhite ),
-			K: new THREE.Mesh( models[ 5 ].geometry, pieMatWhite ),
-			p: new THREE.Mesh( models[ 0 ].geometry, pieMatBlack ),
-			n: new THREE.Mesh( models[ 1 ].geometry, pieMatBlack ),
-			b: new THREE.Mesh( models[ 2 ].geometry, pieMatBlack ),
-			r: new THREE.Mesh( models[ 3 ].geometry, pieMatBlack ),
-			q: new THREE.Mesh( models[ 4 ].geometry, pieMatBlack ),
-			k: new THREE.Mesh( models[ 5 ].geometry, pieMatBlack )
+			wP: models[ 0 ],
+			wN: models[ 1 ],
+			wB: models[ 2 ],
+			wR: models[ 3 ],
+			wQ: models[ 4 ],
+			wK: models[ 5 ],
+			bP: models[ 6 ],
+			bN: models[ 7 ],
+			bB: models[ 8 ],
+			bR: models[ 9 ],
+			bQ: models[ 10 ],
+			bK: models[ 11 ]
 
 		};
 
@@ -6703,8 +6794,8 @@ var Tridchessboard = function( canvasId, config ) {
 	} );
 
 
-	var pieMatWhite = new THREE.MeshBasicMaterial( { color: 0xf7f7f7 } );
-	var pieMatBlack = new THREE.MeshBasicMaterial( { color: 0x3a3a3a } );
+	//var pieMatWhite = new THREE.MeshBasicMaterial( { color: 0xf7f7f7 } );
+	//var pieMatBlack = new THREE.MeshBasicMaterial( { color: 0x3a3a3a } );
 
 	// Piece object
 	var Piece = function( name ) {
@@ -7151,6 +7242,18 @@ var Tridchessboard = function( canvasId, config ) {
 						// If the square is not supposed to be empty
 						if ( piece !== ' ' ) {
 
+							// Convert FEN piece to piece code (wP, bQ, ...)
+							if ( piece.toLowerCase() === piece ) {
+
+								piece = 'b' + piece.toUpperCase();
+
+							}
+							else {
+
+								piece = 'w' + piece.toUpperCase();
+
+							}
+
 							// Add piece to square
 							square.setPiece( new Piece( piece ) );
 
@@ -7215,7 +7318,21 @@ var Tridchessboard = function( canvasId, config ) {
 
 							// Add piece or empty squares to piece positions
 							if ( emptySqu > 0) { piePos += emptySqu; }
-							piePos += piece.name;
+
+							// Convert piece code to FEN piece
+							let pieCode = '';
+
+							if ( piece.name[ 0 ] === 'b' ) {
+
+								pieCode = piece.name[ 1 ].toLowerCase();
+
+							} else {
+
+								pieCode = piece.name[ 1 ].toUpperCase();
+
+							}
+
+							piePos += pieCode;
 							emptySqu = 0;
 
 						} else {
@@ -7256,7 +7373,7 @@ var Tridchessboard = function( canvasId, config ) {
 		// Reset board
 		resetBoard();
 
-		// Iterate over position object (e.g. a3_1: 'P')
+		// Iterate over position object (e.g. a3_1: 'wP')
 		for ( let prop in pos ) {
 
 			if ( pos.hasOwnProperty( prop ) ) {
