@@ -98,9 +98,10 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	// Load config and apply defaults
-	if ( config.draggable !== true ) { config.draggable = false }
-	if ( config.dropOffBoard !== 'trash' ) { config.dropOffBoard = 'snapback' }
-	if ( config.sparePieces !== true ) { config.sparePieces = false }
+	if ( config.draggable !== true ) { config.draggable = false; }
+	if ( config.dropOffBoard !== 'trash' ) { config.dropOffBoard = 'snapback'; }
+	if ( config.sparePieces !== true ) { config.sparePieces = false; }
+	if ( config.stand !== false ) { config.stand = true; }
 
 	// TODO: Validate themes
 	if ( config.hasOwnProperty( 'pieceTheme' ) ) {
@@ -609,8 +610,8 @@ var Tridchessboard = function( canvasId, config ) {
 
 	} );
 
-	// TODO: Make toggleable
-	standMod.visible = false;
+	// Enable/disable stand
+	standMod.visible = config.stand;
 
 
 	// ----------------------------------------------------------------
@@ -1691,6 +1692,19 @@ var Tridchessboard = function( canvasId, config ) {
 
 	}
 
+
+	// ----------------------------------------------------------------
+	// Stand enabling/disabling
+	// ----------------------------------------------------------------
+
+	function stand( enabled ) {
+
+		if ( enabled === true ) { standMod.visible = true; }
+		else if ( enabled === false ) { standMod.visible = false; }
+		else { return standMod.visible; }
+
+	}
+
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
 	// API
@@ -1751,6 +1765,8 @@ var Tridchessboard = function( canvasId, config ) {
 		fen: function() { return position( 'fen' ); },
 
 		start: function() { position( 'start' ); },
+
+		stand: function( enabled ) { return stand( enabled ); },
 
 		orientation: function( arg ) {
 
