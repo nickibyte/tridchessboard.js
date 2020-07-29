@@ -5862,6 +5862,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 	// Load config and apply defaults
 	if ( config.draggable !== true ) { config.draggable = false; }
+	if ( config.turnable !== true ) { config.turnable = false; }
 	if ( config.dropOffBoard !== 'trash' ) { config.dropOffBoard = 'snapback'; }
 	if ( config.sparePieces !== true ) { config.sparePieces = false; }
 	if ( config.stand !== false ) { config.stand = true; }
@@ -6129,6 +6130,7 @@ var Tridchessboard = function( canvasId, config ) {
 	camera.position.set( config.orientation.x,
 						 config.orientation.y,
 						 config.orientation.z );
+	camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
 
 
 	// Renderer
@@ -6174,21 +6176,27 @@ var Tridchessboard = function( canvasId, config ) {
 	orbitControls.rotateSpeed = 1.0;
 	orbitControls.minPolarAngle = 0;
 	orbitControls.maxPolarAngle = Math.PI;
+	orbitControls.enabled = false;
+
+	if ( config.turnable === true ) { orbitControls.enabled = true; }
 
 
 	// Drag controls
 	var draggable = [];
 
-	if ( config.draggable ) {
+	var dragControls = new THREE.DragControls( draggable, false, camera, renderer.domElement );
+ 	dragControls.enabled = false;
 
-		var dragControls = new THREE.DragControls( draggable, false, camera, renderer.domElement );
+	if ( config.draggable === true ) {
+
+		dragControls.enabled = true;
 
 		dragControls.addEventListener( 'dragstart', onDragStart );
 		dragControls.addEventListener( 'dragend', onDragEnd );
 
-	}
+		renderer.domElement.addEventListener( 'mousemove', onMouseMove );
 
-	renderer.domElement.addEventListener( 'mousemove', onMouseMove );
+	}
 
 
 	// DEBUG
@@ -7096,6 +7104,7 @@ var Tridchessboard = function( canvasId, config ) {
 			if ( onDragStart === false ) {
 
 				// Cancel Drag
+				// TODO: Surely this needs to be enabled again somewhere?
 				dragControls.enabled = false;
 				onDragEnd();
 
@@ -7108,7 +7117,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 	function onDragEnd( event ) {
 
-		orbitControls.enabled = true;
+		orbitControls.enabled = config.turnable;
 
 		if ( selected !== null ) {
 
