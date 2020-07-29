@@ -27,6 +27,7 @@ Here is a list of all the changes/differences:
 	* Added `stand`
 	* Added `turnable`
 	* Changed `orientation` (can now be [Orientation Object](#orientation-object) as well as 'white' or 'black')
+	* Changed `pieceTheme` (can now be pieceTheme Object as well as a string or function)
 * [Methods](#methods)
 	* Added `stand()` and `stand( enabled )`
 	* Changed `clear()` (no useAnimation argument, position changes instantly)
@@ -62,8 +63,8 @@ Here is a list of all the changes/differences:
 | showNotation       | Boolean                                | false                               | Enable/disable board notation. <br> **!!! Not implemented yet. !!!**
 | sparePieces        | Boolean                                | false                               | Enable/disable spare pieces that can be dragged onto the board. If enabled, enables draggable as well. <br> **!!! Not implemented yet. !!!**
 | showErrors         | false, String or Function              | n/a                                 | Choose how errors are reported. <br> If false, errors are ignored. <br> If 'console', errors output to console.log(). <br> If 'alert', errors output to window.alert(). <br> If function, it is called with following arguments: error code, error string, data. <br> **!!! Not implemented yet. !!!**
-| pieceTheme         | String or Function                     | ''                                  | Source of piece models. <br> **!!! Not implemented yet. !!!**
-| boardTheme         | String or Function                     | ''                                  | Source of board models. <br> **!!! Not implemented yet. !!!**
+| pieceTheme         | String, Function or pieceTheme Object  | '../assets/pieces/{piece}.glb'      | Source of piece models. <br> If string, '{piece}' is replaced by the piece codes (ie: bP, wK, bR, etc). <br> If function, first argument is the piece code and it should return a string containing the path to the piece model. <br> If object, property names should be piece codes and values should be strings containing the path to the piece model.
+| boardTheme         | String, Function or boardTheme Object  | '../assets/board/{part}.glb'        | Source of board/tower models. <br> If string, '{part}' is replaced by 'board' for the main board model, 'tower' for the tower model and 'stand' for the stand model. <br> If function, first argument is 'board', 'tower', 'stand' and it should return a string containing the path to the corresponding model. <br> If object, property names should be 'board', 'tower', 'stand' and values should be strings containing the path to the corresponding model.
 | stand              | Boolean                                | true                                | Enable/disables visibility of stand model.
 
 
