@@ -29,19 +29,93 @@ var Tridchessboard = function( canvasId, config ) {
 
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
-	// Helper functions, defaults and config
+	// Helpers, defaults and config
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
 
 	// ----------------------------------------------------------------
-	// Helper functions
+	// Helpers
 	// ----------------------------------------------------------------
+
+	// Pos object: Specifies a certain square on the board
+	var Pos = function( file, row, level ) {
+
+		this.f = file;
+		this.r = row;
+		this.l = level;
+
+	}
+
+
+	// Squares
+
+	var MAIN_SQUARES_OBJ = {
+
+		// Low board
+		b2_1: new Pos(1,1,0), c2_1: new Pos(2,1,0), d2_1: new Pos(3,1,0), e2_1: new Pos(4,1,0),
+		b3_1: new Pos(1,2,0), c3_1: new Pos(2,2,0), d3_1: new Pos(3,2,0), e3_1: new Pos(4,2,0),
+		b4_1: new Pos(1,3,0), c4_1: new Pos(2,3,0), d4_1: new Pos(3,3,0), e4_1: new Pos(4,3,0),
+		b5_1: new Pos(1,4,0), c5_1: new Pos(2,4,0), d5_1: new Pos(3,4,0), e5_1: new Pos(4,4,0),
+
+		// Middle board
+		b4_3: new Pos(1,3,2), c4_3: new Pos(2,3,2), d4_3: new Pos(3,3,2), e4_3: new Pos(4,3,2),
+		b5_3: new Pos(1,4,2), c5_3: new Pos(2,4,2), d5_3: new Pos(3,4,2), e5_3: new Pos(4,4,2),
+		b6_3: new Pos(1,5,2), c6_3: new Pos(2,5,2), d6_3: new Pos(3,5,2), e6_3: new Pos(4,5,2),
+		b7_3: new Pos(1,6,2), c7_3: new Pos(2,6,2), d7_3: new Pos(3,6,2), e7_3: new Pos(4,6,2),
+
+		// High board
+		b6_5: new Pos(1,5,4), c6_5: new Pos(2,5,4), d6_5: new Pos(3,5,4), e6_5: new Pos(4,5,4),
+		b7_5: new Pos(1,6,4), c7_5: new Pos(2,6,4), d7_5: new Pos(3,6,4), e7_5: new Pos(4,6,4),
+		b8_5: new Pos(1,7,4), c8_5: new Pos(2,7,4), d8_5: new Pos(3,7,4), e8_5: new Pos(4,7,4),
+		b9_5: new Pos(1,8,4), c9_5: new Pos(2,8,4), d9_5: new Pos(3,8,4), e9_5: new Pos(4,8,4)
+
+	};
+
+	var TOWER_SQUARES_OBJ = {
+
+		T1: { a1_2: new Pos(0,0,1), b1_2: new Pos(1,0,1),
+			  a2_2: new Pos(0,1,1), b2_2: new Pos(1,1,1) },
+
+		T2: { e1_2: new Pos(4,0,1), f1_2: new Pos(5,0,1),
+			  e2_2: new Pos(4,1,1), f2_2: new Pos(5,1,1) },
+
+		T3: { a5_2: new Pos(0,4,1), b5_2: new Pos(1,4,1),
+			  a6_2: new Pos(0,5,1), b6_2: new Pos(1,5,1) },
+
+		T4: { e5_2: new Pos(4,4,1), f5_2: new Pos(5,4,1),
+			  e6_2: new Pos(4,5,1), f6_2: new Pos(5,5,1) },
+
+		T5: { a3_4: new Pos(0,2,3), b3_4: new Pos(1,2,3),
+			  a4_4: new Pos(0,3,3), b4_4: new Pos(1,3,3) },
+
+		T6: { e3_4: new Pos(4,2,3), f3_4: new Pos(5,2,3),
+			  e4_4: new Pos(4,3,3), f4_4: new Pos(5,3,3) },
+
+		T7: { a7_4: new Pos(0,6,3), b7_4: new Pos(1,6,3),
+			  a8_4: new Pos(0,7,3), b8_4: new Pos(1,7,3) },
+
+		T8: { e7_4: new Pos(4,6,3), f7_4: new Pos(5,6,3),
+			  e8_4: new Pos(4,7,3), f8_4: new Pos(5,7,3) },
+
+		T9: { a5_6: new Pos(0,4,5), b5_6: new Pos(1,4,5),
+			  a6_6: new Pos(0,5,5), b6_6: new Pos(1,5,5) },
+
+		T10: { e5_6: new Pos(4,4,5), f5_6: new Pos(5,4,5),
+			   e6_6: new Pos(4,5,5), f6_6: new Pos(5,5,5) },
+
+		T11: { a9_6: new Pos(0,8,5), b9_6: new Pos(1,8,5),
+			   a10_6: new Pos(0,9,5), b10_6: new Pos(1,9,5) },
+
+		T12: { e9_6: new Pos(4,8,5), f9_6: new Pos(5,8,5),
+			   e10_6: new Pos(4,9,5), f10_6: new Pos(5,9,5) }
+
+	};
+
 
 	// Validation
 
+	// TODO: Remove this as it is no longer needed
 	function isValidSquare( squ ) {
-
-		console.log("Checking square validity");
 
 		if ( typeof( squ ) !== 'string' ) { return false; }
 
@@ -50,15 +124,12 @@ var Tridchessboard = function( canvasId, config ) {
 		let reg = new RegExp( '^[a-f](?:[1-9]|10)_[1-6]$' );
 		if ( !reg.test( squ ) ) { return false; }
 
-		console.log("isValidSquare returned true");
-
 		return true;
 
 	}
 
+	// TODO: Remove this as it is no longer needed
 	function isValidTower( tow ) {
-
-		console.log("Checking tower validity");
 
 		if ( typeof( tow ) !== 'string' ) { return false; }
 
@@ -66,15 +137,11 @@ var Tridchessboard = function( canvasId, config ) {
 		let reg = new RegExp( '^T(?:[1-9]|1[012])$' );
 		if ( !reg.test( tow ) ) { return false; }
 
-		console.log("isValidTower returned true");
-
 		return true;
 
 	}
 
 	function isValidPieceCode( pie ) {
-
-		console.log("Checking piece code validity");
 
 		if ( typeof( pie ) !== 'string' ) { return false; }
 
@@ -82,51 +149,50 @@ var Tridchessboard = function( canvasId, config ) {
 		let reg = new RegExp( '^[wb][PNBRQK]$' );
 		if ( !reg.test( pie ) ) { return false; }
 
-		console.log("isValidPieceCode returned true");
-
 		return true;
 
 	}
 
-	// TODO: Check if squares even exist? (e.g. c3_5)
 	function isValidPos( pos ) {
 
 		if ( typeof( pos ) !== 'object' ) { return false; }
 
-		// Iterate over position object (e.g. a3_1: 'wP')
-		for ( let prop in pos ) {
+		var squares = MAIN_SQUARES_OBJ;
 
-			console.log("Checking prop:");
-			console.log(prop);
+		// Get towers from position object
+		for ( let tow in TOWER_SQUARES_OBJ ) {
 
-			if ( pos.hasOwnProperty( prop ) ) {
+			if ( pos.hasOwnProperty( tow ) && pos[ tow ] === true ) {
 
-				console.log("Checking property name");
-
-				// Check property name (square or tower name)
-				if ( !isValidSquare( prop ) && !isValidTower( prop ) ) {
-
-					return false;
-
-				}
-
-				console.log("Checking property value");
-
-				// Check property value (only piece code)
-				// Invalid tower values are treated as false by loadPos()
-				let val = pos[ prop ];
-
-				if ( typeof( val ) === 'string' ) {
-
-					if ( !isValidPieceCode( val ) ) { return false; }
-
-				}
+				// Add tower squares to main squares
+				Object.assign( squares, TOWER_SQUARES_OBJ[ tow ] );
 
 			}
 
 		}
 
-		console.log("isValidPos returned true");
+		// Iterate over position object (e.g. a3_1: 'wP')
+		for ( let prop in pos ) {
+
+			if ( pos.hasOwnProperty( prop ) ) {
+
+				if ( TOWER_SQUARES_OBJ.hasOwnProperty( prop ) ) {
+
+					// If valid tower
+					// Check tower value (true/false)
+					if ( typeof( pos[ prop ] ) !== 'boolean' ) { return false; }
+
+				} else if ( squares.hasOwnProperty( prop ) ) {
+
+					// If square is valid and exists
+					// Check piece code
+					if ( !isValidPieceCode( pos[ prop ] ) ) { return false; }
+
+				} else { return false; }
+
+			}
+
+		}
 
 		return true;
 
@@ -577,14 +643,6 @@ var Tridchessboard = function( canvasId, config ) {
 	// Globals and helper functions
 	// ----------------------------------------------------------------
 
-	// Position object: Specifies a certain square on the board
-	var Pos = function( file, row, level ) {
-
-		this.f = file;
-		this.r = row;
-		this.l = level;
-
-	}
 
 	function posToVector3( pos ) {
 
@@ -621,6 +679,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	// Squares
+	// TODO: Remove replaced by MAIN_SQUARES_OBJ
 	var MAIN_SQUARES = [
 		// Low board
 		new Pos(1,1,0), new Pos(2,1,0), new Pos(3,1,0), new Pos(4,1,0),
@@ -641,6 +700,7 @@ var Tridchessboard = function( canvasId, config ) {
 		new Pos(1,8,4), new Pos(2,8,4), new Pos(3,8,4), new Pos(4,8,4)
 	];
 
+	// TODO: Remove replaced by TOWER_SQUARES_OBJ
 	var TOWER_SQUARES = [
 		// Low board
 		[ new Pos(0,0,1), new Pos(1,0,1), new Pos(0,1,1), new Pos(1,1,1) ],
@@ -864,6 +924,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	// Create squares for main boards
+	// TODO: Modify to use MAIN_SQUARES_OBJ
 	for ( let squ = 0; squ < MAIN_SQUARES.length; squ++ ) {
 
 		// Get position
@@ -1037,6 +1098,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	// Add towers
+	// TODO: Modify to use TOWER_SQUARES_OBJ
 	for ( let tow = 0; tow < TOWER_SQUARES.length; tow++ ) {
 
 		let squares = [];
