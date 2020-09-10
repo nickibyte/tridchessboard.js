@@ -5792,39 +5792,120 @@ var Tridchessboard = function( canvasId, config ) {
 
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
-	// Defaults and config
+	// Helper functions, defaults and config
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
 
+	// ----------------------------------------------------------------
+	// Helper functions
+	// ----------------------------------------------------------------
+
+	// Validation
+
+	function isValidSquare( squ ) {
+
+		console.log("Checking square validity");
+
+		if ( typeof( squ ) !== 'string' ) { return false; }
+
+		// Check for valid square name (e.g. a3_1)
+		// file (a-f), row (1-10) and level (1-6)
+		let reg = new RegExp( '^[a-f](?:[1-9]|10)_[1-6]$' );
+		if ( !reg.test( squ ) ) { return false; }
+
+		console.log("isValidSquare returned true");
+
+		return true;
+
+	}
+
+	function isValidTower( tow ) {
+
+		console.log("Checking tower validity");
+
+		if ( typeof( tow ) !== 'string' ) { return false; }
+
+		// Check for valid tower name (T1, T2, ..., T12)
+		let reg = new RegExp( '^T(?:[1-9]|1[012])$' );
+		if ( !reg.test( tow ) ) { return false; }
+
+		console.log("isValidTower returned true");
+
+		return true;
+
+	}
+
+	function isValidPieceCode( pie ) {
+
+		console.log("Checking piece code validity");
+
+		if ( typeof( pie ) !== 'string' ) { return false; }
+
+		// Check for valid piece code (e.g. wP, bK, wQ)
+		let reg = new RegExp( '^[wb][PNBRQK]$' );
+		if ( !reg.test( pie ) ) { return false; }
+
+		console.log("isValidPieceCode returned true");
+
+		return true;
+
+	}
+
+	function isValidPos( pos ) {
+
+		if ( typeof( pos ) !== 'object' ) { return false; }
+
+		// Iterate over position object (e.g. a3_1: 'wP')
+		for ( let prop in pos ) {
+
+			console.log("Checking prop:");
+			console.log(prop);
+
+			if ( pos.hasOwnProperty( prop ) ) {
+
+				console.log("Checking property name");
+
+				// Check property name (square or tower name)
+				if ( !isValidSquare( prop ) && !isValidTower( prop ) ) {
+
+					return false;
+
+				}
+
+				console.log("Checking property value");
+
+				// Check property value (only piece code)
+				// Invalid tower values are treated as false by loadPos()
+				let val = pos[ prop ];
+
+				if ( typeof( val ) === 'string' ) {
+
+					if ( !isValidPieceCode( val ) ) { return false; }
+
+				}
+
+			}
+
+		}
+
+		console.log("isValidPos returned true");
+
+		return true;
+
+	}
+
+	function isValidFen( fen ) { }
+
+	function isValidOrientation( orientation ) { }
+
+	function isValidPieceTheme( pieceTheme ) { }
+
+	function isValidBoardTheme( boardTheme ) { }
+
+
+	// ----------------------------------------------------------------
 	// Defaults
-	/*var DEFAULT_CONFIG = {
-
-		draggable: false,
-		dropOffBoard: 'snapback',
-		position: null,
-		onChange: null,
-		onDragStart: null,
-		onDragMove: null,
-		onDrop: null,
-		//onMouseoutSquare,
-		//onMouseoverSquare,
-		onMoveEnd: null,
-		onSnapbackEnd: null,
-		onSnapEnd: null,
-		orientation,
-		showNotation: true,
-		sparePieces: false,
-		showErrors,
-		pieceTheme: '',
-		boardTheme: '',
-		//appearSpeed: 200,
-		//moveSpeed: 200,
-		//snapbackSpeed: 50,
-		//snapSpeed: 25,
-		//trashSpeed: 100,
-
-	};*/
-
+	// ----------------------------------------------------------------
 
 	// Orientation (camera position)
 	var ORIENTATION_WHITE = new THREE.Vector3( -12, 10, 0 );
@@ -5860,14 +5941,21 @@ var Tridchessboard = function( canvasId, config ) {
 	};
 
 
+	// ----------------------------------------------------------------
+	// Config
+	// ----------------------------------------------------------------
+
 	// Load config and apply defaults
+
 	if ( config.draggable !== true ) { config.draggable = false; }
 	if ( config.turnable !== true ) { config.turnable = false; }
 	if ( config.dropOffBoard !== 'trash' ) { config.dropOffBoard = 'snapback'; }
 	if ( config.sparePieces !== true ) { config.sparePieces = false; }
 	if ( config.stand !== false ) { config.stand = true; }
 
+
 	// TODO: Validate themes
+	// pieceTheme
 	if ( config.hasOwnProperty( 'pieceTheme' ) ) {
 
 		if ( typeof ( config.pieceTheme ) === 'string' ) {
@@ -5918,6 +6006,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	// TODO: Validate themes
+	// boardTheme
 	if ( config.hasOwnProperty( 'boardTheme' ) ) {
 
 		if ( typeof ( config.boardTheme ) === 'string' ) {
@@ -5949,6 +6038,7 @@ var Tridchessboard = function( canvasId, config ) {
 	} else { config.boardTheme = BOARD_THEME; }
 
 
+	// orientation
 	if ( config.hasOwnProperty( 'orientation' ) ) {
 
 		if ( typeof ( config.orientation ) === 'string' &&
@@ -6103,12 +6193,11 @@ var Tridchessboard = function( canvasId, config ) {
 
 	}
 
-	// TODO: Config - stand (toggle)
 	// TODO: Config - user defined start position
 	// TODO: Config - show errors
 	// TODO: Config - spare pieces
 	// TODO: Config - notation
-	// TODO: Config - shorthands (start, fen, position)
+	// TODO: Config - shorthands ('start', fen, position instead of config object)
 	// TODO: Config - configurable colors (background, pieces, squares?)
 
 
@@ -6204,6 +6293,7 @@ var Tridchessboard = function( canvasId, config ) {
 	//scene.add( axesHelper );
 
 
+	// TODO: Make into API method
 	// Window Resizing
 	function onWindowResize() {
 
@@ -7188,6 +7278,7 @@ var Tridchessboard = function( canvasId, config ) {
 	}
 
 
+	// TODO: Check if valid fen string
 	function loadFen( fen ) {
 
 		var oldPos = generatePos();
@@ -7378,36 +7469,40 @@ var Tridchessboard = function( canvasId, config ) {
 
 	function loadPos( pos ) {
 
-		var oldPos = generatePos();
+		if ( isValidPos( pos ) ) {
 
-		// Reset board
-		resetBoard();
+			var oldPos = generatePos();
 
-		// Iterate over position object (e.g. a3_1: 'wP')
-		for ( let prop in pos ) {
+			// Reset board
+			resetBoard();
 
-			if ( pos.hasOwnProperty( prop ) ) {
+			// Iterate over position object (e.g. a3_1: 'wP')
+			for ( let prop in pos ) {
 
-				// Get square/tower
-				let obj = board.getObjectByName( prop );
+				if ( pos.hasOwnProperty( prop ) ) {
 
-				if ( obj.type === 'square' ) {
+					// Get square/tower
+					let obj = board.getObjectByName( prop );
 
-					// Add piece to square
-					obj.setPiece( new Piece( pos[ prop ] ) );
+					if ( obj.type === 'square' ) {
 
-				} else if ( obj.type === 'tower' && pos[ prop ] ) {
+						// Add piece to square
+						obj.setPiece( new Piece( pos[ prop ] ) );
 
-					// Activate Tower
-					obj.activate();
+					} else if ( obj.type === 'tower' && pos[ prop ] ) {
+
+						// Activate Tower
+						obj.activate();
+
+					}
 
 				}
 
 			}
 
-		}
+			callOnChange( oldPos );
 
-		callOnChange( oldPos );
+		}
 
 	}
 
@@ -7457,7 +7552,6 @@ var Tridchessboard = function( canvasId, config ) {
 
 		}
 
-		// TODO: Check if valid position object/fen string
 		else if ( typeof( arg ) === 'object' ) { loadPos( arg ); }
 
 		else if ( typeof( arg ) === 'string' ) { loadFen( arg ); }
@@ -7477,13 +7571,13 @@ var Tridchessboard = function( canvasId, config ) {
 
 	}
 
+
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
 	// API
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
 
-	// TODO: Validate position
 	// Load position
 	if ( config.position !== undefined ) {
 
