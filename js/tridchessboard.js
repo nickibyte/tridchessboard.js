@@ -379,7 +379,11 @@ var Tridchessboard = function( canvasId, config ) {
 
 	function fenToObj( fen ) {
 
-		var squares = MAIN_SQUARES;
+		var squares = clone( MAIN_SQUARES );
+
+		// DEBUG
+		console.log( JSON.parse( JSON.stringify( squares ) ) );
+		x=0;for(let y in squares){x++;}console.log(x);
 
 		var pos = {};
 
@@ -404,7 +408,7 @@ var Tridchessboard = function( canvasId, config ) {
 			let tow = 'T' + towPos[ i ];
 
 			// Add tower squares to main squares
-			Object.assign( squares, TOWER_SQUARES[ tow ] );
+			squares = merge( squares, TOWER_SQUARES[ tow ] );
 
 			// Add tower to pos
  			pos[ tow ] = true;
@@ -412,6 +416,8 @@ var Tridchessboard = function( canvasId, config ) {
 			// DEBUG
 			console.log( "Adding " + tow + " to pos: " );
 			console.log( pos );
+			console.log( JSON.parse( JSON.stringify( squares ) ) );
+			x=0;for(let y in squares){x++;}console.log(x);
 
 		}
 
@@ -429,70 +435,65 @@ var Tridchessboard = function( canvasId, config ) {
 		console.log( "Decompressing 11: " + fen[ 1 ] );
 
 		// Get piece positions from fen
-		var levels = fen[ 1 ].split( '|' );
+		fen[ 1 ] = fen[ 1 ].replace( /[|/]/g, '' );
 
-		for ( let l = 0; l < levels.length; l++ ) {
+		// DEBUG
+		console.log(fen[ 1 ]);
+		console.log(fen[ 1 ].length);
+		console.log( JSON.parse( JSON.stringify( squares ) ) );
+		x=0;for(let y in squares){x++;}console.log(x);
 
-			let rows = levels[ l ].split( '/' );
+		var i = 0;
 
-			// DEBUG
-			console.log( "Checking level " + l + "(" + (6-l) + "): " + levels[ l ] );
+		for ( let l = 6; l >= 1; l-- ) {
 
-			for ( let r = 0; r < rows.length; r++ ) {
+			for ( let r = 10; r >= 1; r-- ) {
 
-				let files = rows[ r ].split( '' );
+				for ( let f = 0; f <= 5; f++ ) {
 
-				// DEBUG
-				console.log( "Checking row " + r + "(" + (10-r) + "): " + rows[ r ] );
-
-				for ( let f = 0; f < files.length; f++ ) {
-
-					let piece = files[ f ];
+					let squ = 'abcdef'.charAt( f ) + r + '_' + l;
 
 					// DEBUG
-					console.log( "Checking square: " + piece );
+					console.log( "Checking square " + squ );
 
-					if ( piece !== '1' ) {
+					if ( squares.hasOwnProperty( squ ) ) {
 
-						// If square is not empty
-
-						// Convert FEN piece to piece code (wP, bQ, ...)
-						if ( piece.toLowerCase() === piece ) {
-
-							piece = 'b' + piece.toUpperCase();
-
-						}
-						else {
-
-							piece = 'w' + piece.toUpperCase();
-
-						}
+						let piece = fen[ 1 ][ i ];
 
 						// DEBUG
-						console.log( "Converted FEN piece to " + piece );
+						console.log( "Checking piece " + piece );
 
-						// Compose square name
-						let file = [ 'b', 'c', 'd', 'e' ][ f ];
-						let row = 10 - l - r;
-						let level = 6 - l;
+						if ( piece !== '1' ) {
 
-						if ( l % 2 == 0 ) {
+							// If square is not empty
 
-							// If it is a tower level
+							// Convert FEN piece to piece code (wP, bQ, ...)
+							if ( piece.toLowerCase() === piece ) {
 
-							file = [ 'a', 'b', 'e', 'f' ][ f ];
-							row = [ 10 - l, 9 - l , 6 - l , 5 - l ][ r ];
+								piece = 'b' + piece.toUpperCase();
+
+							}
+							else {
+
+								piece = 'w' + piece.toUpperCase();
+
+							}
+
+							// DEBUG
+							console.log( "Converted FEN piece to " + piece );
+
+
+							// Add square + piece to pos
+							pos[ squ ] = piece;
+
+							// DEBUG
+							console.log( "Adding " + squ + " to pos: " );
+							console.log( pos );
 
 						}
 
-						let squ = file + row + '_' + level;
-
-						// Add square + piece to pos
-						pos[ squ ] = piece;
-
-						// DEBUG
-						console.log( "Adding " + squ + " to pos: " );
-						console.log( pos );
+						console.log("FEN("+ i + "/" + fen[ 1 ].length + ")");
+						i++;
 
 					}
 
