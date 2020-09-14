@@ -207,6 +207,261 @@ var Tridchessboard = function( canvasId, config ) {
 	function isValidBoardTheme( boardTheme ) { }
 
 
+	// FEN and Position Object conversion
+
+	function objToFen( pos ) {
+
+		var squares = MAIN_SQUARES_OBJ;
+
+		// FEN piece positions with square names
+		var piePos = 'a10_6b10_6e10_6f10_6/a9_6b9_6e9_6f9_6/a6_6b6_6e6_6f6_6/a5_6b5_6e5_6f5_6|' +
+					 'b9_5c9_5d9_5e9_5/b8_5c8_5d8_5e8_5/b7_5c7_5d7_5e7_5/b6_5c6_5d6_5e6_5|' +
+					 'a8_4b8_4e8_4f8_4/a7_4b7_4e7_4f7_4/a4_4b4_4e4_4f4_4/a3_4b3_4e3_4f3_4|' +
+					 'b7_3c7_3d7_3e7_3/b6_3c6_3d6_3e6_3/b5_3c5_3d5_3e5_3/b4_3c4_3d4_3e4_3|' +
+					 'a6_2b6_2e6_2f6_2/a5_2b5_2e5_2f5_2/a2_2b2_2e2_2f2_2/a1_2b1_2e1_2f1_2|' +
+					 'b5_1c5_1d5_1e5_1/b4_1c4_1d4_1e4_1/b3_1c3_1d3_1e3_1/b2_1c2_1d2_1e2_1';
+
+		// Generate tower positions
+		var towPos = '';
+
+		for ( let i = 1; i <= 12; i++ ) {
+
+			// Tower name
+			let tow = 'T' + i;
+
+			// DEBUG
+			console.log( "Checking tower " + tow );
+
+			if ( pos.hasOwnProperty( tow ) && pos[ tow ] === true ) {
+
+				// If tower exists
+
+				// Add tower squares to main squares
+				Object.assign( squares, TOWER_SQUARES_OBJ[ tow ] );
+
+				// Convert tower number to 12-base and add to tower positions
+				let num = i.toString( 13 );
+				towPos += num;
+
+				// DEBUG
+				console.log( "Tower active. Adding " + num + " to towPos: " + towPos );
+
+			} else {
+
+				// If tower doesn't exist
+
+				// Remove tower squares from piece positions
+				for ( let squ in TOWER_SQUARES_OBJ[ tow ] ) {
+
+					piePos = piePos.replace( squ, '')
+
+					// DEBUG
+					console.log( "Tower inactive. Removing " + squ + " from piePos: " + piePos );
+
+				}
+
+			}
+
+		}
+
+		// Generate piece positions
+		for ( let squ in squares ) {
+
+			// DEBUG
+			console.log( "Checking square " + squ );
+
+			if ( pos.hasOwnProperty( squ ) ) {
+
+				// If square is occupied
+
+				// Convert piece code to FEN piece
+				let pieCode = pos[ squ ];
+
+				if ( pieCode[ 0 ] === 'b' ) {
+
+					pieCode = pieCode[ 1 ].toLowerCase();
+
+				} else {
+
+					pieCode = pieCode[ 1 ].toUpperCase();
+
+				}
+
+				// Add piece to piece positions
+				piePos = piePos.replace( squ, pieCode );
+
+				// DEBUG
+				console.log( "Square occupied. Adding " + pieCode + " to piePos: " + piePos );
+
+			} else {
+
+				// If square isn't occupied
+
+				// Add empty square to piece positions
+				piePos = piePos.replace( squ, '1' );
+
+				// DEBUG
+				console.log( "Square unoccupied. Adding 1 to piePos: " + piePos );
+
+			}
+
+		}
+
+		// Compress empty squares in piece positions
+		piePos = piePos.replace( /1111/g, '4' );
+		// DEBUG
+		console.log( "Compressing 1111: " + piePos );
+
+		piePos = piePos.replace( /111/g, '3' );
+		// DEBUG
+		console.log( "Compressing 111: " + piePos );
+
+		piePos = piePos.replace( /11/g, '2' );
+		// DEBUG
+		console.log( "Compressing 11: " + piePos );
+
+		// DEBUG
+		console.log( "Done: '" + towPos + ' ' + piePos + "'" );
+
+		// Compose and return FEN string
+		return towPos + ' ' + piePos;
+
+	}
+
+	function fenToObj( fen ) {
+
+		//var squares = MAIN_SQUARES_OBJ;
+
+		var pos = {};
+
+		// DEBUG
+		console.log( "FEN: " + fen );
+
+		// Split fen into towers and piece positions
+		fen = fen.split( ' ' );
+
+		// Get towers from fen
+		var towPos = fen[ 0 ].split( '' );
+
+		for ( let i = 0; i < towPos.length; i++ ) {
+
+			// DEBUG
+			console.log( "Checking tower " + towPos[ i ] );
+
+			// Convert 12-base positions to integer
+			towPos[ i ] = parseInt( towPos[ i ], 13 );
+
+			// Tower name
+			let tow = 'T' + towPos[ i ];
+
+			// Add tower squares to main squares
+			//Object.assign( squares, TOWER_SQUARES_OBJ[ tow ] );
+
+			// Add tower to pos
+ 			pos[ tow ] = true;
+
+			// DEBUG
+			console.log( "Adding " + tow + " to pos: " );
+			console.log( pos );
+
+		}
+
+		// Expand empty squares in piece positions
+		fen[ 1 ] = fen[ 1 ].replace( /4/g, '1111' );
+		// DEBUG
+		console.log( "Decompressing 1111: " + fen[ 1 ] );
+
+		fen[ 1 ] = fen[ 1 ].replace( /3/g, '111' );
+		// DEBUG
+		console.log( "Decompressing 111: " + fen[ 1 ] );
+
+		fen[ 1 ] = fen[ 1 ].replace( /2/g, '11' );
+		// DEBUG
+		console.log( "Decompressing 11: " + fen[ 1 ] );
+
+		// Get piece positions from fen
+		var levels = fen[ 1 ].split( '|' );
+
+		for ( let l = 0; l < levels.length; l++ ) {
+
+			let rows = levels[ l ].split( '/' );
+
+			// DEBUG
+			console.log( "Checking level " + l + "(" + (6-l) + "): " + levels[ l ] );
+
+			for ( let r = 0; r < rows.length; r++ ) {
+
+				let files = rows[ r ].split( '' );
+
+				// DEBUG
+				console.log( "Checking row " + r + "(" + (10-r) + "): " + rows[ r ] );
+
+				for ( let f = 0; f < files.length; f++ ) {
+
+					let piece = files[ f ];
+
+					// DEBUG
+					console.log( "Checking square: " + piece );
+
+					if ( piece !== '1' ) {
+
+						// If square is not empty
+
+						// Convert FEN piece to piece code (wP, bQ, ...)
+						if ( piece.toLowerCase() === piece ) {
+
+							piece = 'b' + piece.toUpperCase();
+
+						}
+						else {
+
+							piece = 'w' + piece.toUpperCase();
+
+						}
+
+						// DEBUG
+						console.log( "Converted FEN piece to " + piece );
+
+						// Compose square name
+						let file = [ 'b', 'c', 'd', 'e' ][ f ];
+						let row = 10 - l - r;
+						let level = 6 - l;
+
+						if ( l % 2 == 0 ) {
+
+							// If it is a tower level
+
+							file = [ 'a', 'b', 'e', 'f' ][ f ];
+							row = [ 10 - l, 9 - l , 6 - l , 5 - l ][ r ];
+
+						}
+
+						let squ = file + row + '_' + level;
+
+						// Add square + piece to pos
+						pos[ squ ] = piece;
+
+						// DEBUG
+						console.log( "Adding " + squ + " to pos: " );
+						console.log( pos );
+
+					}
+
+				}
+
+			}
+
+		}
+
+		// DEBUG
+		console.log( "Done: " );
+		console.log( pos );
+
+		return pos;
+
+	}
+
+
 	// ----------------------------------------------------------------
 	// Defaults
 	// ----------------------------------------------------------------
@@ -1929,6 +2184,10 @@ var Tridchessboard = function( canvasId, config ) {
 		position: function( arg ) { return position( arg ); },
 
 		fen: function() { return position( 'fen' ); },
+
+		objToFen: function( pos ) { return objToFen( pos ); },
+
+		fenToObj: function( fen ) { return fenToObj( fen ); },
 
 		start: function() { position( 'start' ); },
 
