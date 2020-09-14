@@ -49,7 +49,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 	// Squares
 
-	var MAIN_SQUARES_OBJ = {
+	var MAIN_SQUARES = {
 
 		// Low board
 		b2_1: new Pos(1,1,0), c2_1: new Pos(2,1,0), d2_1: new Pos(3,1,0), e2_1: new Pos(4,1,0),
@@ -71,7 +71,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 	};
 
-	var TOWER_SQUARES_OBJ = {
+	var TOWER_SQUARES = {
 
 		T1: { a1_2: new Pos(0,0,1), b1_2: new Pos(1,0,1),
 			  a2_2: new Pos(0,1,1), b2_2: new Pos(1,1,1) },
@@ -157,15 +157,15 @@ var Tridchessboard = function( canvasId, config ) {
 
 		if ( typeof( pos ) !== 'object' ) { return false; }
 
-		var squares = MAIN_SQUARES_OBJ;
+		var squares = MAIN_SQUARES;
 
 		// Get towers from position object
-		for ( let tow in TOWER_SQUARES_OBJ ) {
+		for ( let tow in TOWER_SQUARES ) {
 
 			if ( pos.hasOwnProperty( tow ) && pos[ tow ] === true ) {
 
 				// Add tower squares to main squares
-				Object.assign( squares, TOWER_SQUARES_OBJ[ tow ] );
+				Object.assign( squares, TOWER_SQUARES[ tow ] );
 
 			}
 
@@ -176,7 +176,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 			if ( pos.hasOwnProperty( prop ) ) {
 
-				if ( TOWER_SQUARES_OBJ.hasOwnProperty( prop ) ) {
+				if ( TOWER_SQUARES.hasOwnProperty( prop ) ) {
 
 					// If valid tower
 					// Check tower value (true/false)
@@ -211,7 +211,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 	function objToFen( pos ) {
 
-		var squares = MAIN_SQUARES_OBJ;
+		var squares = MAIN_SQUARES;
 
 		// FEN piece positions with square names
 		var piePos = 'a10_6b10_6e10_6f10_6/a9_6b9_6e9_6f9_6/a6_6b6_6e6_6f6_6/a5_6b5_6e5_6f5_6|' +
@@ -237,7 +237,7 @@ var Tridchessboard = function( canvasId, config ) {
 				// If tower exists
 
 				// Add tower squares to main squares
-				Object.assign( squares, TOWER_SQUARES_OBJ[ tow ] );
+				Object.assign( squares, TOWER_SQUARES[ tow ] );
 
 				// Convert tower number to 12-base and add to tower positions
 				let num = i.toString( 13 );
@@ -251,7 +251,7 @@ var Tridchessboard = function( canvasId, config ) {
 				// If tower doesn't exist
 
 				// Remove tower squares from piece positions
-				for ( let squ in TOWER_SQUARES_OBJ[ tow ] ) {
+				for ( let squ in TOWER_SQUARES[ tow ] ) {
 
 					piePos = piePos.replace( squ, '')
 
@@ -330,7 +330,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 	function fenToObj( fen ) {
 
-		//var squares = MAIN_SQUARES_OBJ;
+		var squares = MAIN_SQUARES;
 
 		var pos = {};
 
@@ -355,7 +355,7 @@ var Tridchessboard = function( canvasId, config ) {
 			let tow = 'T' + towPos[ i ];
 
 			// Add tower squares to main squares
-			//Object.assign( squares, TOWER_SQUARES_OBJ[ tow ] );
+			Object.assign( squares, TOWER_SQUARES[ tow ] );
 
 			// Add tower to pos
  			pos[ tow ] = true;
@@ -934,8 +934,8 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	// Squares
-	// TODO: Remove replaced by MAIN_SQUARES_OBJ
-	var MAIN_SQUARES = [
+	// TODO: Remove, replaced by MAIN_SQUARES
+	var MAIN_SQUARES_OLD = [
 		// Low board
 		new Pos(1,1,0), new Pos(2,1,0), new Pos(3,1,0), new Pos(4,1,0),
 		new Pos(1,2,0), new Pos(2,2,0), new Pos(3,2,0), new Pos(4,2,0),
@@ -955,8 +955,8 @@ var Tridchessboard = function( canvasId, config ) {
 		new Pos(1,8,4), new Pos(2,8,4), new Pos(3,8,4), new Pos(4,8,4)
 	];
 
-	// TODO: Remove replaced by TOWER_SQUARES_OBJ
-	var TOWER_SQUARES = [
+	// TODO: Remove, replaced by TOWER_SQUARES
+	var TOWER_SQUARES_OLD = [
 		// Low board
 		[ new Pos(0,0,1), new Pos(1,0,1), new Pos(0,1,1), new Pos(1,1,1) ],
 		[ new Pos(4,0,1), new Pos(5,0,1), new Pos(4,1,1), new Pos(5,1,1) ],
@@ -1179,15 +1179,13 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	// Create squares for main boards
-	// TODO: Modify to use MAIN_SQUARES_OBJ
-	for ( let squ = 0; squ < MAIN_SQUARES.length; squ++ ) {
+	for ( let squ in MAIN_SQUARES ) {
 
 		// Get position
 		let pos = MAIN_SQUARES[ squ ];
-		let name = 'abcdef'.charAt(pos.f) + (pos.r + 1) + '_' + (pos.l + 1);
 
 		// Add square
-		let square = new Square( name, pos );
+		let square = new Square( squ, pos );
 		board.add( square );
 
 	}
@@ -1353,28 +1351,26 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	// Add towers
-	// TODO: Modify to use TOWER_SQUARES_OBJ
-	for ( let tow = 0; tow < TOWER_SQUARES.length; tow++ ) {
+	for ( let i = 1; i <= 12; i++ ) {
 
 		let squares = [];
 
-		for ( let squ = 0; squ < TOWER_SQUARES[ tow ].length; squ++ ) {
+		// Tower name
+		let tow = 'T' + i;
+
+		for ( let squ in TOWER_SQUARES[ tow ] ) {
 
 			// Get position
 			let pos = TOWER_SQUARES[ tow ][ squ ];
-			let name = 'abcdef'.charAt(pos.f) + (pos.r + 1) + '_' + (pos.l + 1);
 
 			// Add square
-			let square = new Square( name, pos );
+			let square = new Square( squ, pos );
 			squares.push( square );
 
 		}
 
-		let pos = tow + 1;
-		let name = 'T' + pos;
-
 		// Add tower
-		let tower = new Tower( name, pos, squares );
+		let tower = new Tower( tow, i, squares );
 		towerObjs.push( tower );
 		tower.deactivate();
 
