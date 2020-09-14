@@ -5800,6 +5800,55 @@ var Tridchessboard = function( canvasId, config ) {
 	// Helpers
 	// ----------------------------------------------------------------
 
+	// Clone a JavaScript object (shallow clone)
+	// Returns new object
+	// TODO: Remove, can be done by merging with only one argument
+	function clone( obj ) {
+
+		var target = {};
+
+		for ( let prop in obj ) {
+
+			if ( obj.hasOwnProperty( prop ) ) {
+
+				target[ prop ] = obj[ prop ];
+
+			}
+
+		}
+
+		return target;
+
+	}
+
+	// Merge two JavaScript objects (shallow merge)
+	// Returns new object
+	// TODO: Change so that only properties are copied
+	function merge() {
+
+		var target = {};
+
+		for ( let i = 0; i < arguments.length; i++ ) {
+
+			let obj = arguments[ i ];
+
+			for ( let prop in obj ) {
+
+				if ( obj.hasOwnProperty( prop ) ) {
+
+					target[ prop ] = obj[ prop ];
+
+				}
+
+			}
+
+		}
+
+		return target;
+
+	}
+
+
 	// Pos object: Specifies a certain square on the board
 	var Pos = function( file, row, level ) {
 
@@ -5812,7 +5861,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 	// Squares
 
-	var MAIN_SQUARES_OBJ = {
+	var MAIN_SQUARES = {
 
 		// Low board
 		b2_1: new Pos(1,1,0), c2_1: new Pos(2,1,0), d2_1: new Pos(3,1,0), e2_1: new Pos(4,1,0),
@@ -5834,7 +5883,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 	};
 
-	var TOWER_SQUARES_OBJ = {
+	var TOWER_SQUARES = {
 
 		T1: { a1_2: new Pos(0,0,1), b1_2: new Pos(1,0,1),
 			  a2_2: new Pos(0,1,1), b2_2: new Pos(1,1,1) },
@@ -5920,15 +5969,15 @@ var Tridchessboard = function( canvasId, config ) {
 
 		if ( typeof( pos ) !== 'object' ) { return false; }
 
-		var squares = MAIN_SQUARES_OBJ;
+		var squares = clone( MAIN_SQUARES );
 
 		// Get towers from position object
-		for ( let tow in TOWER_SQUARES_OBJ ) {
+		for ( let tow in TOWER_SQUARES ) {
 
 			if ( pos.hasOwnProperty( tow ) && pos[ tow ] === true ) {
 
 				// Add tower squares to main squares
-				Object.assign( squares, TOWER_SQUARES_OBJ[ tow ] );
+				squares = merge( squares, TOWER_SQUARES[ tow ] );
 
 			}
 
@@ -5939,7 +5988,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 			if ( pos.hasOwnProperty( prop ) ) {
 
-				if ( TOWER_SQUARES_OBJ.hasOwnProperty( prop ) ) {
+				if ( TOWER_SQUARES.hasOwnProperty( prop ) ) {
 
 					// If valid tower
 					// Check tower value (true/false)
@@ -5974,7 +6023,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 	function objToFen( pos ) {
 
-		var squares = MAIN_SQUARES_OBJ;
+		var squares = clone( MAIN_SQUARES );
 
 		// FEN piece positions with square names
 		var piePos = 'a10_6b10_6e10_6f10_6/a9_6b9_6e9_6f9_6/a6_6b6_6e6_6f6_6/a5_6b5_6e5_6f5_6|' +
@@ -6000,7 +6049,7 @@ var Tridchessboard = function( canvasId, config ) {
 				// If tower exists
 
 				// Add tower squares to main squares
-				Object.assign( squares, TOWER_SQUARES_OBJ[ tow ] );
+				squares = merge( squares, TOWER_SQUARES[ tow ] );
 
 				// Convert tower number to 12-base and add to tower positions
 				let num = i.toString( 13 );
@@ -6014,7 +6063,7 @@ var Tridchessboard = function( canvasId, config ) {
 				// If tower doesn't exist
 
 				// Remove tower squares from piece positions
-				for ( let squ in TOWER_SQUARES_OBJ[ tow ] ) {
+				for ( let squ in TOWER_SQUARES[ tow ] ) {
 
 					piePos = piePos.replace( squ, '')
 
@@ -6093,7 +6142,11 @@ var Tridchessboard = function( canvasId, config ) {
 
 	function fenToObj( fen ) {
 
-		//var squares = MAIN_SQUARES_OBJ;
+		var squares = clone( MAIN_SQUARES );
+
+		// DEBUG
+		console.log( JSON.parse( JSON.stringify( squares ) ) );
+		x=0;for(let y in squares){x++;}console.log(x);
 
 		var pos = {};
 
@@ -6118,7 +6171,7 @@ var Tridchessboard = function( canvasId, config ) {
 			let tow = 'T' + towPos[ i ];
 
 			// Add tower squares to main squares
-			//Object.assign( squares, TOWER_SQUARES_OBJ[ tow ] );
+			squares = merge( squares, TOWER_SQUARES[ tow ] );
 
 			// Add tower to pos
  			pos[ tow ] = true;
@@ -6126,6 +6179,8 @@ var Tridchessboard = function( canvasId, config ) {
 			// DEBUG
 			console.log( "Adding " + tow + " to pos: " );
 			console.log( pos );
+			console.log( JSON.parse( JSON.stringify( squares ) ) );
+			x=0;for(let y in squares){x++;}console.log(x);
 
 		}
 
@@ -6143,70 +6198,65 @@ var Tridchessboard = function( canvasId, config ) {
 		console.log( "Decompressing 11: " + fen[ 1 ] );
 
 		// Get piece positions from fen
-		var levels = fen[ 1 ].split( '|' );
+		fen[ 1 ] = fen[ 1 ].replace( /[|/]/g, '' );
 
-		for ( let l = 0; l < levels.length; l++ ) {
+		// DEBUG
+		console.log(fen[ 1 ]);
+		console.log(fen[ 1 ].length);
+		console.log( JSON.parse( JSON.stringify( squares ) ) );
+		x=0;for(let y in squares){x++;}console.log(x);
 
-			let rows = levels[ l ].split( '/' );
+		var i = 0;
 
-			// DEBUG
-			console.log( "Checking level " + l + "(" + (6-l) + "): " + levels[ l ] );
+		for ( let l = 6; l >= 1; l-- ) {
 
-			for ( let r = 0; r < rows.length; r++ ) {
+			for ( let r = 10; r >= 1; r-- ) {
 
-				let files = rows[ r ].split( '' );
+				for ( let f = 0; f <= 5; f++ ) {
 
-				// DEBUG
-				console.log( "Checking row " + r + "(" + (10-r) + "): " + rows[ r ] );
-
-				for ( let f = 0; f < files.length; f++ ) {
-
-					let piece = files[ f ];
+					let squ = 'abcdef'.charAt( f ) + r + '_' + l;
 
 					// DEBUG
-					console.log( "Checking square: " + piece );
+					console.log( "Checking square " + squ );
 
-					if ( piece !== '1' ) {
+					if ( squares.hasOwnProperty( squ ) ) {
 
-						// If square is not empty
-
-						// Convert FEN piece to piece code (wP, bQ, ...)
-						if ( piece.toLowerCase() === piece ) {
-
-							piece = 'b' + piece.toUpperCase();
-
-						}
-						else {
-
-							piece = 'w' + piece.toUpperCase();
-
-						}
+						let piece = fen[ 1 ][ i ];
 
 						// DEBUG
-						console.log( "Converted FEN piece to " + piece );
+						console.log( "Checking piece " + piece );
 
-						// Compose square name
-						let file = [ 'b', 'c', 'd', 'e' ][ f ];
-						let row = 10 - l - r;
-						let level = 6 - l;
+						if ( piece !== '1' ) {
 
-						if ( l % 2 == 0 ) {
+							// If square is not empty
 
-							// If it is a tower level
+							// Convert FEN piece to piece code (wP, bQ, ...)
+							if ( piece.toLowerCase() === piece ) {
 
-							file = [ 'a', 'b', 'e', 'f' ][ f ];
-							row = [ 10 - l, 9 - l , 6 - l , 5 - l ][ r ];
+								piece = 'b' + piece.toUpperCase();
+
+							}
+							else {
+
+								piece = 'w' + piece.toUpperCase();
+
+							}
+
+							// DEBUG
+							console.log( "Converted FEN piece to " + piece );
+
+
+							// Add square + piece to pos
+							pos[ squ ] = piece;
+
+							// DEBUG
+							console.log( "Adding " + squ + " to pos: " );
+							console.log( pos );
 
 						}
 
-						let squ = file + row + '_' + level;
-
-						// Add square + piece to pos
-						pos[ squ ] = piece;
-
-						// DEBUG
-						console.log( "Adding " + squ + " to pos: " );
-						console.log( pos );
+						console.log("FEN("+ i + "/" + fen[ 1 ].length + ")");
+						i++;
 
 					}
 
@@ -6697,8 +6747,8 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	// Squares
-	// TODO: Remove replaced by MAIN_SQUARES_OBJ
-	var MAIN_SQUARES = [
+	// TODO: Remove, replaced by MAIN_SQUARES
+	var MAIN_SQUARES_OLD = [
 		// Low board
 		new Pos(1,1,0), new Pos(2,1,0), new Pos(3,1,0), new Pos(4,1,0),
 		new Pos(1,2,0), new Pos(2,2,0), new Pos(3,2,0), new Pos(4,2,0),
@@ -6718,8 +6768,8 @@ var Tridchessboard = function( canvasId, config ) {
 		new Pos(1,8,4), new Pos(2,8,4), new Pos(3,8,4), new Pos(4,8,4)
 	];
 
-	// TODO: Remove replaced by TOWER_SQUARES_OBJ
-	var TOWER_SQUARES = [
+	// TODO: Remove, replaced by TOWER_SQUARES
+	var TOWER_SQUARES_OLD = [
 		// Low board
 		[ new Pos(0,0,1), new Pos(1,0,1), new Pos(0,1,1), new Pos(1,1,1) ],
 		[ new Pos(4,0,1), new Pos(5,0,1), new Pos(4,1,1), new Pos(5,1,1) ],
@@ -6942,15 +6992,13 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	// Create squares for main boards
-	// TODO: Modify to use MAIN_SQUARES_OBJ
-	for ( let squ = 0; squ < MAIN_SQUARES.length; squ++ ) {
+	for ( let squ in MAIN_SQUARES ) {
 
 		// Get position
 		let pos = MAIN_SQUARES[ squ ];
-		let name = 'abcdef'.charAt(pos.f) + (pos.r + 1) + '_' + (pos.l + 1);
 
 		// Add square
-		let square = new Square( name, pos );
+		let square = new Square( squ, pos );
 		board.add( square );
 
 	}
@@ -7116,28 +7164,26 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	// Add towers
-	// TODO: Modify to use TOWER_SQUARES_OBJ
-	for ( let tow = 0; tow < TOWER_SQUARES.length; tow++ ) {
+	for ( let i = 1; i <= 12; i++ ) {
 
 		let squares = [];
 
-		for ( let squ = 0; squ < TOWER_SQUARES[ tow ].length; squ++ ) {
+		// Tower name
+		let tow = 'T' + i;
+
+		for ( let squ in TOWER_SQUARES[ tow ] ) {
 
 			// Get position
 			let pos = TOWER_SQUARES[ tow ][ squ ];
-			let name = 'abcdef'.charAt(pos.f) + (pos.r + 1) + '_' + (pos.l + 1);
 
 			// Add square
-			let square = new Square( name, pos );
+			let square = new Square( squ, pos );
 			squares.push( square );
 
 		}
 
-		let pos = tow + 1;
-		let name = 'T' + pos;
-
 		// Add tower
-		let tower = new Tower( name, pos, squares );
+		let tower = new Tower( tow, i, squares );
 		towerObjs.push( tower );
 		tower.deactivate();
 
@@ -7597,6 +7643,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	// TODO: Check if valid fen string
+	// TODO: Replace with loadPos( fenToObj( fen ) )
 	function loadFen( fen ) {
 
 		var oldPos = generatePos();
@@ -7693,6 +7740,7 @@ var Tridchessboard = function( canvasId, config ) {
 	}
 
 
+	// TODO: Replace with objToFen( generatePos )
 	function generateFen() {
 
 		// Get tower positions
@@ -7935,14 +7983,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 		},
 
-		// TODO: Reset towers + remove pieces, remove towers + pieces or only remove pieces?
-		clear: function() {
-
-			loadFen( EMPTY_BOARD_FEN );
-			//resetBoard();
-			// foreach square in squares: setPiece(null)
-
-		},
+		clear: function() { position( {} ); },
 
 		position: function( arg ) { return position( arg ); },
 
