@@ -2220,14 +2220,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 		},
 
-		// TODO: Reset towers + remove pieces, remove towers + pieces or only remove pieces?
-		clear: function() {
-
-			loadFen( EMPTY_BOARD_FEN );
-			//resetBoard();
-			// foreach square in squares: setPiece(null)
-
-		},
+		clear: function() { position( {} ); },
 
 		position: function( arg ) { return position( arg ); },
 
