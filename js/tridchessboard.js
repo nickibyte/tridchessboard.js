@@ -37,27 +37,6 @@ var Tridchessboard = function( canvasId, config ) {
 	// Helpers
 	// ----------------------------------------------------------------
 
-	// Clone a JavaScript object (shallow clone)
-	// Returns new object
-	// TODO: Remove, can be done by merging with only one argument
-	function clone( obj ) {
-
-		var target = {};
-
-		for ( let prop in obj ) {
-
-			if ( obj.hasOwnProperty( prop ) ) {
-
-				target[ prop ] = obj[ prop ];
-
-			}
-
-		}
-
-		return target;
-
-	}
-
 	// Merge two JavaScript objects (shallow merge)
 	// Returns new object
 	// TODO: Change so that only properties are copied
@@ -206,7 +185,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 		if ( typeof( pos ) !== 'object' ) { return false; }
 
-		var squares = clone( MAIN_SQUARES );
+		var squares = merge( MAIN_SQUARES );
 
 		// Get towers from position object
 		for ( let tow in TOWER_SQUARES ) {
@@ -259,8 +238,6 @@ var Tridchessboard = function( canvasId, config ) {
 	// FEN and Position Object conversion
 
 	function objToFen( pos ) {
-
-		var squares = clone( MAIN_SQUARES );
 
 		// FEN piece positions with square names
 		var piePos = 'a10_6b10_6e10_6f10_6/a9_6b9_6e9_6f9_6/a6_6b6_6e6_6f6_6/a5_6b5_6e5_6f5_6|' +
@@ -379,7 +356,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 	function fenToObj( fen ) {
 
-		var squares = clone( MAIN_SQUARES );
+		var squares = merge( MAIN_SQUARES );
 
 		// DEBUG
 		console.log( JSON.parse( JSON.stringify( squares ) ) );

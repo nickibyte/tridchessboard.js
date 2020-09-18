@@ -5800,27 +5800,6 @@ var Tridchessboard = function( canvasId, config ) {
 	// Helpers
 	// ----------------------------------------------------------------
 
-	// Clone a JavaScript object (shallow clone)
-	// Returns new object
-	// TODO: Remove, can be done by merging with only one argument
-	function clone( obj ) {
-
-		var target = {};
-
-		for ( let prop in obj ) {
-
-			if ( obj.hasOwnProperty( prop ) ) {
-
-				target[ prop ] = obj[ prop ];
-
-			}
-
-		}
-
-		return target;
-
-	}
-
 	// Merge two JavaScript objects (shallow merge)
 	// Returns new object
 	// TODO: Change so that only properties are copied
@@ -5969,7 +5948,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 		if ( typeof( pos ) !== 'object' ) { return false; }
 
-		var squares = clone( MAIN_SQUARES );
+		var squares = merge( MAIN_SQUARES );
 
 		// Get towers from position object
 		for ( let tow in TOWER_SQUARES ) {
@@ -6021,9 +6000,9 @@ var Tridchessboard = function( canvasId, config ) {
 
 	// FEN and Position Object conversion
 
+	// TODO: Handle empty tower portion of fen string
+	// TODO: Remove DEBUG code
 	function objToFen( pos ) {
-
-		var squares = clone( MAIN_SQUARES );
 
 		// FEN piece positions with square names
 		var piePos = 'a10_6b10_6e10_6f10_6/a9_6b9_6e9_6f9_6/a6_6b6_6e6_6f6_6/a5_6b5_6e5_6f5_6|' +
@@ -6047,9 +6026,6 @@ var Tridchessboard = function( canvasId, config ) {
 			if ( pos.hasOwnProperty( tow ) && pos[ tow ] === true ) {
 
 				// If tower exists
-
-				// Add tower squares to main squares
-				squares = merge( squares, TOWER_SQUARES[ tow ] );
 
 				// Convert tower number to 12-base and add to tower positions
 				let num = i.toString( 13 );
@@ -6077,14 +6053,14 @@ var Tridchessboard = function( canvasId, config ) {
 		}
 
 		// Generate piece positions
-		for ( let squ in squares ) {
+		for ( let squ in pos ) {
 
 			// DEBUG
 			console.log( "Checking square " + squ );
 
-			if ( pos.hasOwnProperty( squ ) ) {
+			if ( pos.hasOwnProperty( squ ) && squ[ 0 ] !== 'T' ) {
 
-				// If square is occupied
+				// If square is occupied and it is not a tower
 
 				// Convert piece code to FEN piece
 				let pieCode = pos[ squ ];
@@ -6105,32 +6081,15 @@ var Tridchessboard = function( canvasId, config ) {
 				// DEBUG
 				console.log( "Square occupied. Adding " + pieCode + " to piePos: " + piePos );
 
-			} else {
-
-				// If square isn't occupied
-
-				// Add empty square to piece positions
-				piePos = piePos.replace( squ, '1' );
-
-				// DEBUG
-				console.log( "Square unoccupied. Adding 1 to piePos: " + piePos );
-
 			}
 
 		}
 
+		// Add empty squares to piece positions
+		piePos = piePos.replace( /[a-f](?:[1-9]|10)_[1-6]/g, '1' );
+
 		// Compress empty squares in piece positions
-		piePos = piePos.replace( /1111/g, '4' );
-		// DEBUG
-		console.log( "Compressing 1111: " + piePos );
-
-		piePos = piePos.replace( /111/g, '3' );
-		// DEBUG
-		console.log( "Compressing 111: " + piePos );
-
-		piePos = piePos.replace( /11/g, '2' );
-		// DEBUG
-		console.log( "Compressing 11: " + piePos );
+		piePos = piePos.replace( /1111/g, '4' ).replace( /111/g, '3' ).replace( /11/g, '2' );
 
 		// DEBUG
 		console.log( "Done: '" + towPos + ' ' + piePos + "'" );
@@ -6140,9 +6099,11 @@ var Tridchessboard = function( canvasId, config ) {
 
 	}
 
+	// TODO: Make more efficient (maybe get rid of the object merging)
+	// TODO: Remove DEBUG code
 	function fenToObj( fen ) {
 
-		var squares = clone( MAIN_SQUARES );
+		var squares = merge( MAIN_SQUARES );
 
 		// DEBUG
 		console.log( JSON.parse( JSON.stringify( squares ) ) );
@@ -6445,7 +6406,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 			var newPos = generatePos();
 
-			// TODO: Only call if the position was changed
+			// TODO: Only call if the position was changed (compare objects)
 			config.onChange( oldPos, newPos );
 
 		}
@@ -6520,7 +6481,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 			var newPos = generatePos();
 
-			// TODO: Only call if the position was changed
+			// TODO: Only call if the position was changed (compare objects)
 			config.onMoveEnd( oldPos, newPos );
 
 		}
