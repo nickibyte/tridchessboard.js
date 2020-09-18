@@ -264,9 +264,6 @@ var Tridchessboard = function( canvasId, config ) {
 
 				// If tower exists
 
-				// Add tower squares to main squares
-				squares = merge( squares, TOWER_SQUARES[ tow ] );
-
 				// Convert tower number to 12-base and add to tower positions
 				let num = i.toString( 13 );
 				towPos += num;
@@ -293,14 +290,14 @@ var Tridchessboard = function( canvasId, config ) {
 		}
 
 		// Generate piece positions
-		for ( let squ in squares ) {
+		for ( let squ in pos ) {
 
 			// DEBUG
 			console.log( "Checking square " + squ );
 
-			if ( pos.hasOwnProperty( squ ) ) {
+			if ( pos.hasOwnProperty( squ ) && squ[ 0 ] !== 'T' ) {
 
-				// If square is occupied
+				// If square is occupied and it is not a tower
 
 				// Convert piece code to FEN piece
 				let pieCode = pos[ squ ];
@@ -321,32 +318,15 @@ var Tridchessboard = function( canvasId, config ) {
 				// DEBUG
 				console.log( "Square occupied. Adding " + pieCode + " to piePos: " + piePos );
 
-			} else {
-
-				// If square isn't occupied
-
-				// Add empty square to piece positions
-				piePos = piePos.replace( squ, '1' );
-
-				// DEBUG
-				console.log( "Square unoccupied. Adding 1 to piePos: " + piePos );
-
 			}
 
 		}
 
+		// Add empty squares to piece positions
+		piePos = piePos.replace( /[a-f](?:[1-9]|10)_[1-6]/g, '1' );
+
 		// Compress empty squares in piece positions
-		piePos = piePos.replace( /1111/g, '4' );
-		// DEBUG
-		console.log( "Compressing 1111: " + piePos );
-
-		piePos = piePos.replace( /111/g, '3' );
-		// DEBUG
-		console.log( "Compressing 111: " + piePos );
-
-		piePos = piePos.replace( /11/g, '2' );
-		// DEBUG
-		console.log( "Compressing 11: " + piePos );
+		piePos = piePos.replace( /1111/g, '4' ).replace( /111/g, '3' ).replace( /11/g, '2' );
 
 		// DEBUG
 		console.log( "Done: '" + towPos + ' ' + piePos + "'" );
