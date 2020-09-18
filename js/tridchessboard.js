@@ -237,6 +237,8 @@ var Tridchessboard = function( canvasId, config ) {
 
 	// FEN and Position Object conversion
 
+	// TODO: Handle empty tower portion of fen string
+	// TODO: Remove DEBUG code
 	function objToFen( pos ) {
 
 		// FEN piece positions with square names
@@ -354,6 +356,8 @@ var Tridchessboard = function( canvasId, config ) {
 
 	}
 
+	// TODO: Make more efficient (maybe get rid of the object merging)
+	// TODO: Remove DEBUG code
 	function fenToObj( fen ) {
 
 		var squares = merge( MAIN_SQUARES );
@@ -659,7 +663,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 			var newPos = generatePos();
 
-			// TODO: Only call if the position was changed
+			// TODO: Only call if the position was changed (compare objects)
 			config.onChange( oldPos, newPos );
 
 		}
@@ -734,7 +738,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 			var newPos = generatePos();
 
-			// TODO: Only call if the position was changed
+			// TODO: Only call if the position was changed (compare objects)
 			config.onMoveEnd( oldPos, newPos );
 
 		}
