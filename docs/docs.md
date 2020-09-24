@@ -38,7 +38,8 @@ Here is a list of all the changes/differences:
 	* Adapted square names for three dimensions
 	* Added towers
 * [FEN String](#fen-string)
-	* Added Towers
+	* Added towers
+	* Added levels to position data
 * Added [Orientation Object](#orientation-object)
 * Highlighting of squares/pieces is handled differently (using [Config Properties](#config-properties) rather than CSS classes)
 
@@ -100,7 +101,7 @@ The properties of the object can be:
 * tower positions (T1, T2, ..., T12) as property name and true/false as values (indicating that the tower at that position does/doesn't exist)
 
 The square names used by tridchessboard.js are algebraic (like in regular chess).
-However the files range from a-f and the rows from 1-10 (instead of a-h and 1-8).
+However the files range from a-f and the rank from 1-10 (instead of a-h and 1-8).
 Additionally a suffix (underscore + number) is added to indicate the level 1-6.
 
 The twelve possible tower positions are labled T1 through T12.
@@ -115,7 +116,7 @@ You can use Tridchessboard's `objToFen` method to convert a Position Object to a
 
 [Forsyth-Edwards Notation (FEN)] is a way of representing the current state of a chessgame using a simple string.
 
-> 12bc rnnr/pbbp/pqkp/pppp/4/4/4/4/4/4/PBBP/RNNR/4/4/PPPP/PQKP w KQkq - 0 1
+> 12bc rnnr/pbbp//|pqkp/pppp/4/4|///|4/4/4/4|//PBBP/RNNR|4/4/PPPP/PQKP w KQkq - 0 1
 
 For tridchessboard.js the notation has been extended to include the tower positions as the first field of the FEN String.
 The tower positions (1-12) are converted to hexadecimal, so positions 1 to 9 remain the same while positions 10, 11 and 12 become a, b and c.
@@ -123,6 +124,24 @@ This way each position only takes up one character in the string.
 In the example FEN String above the first field (12bc) tells us that there are four towers placed at positions 1, 2, 11 and 12.
 
 The second field of the FEN String holds the piece positions.
+Here the '|' (pipe symbol) has been added as a separator between the different levels of the Tri-D chessboard.
+The '/' (forward slash) separates the rank on each level just like in regular FEN.
+
+The piece placements are stored rank by rank in big-endian order (just like in regular FEN).
+This means they start on the highest level (level 6) on the last rank (rank 10).
+From there they go backwards through the ranks on each level before continuing with the next lower level.
+Within a rank the pieces are stored in littel-endian order (in the order of their file from a-f).
+
+The pieces themselves are stored (just like in regular FEN) as a single letter according to the [Algebraic chess notation] (with 'p' for pawns).
+Lowercase letters are used for black pieces and uppercase letters for white pieces.
+The number of (continuous) empty squares is stored as a decimal digit.
+
+The other fields of the FEN String hold castling and other move information and are ignored by tridchessboard.js.
+
+Due to the asymmetric nature of the Tri-D chessboard, one has to take extra care when parsing the Tri-D FEN String.
+Especially on tower levels where squares may or may not exist, depending on the tower positions.
+
+You can use Tridchessboard's `fenToObj` method to convert a FEN String to a [Position Object](#position-object).
 
 
 ## Orientation Object
@@ -151,3 +170,4 @@ Work in progress.
 
 [chessboard.js]: https://github.com/oakmac/chessboardjs
 [Forsyth-Edwards Notation (FEN)]: https://en.wikipedia.org/wiki/Forsyth-Edwards_Notation
+[Algebraic chess notation]: https://en.wikipedia.org/wiki/Algebraic_notation_(chess)
