@@ -33,6 +33,7 @@ Here is a list of all the changes/differences:
 	* Changed `clear()` (no useAnimation argument, position changes instantly)
 	* Changed `position( newPosition )` (no useAnimation argument, position changes instantly)
 	* Changed `start()` (no useAnimation argument, position changes instantly)
+	* Changed `orientation()` (returns/takes [Orientation Object](#orientation-object) as well as 'white' or 'black', added 'reset' option)
 * [Position Object](#position-object)
 	* Adapted square names for three dimensions
 	* Added towers
@@ -70,23 +71,23 @@ Here is a list of all the changes/differences:
 
 ## Methods
 
-| Method                    | Arguments                              | Description
-|--------------------       |--------------------                    |------------------------------------------------------------
-| clear()                   | none                                   | Removes all pieces and towers from the board. <br> Same as position( {} )
-| destroy()                 | none                                   | Removes chessboard from the DOM. <br> **!!! Not implemented yet. !!!**
-| fen()                     | none                                   | Returns current position as FEN String. Same as position( 'fen' )
-| flip()                    | none                                   | Flips board orientation. Same as orientation( 'flip' )
-| move( move1, move2, ... ) | 'c3_1-c4_2', 'T1-T5', etc              | Performs the move(s) given as arguments. Returns the new board position.
-| position( fen )           | 'fen' (optional)                       | Returns the current board position. If 'fen', returns FEN String.
-| position( newPosition )   | Position Object, FEN String or 'start' | Sets the board position to the position given as argument.
-| orientation()             | none                                   | Returns the current board orientation.
-| orientation( side )       | 'white', 'black' or 'flip'             | If 'white' or 'black', sets orientation. <br> If 'flip', flips orientation.
-| resize()                  | none                                   | Resizes board based on size of parent DIV. <br> **!!! Not implemented yet. !!!**
-| start()                   | none                                   | Sets the board position to the start position. Same as position( 'start')
-| stand()                   | none                                   | Returns the current visibility of the stand model. Enabled (true) or disabled (false).
-| stand( enabled )          | true or false                          | Enables/disables visibility of stand model.
-| objToFen( obj )           | Position Object                        | Takes a Position Object and returns the corresponding FEN String. <br> **!!! Not implemented yet. !!!**
-| fenToObj( fen )           | FEN String                             | Takes a FEN String and returns a corresponding Position Object. <br> **!!! Not implemented yet. !!!**
+| Method                    | Arguments                                                  | Description
+|--------------------       |--------------------                                        |------------------------------------------------------------
+| clear()                   | none                                                       | Removes all pieces and towers from the board. <br> Same as position( {} )
+| destroy()                 | none                                                       | Removes chessboard from the DOM. <br> **!!! Not implemented yet. !!!**
+| fen()                     | none                                                       | Returns current position as FEN String. Same as position( 'fen' )
+| flip()                    | none                                                       | Flips board orientation. Same as orientation( 'flip' )
+| move( move1, move2, ... ) | 'c3_1-c4_2', 'T1-T5', etc                                  | Performs the move(s) given as arguments. Returns the new board position.
+| position( fen )           | 'fen' (optional)                                           | Returns the current board position. If 'fen', returns FEN String.
+| position( newPosition )   | Position Object, FEN String or 'start'                     | Sets the board position to the position given as argument.
+| orientation()             | none                                                       | Returns the current board orientation.
+| orientation( side )       | Orientation Object, 'white', 'black', 'flip' or 'reset'    | Sets orientation (camera position). <br> If 'white' or 'black', sets orientation to the whiteOrientation/blackOrientation config properties. <br> If 'flip', flips orientation between 'white' and 'black'. Only has an effect, if orientation has been set to 'white' or 'black' previously.
+| resize()                  | none                                                       | Resizes board based on size of parent DIV. <br> **!!! Not implemented yet. !!!**
+| start()                   | none                                                       | Sets the board position to the start position. Same as position( 'start')
+| stand()                   | none                                                       | Returns the current visibility of the stand model. Enabled (true) or disabled (false).
+| stand( enabled )          | true or false                                              | Enables/disables visibility of stand model.
+| objToFen( obj )           | Position Object                                            | Takes a Position Object and returns the corresponding FEN String.
+| fenToObj( fen )           | FEN String                                                 | Takes a FEN String and returns a corresponding Position Object.
 
 
 ## Position Object
@@ -126,7 +127,16 @@ The second field of the FEN String holds the piece positions.
 
 ## Orientation Object
 
-Work in progress.
+The Orientation Object is a JavaScript object which resemles a 3D-Vector and determines the camera position.
+
+The Object must have the properties x, y and z.
+The values of these properties must be a JavaScript Number.
+
+The `orientation` method takes 'white' and 'black' as well as an Orientation Object.
+These strings are translated into the `whiteOrientation` and the `blackOrientation` config properties, which themselves are Orientation Objects.
+
+A call to `orientation( 'flip' )` only has an effect if the orientation has previously been set to 'white' or 'black'.
+Either by the `orientation` config property or the `orientation` method.
 
 
 ## Notation Object
