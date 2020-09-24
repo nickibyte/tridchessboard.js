@@ -740,6 +740,8 @@ var Tridchessboard = function( canvasId, config ) {
 
 	// Load config and apply defaults
 
+	// TODO: DeepCopy config object
+
 	if ( config.draggable !== true ) { config.draggable = false; }
 	if ( config.turnable !== true ) { config.turnable = false; }
 	if ( config.dropOffBoard !== 'trash' ) { config.dropOffBoard = 'snapback'; }
@@ -2389,7 +2391,7 @@ var Tridchessboard = function( canvasId, config ) {
 	// Return object with API methods
 	return {
 
-
+		// TODO: Remove add/remove functions (Should be handled over position()?)
 		add: function( target, piece ) { add( target, piece ); },
 
 		remove: function( target ) { remove( target ); },
