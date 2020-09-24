@@ -701,8 +701,8 @@ var Tridchessboard = function( canvasId, config ) {
 	// ----------------------------------------------------------------
 
 	// Orientation (camera position)
-	var ORIENTATION_WHITE = new THREE.Vector3( -12, 10, 0 );
-	var ORIENTATION_BLACK = new THREE.Vector3( 5, 15, 0 );
+	var WHITE_ORIENTATION = new THREE.Vector3( -12, 10, 0 );
+	var BLACK_ORIENTATION = new THREE.Vector3( 5, 15, 0 );
 	var DEFAULT_ORIENTATION = new THREE.Vector3( -10, 7, 10 );
 	var currentOrientation = null;
 
@@ -831,24 +831,38 @@ var Tridchessboard = function( canvasId, config ) {
 	} else { config.boardTheme = BOARD_THEME; }
 
 
+	// whiteOrientation
+	if ( config.hasOwnProperty( 'whiteOrientation' ) &&
+		 isValidOrientation( config.whiteOrientation ) ) {
+
+		WHITE_ORIENTATION = config.whiteOrientation;
+
+	}
+
+	// blackOrientation
+	if ( config.hasOwnProperty( 'blackOrientation' ) &&
+		 isValidOrientation( config.blackOrientation ) ) {
+
+		BLACK_ORIENTATION = config.blackOrientation;
+
+	}
+
 	// orientation
 	if ( config.hasOwnProperty( 'orientation' ) ) {
 
 		if ( typeof ( config.orientation ) === 'string' &&
 			 config.orientation.toLowerCase() === 'white' ) {
 
-			config.orientation = ORIENTATION_WHITE;
+			config.orientation = WHITE_ORIENTATION;
 			currentOrientation = 'white';
 
 		} else if ( typeof ( config.orientation ) === 'string' &&
 					config.orientation.toLowerCase() === 'black' ) {
 
-			config.orientation = ORIENTATION_BLACK;
+			config.orientation = BLACK_ORIENTATION;
 			currentOrientation = 'black';
 
-		} else if ( typeof ( config.orientation.x ) !== 'number' ||
-					typeof ( config.orientation.y ) !== 'number' ||
-					typeof ( config.orientation.z ) !== 'number' ) {
+		} else if ( !isValidOrientation( config.orientation ) ) {
 
 			config.orientation = DEFAULT_ORIENTATION;
 
@@ -2422,18 +2436,25 @@ var Tridchessboard = function( canvasId, config ) {
 
 			if ( arguments.length === 0 ) {
 
-				// TODO: Check if currentOrientation is set and return that instead
-				return { x: Number ( camera.position.x.toFixed(2) ),
-						 y: Number ( camera.position.y.toFixed(2) ),
-						 z: Number ( camera.position.z.toFixed(2) ) }
+				if ( currentOrientation === 'white' || currentOrientation === 'black' ) {
+
+					return currentOrientation;
+
+				} else {
+
+					return { x: Number ( camera.position.x.toFixed(2) ),
+							 y: Number ( camera.position.y.toFixed(2) ),
+							 z: Number ( camera.position.z.toFixed(2) ) };
+
+				}
 
 			}
 
 			if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'white' ) {
 
-				camera.position.set( ORIENTATION_WHITE.x,
-									 ORIENTATION_WHITE.y,
-									 ORIENTATION_WHITE.z );
+				camera.position.set( WHITE_ORIENTATION.x,
+									 WHITE_ORIENTATION.y,
+									 WHITE_ORIENTATION.z );
 
 				camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
 
@@ -2443,9 +2464,9 @@ var Tridchessboard = function( canvasId, config ) {
 
 			if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'black' ) {
 
-				camera.position.set( ORIENTATION_BLACK.x,
-									 ORIENTATION_BLACK.y,
-									 ORIENTATION_BLACK.z );
+				camera.position.set( BLACK_ORIENTATION.x,
+									 BLACK_ORIENTATION.y,
+									 BLACK_ORIENTATION.z );
 
 				camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
 
@@ -2455,15 +2476,22 @@ var Tridchessboard = function( canvasId, config ) {
 
 			if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'flip' ) {
 
-				if ( currentOrientation == 'white' ) {
+				if ( currentOrientation === 'white' ) {
 
 					this.orientation( 'black' );
 
-				} else if ( currentOrientation == 'black' ) {
+				} else if ( currentOrientation === 'black' ) {
 
 					this.orientation( 'white' );
 
 				}
+
+			}
+
+			// TODO: Does it make sense to have this option?
+			if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'reset' ) {
+
+				currentOrientation = null;
 
 			}
 
@@ -2473,6 +2501,8 @@ var Tridchessboard = function( canvasId, config ) {
 
 				camera.position.set( arg.x, arg.y, arg.z );
 				camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
+
+				currentOrientation = null;
 
 			}
 		}
