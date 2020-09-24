@@ -130,7 +130,7 @@ The '/' (forward slash) separates the rank on each level just like in regular FE
 The piece placements are stored rank by rank in big-endian order (just like in regular FEN).
 This means they start on the highest level (level 6) on the last rank (rank 10).
 From there they go backwards through the ranks on each level before continuing with the next lower level.
-Within a rank the pieces are stored in littel-endian order (in the order of their file from a-f).
+Within a rank the pieces are stored in little-endian order (in the order of their file from a-f).
 
 The pieces themselves are stored (just like in regular FEN) as a single letter according to the [Algebraic chess notation] (with 'p' for pawns).
 Lowercase letters are used for black pieces and uppercase letters for white pieces.
