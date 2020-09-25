@@ -150,6 +150,7 @@ The Orientation Object is a JavaScript object which resemles a 3D-Vector and det
 
 The Object must have the properties x, y and z.
 The values of these properties must be a JavaScript Number.
+Any values which result in a distance (to origin) less than 1 or greater than 25 will automatically be scaled up/down to meet these bounds.
 
 The `orientation` method takes 'white' and 'black' as well as an Orientation Object.
 These strings are translated into the `whiteOrientation` and the `blackOrientation` config properties, which themselves are Orientation Objects.

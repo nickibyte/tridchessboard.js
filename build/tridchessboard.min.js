@@ -5792,9 +5792,50 @@ var Tridchessboard = function( canvasId, config ) {
 
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
-	// Helpers, defaults and config
+	// Defaults, helpers and config
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
+
+	// ----------------------------------------------------------------
+	// Defaults
+	// ----------------------------------------------------------------
+
+	// For OrbitControls and Orientation Object
+	var MAX_SCROLLOUT_DISTANCE = 25;
+
+	// Orientation (camera position)
+	var WHITE_ORIENTATION = { x: -12, y: 10, z: 0 };
+	var BLACK_ORIENTATION = { x: 5, y: 15, z: 0 };
+	var DEFAULT_ORIENTATION = { x: -10, y: 7, z: 10 };
+	var currentOrientation = null;
+
+	// PieceTheme
+	var PIECE_THEME = {
+
+		wP: '../assets/pieces/wP.glb',
+		wN: '../assets/pieces/wN.glb',
+		wB: '../assets/pieces/wB.glb',
+		wR: '../assets/pieces/wR.glb',
+		wQ: '../assets/pieces/wQ.glb',
+		wK: '../assets/pieces/wK.glb',
+		bP: '../assets/pieces/bP.glb',
+		bN: '../assets/pieces/bN.glb',
+		bB: '../assets/pieces/bB.glb',
+		bR: '../assets/pieces/bR.glb',
+		bQ: '../assets/pieces/bQ.glb',
+		bK: '../assets/pieces/bK.glb'
+
+	};
+
+	// BoardTheme
+	var BOARD_THEME = {
+
+		board: '../assets/board/board.glb',
+		tower: '../assets/board/tower.glb',
+		stand: '../assets/board/stand.glb'
+
+	};
+
 
 	// ----------------------------------------------------------------
 	// Helpers
@@ -6231,12 +6272,11 @@ var Tridchessboard = function( canvasId, config ) {
 
 		for ( let i = 0; i < props.length; i++ ) {
 
-			if ( !orientation.hasOwnProperty( props[ i ] ) ||
-				 typeof( orientation[ props[ i ] ] ) !== 'number'  ) {
+			let prop = props[ i ];
 
-				return false;
-
-			}
+			// Check: x, y and z exist and is number
+			if ( !orientation.hasOwnProperty( prop ) ) { return false; }
+			if ( typeof( orientation[ prop ] ) !== 'number' ) { return false; }
 
 		}
 
@@ -6457,44 +6497,6 @@ var Tridchessboard = function( canvasId, config ) {
 		return pos;
 
 	}
-
-
-	// ----------------------------------------------------------------
-	// Defaults
-	// ----------------------------------------------------------------
-
-	// Orientation (camera position)
-	var WHITE_ORIENTATION = new THREE.Vector3( -12, 10, 0 );
-	var BLACK_ORIENTATION = new THREE.Vector3( 5, 15, 0 );
-	var DEFAULT_ORIENTATION = new THREE.Vector3( -10, 7, 10 );
-	var currentOrientation = null;
-
-	// PieceTheme
-	var PIECE_THEME = {
-
-		wP: '../assets/pieces/wP.glb',
-		wN: '../assets/pieces/wN.glb',
-		wB: '../assets/pieces/wB.glb',
-		wR: '../assets/pieces/wR.glb',
-		wQ: '../assets/pieces/wQ.glb',
-		wK: '../assets/pieces/wK.glb',
-		bP: '../assets/pieces/bP.glb',
-		bN: '../assets/pieces/bN.glb',
-		bB: '../assets/pieces/bB.glb',
-		bR: '../assets/pieces/bR.glb',
-		bQ: '../assets/pieces/bQ.glb',
-		bK: '../assets/pieces/bK.glb'
-
-	};
-
-	// BoardTheme
-	var BOARD_THEME = {
-
-		board: '../assets/board/board.glb',
-		tower: '../assets/board/tower.glb',
-		stand: '../assets/board/stand.glb'
-
-	};
 
 
 	// ----------------------------------------------------------------
@@ -6787,7 +6789,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 	// Scene
 	var scene = new THREE.Scene();
-	var camera = new THREE.PerspectiveCamera( 60, width / height, 1, 1000 );
+	var camera = new THREE.PerspectiveCamera( 60, width / height, 0.1, 1000 );
 	camera.position.set( config.orientation.x,
 						 config.orientation.y,
 						 config.orientation.z );
@@ -6830,8 +6832,8 @@ var Tridchessboard = function( canvasId, config ) {
 
 	// Orbit controls
 	var orbitControls = new THREE.OrbitControls( camera, renderer.domElement );
-	orbitControls.minDistance = 2;
-	orbitControls.maxDistance = 30;
+	orbitControls.minDistance = 1;
+	orbitControls.maxDistance = MAX_SCROLLOUT_DISTANCE;
 	orbitControls.enablePan = false;
 	orbitControls.zoomSpeed = 1.0;
 	orbitControls.rotateSpeed = 1.0;
@@ -6839,6 +6841,10 @@ var Tridchessboard = function( canvasId, config ) {
 	orbitControls.maxPolarAngle = Math.PI;
 	orbitControls.enabled = false;
 
+	// Restrict camera distance to MAX_SCROLLOUT_DISTANCE
+	orbitControls.update();
+
+	// Apply turnable config option
 	if ( config.turnable === true ) { orbitControls.enabled = true; }
 
 
@@ -8197,6 +8203,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 		stand: function( enabled ) { return stand( enabled ); },
 
+		// TODO: Make into separate function
 		orientation: function( arg ) {
 
 			if ( arguments.length === 0 ) {
@@ -8221,7 +8228,7 @@ var Tridchessboard = function( canvasId, config ) {
 									 WHITE_ORIENTATION.y,
 									 WHITE_ORIENTATION.z );
 
-				camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
+				orbitControls.update();
 
 				currentOrientation = 'white';
 
@@ -8233,7 +8240,7 @@ var Tridchessboard = function( canvasId, config ) {
 									 BLACK_ORIENTATION.y,
 									 BLACK_ORIENTATION.z );
 
-				camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
+				orbitControls.update();
 
 				currentOrientation = 'black';
 
@@ -8260,12 +8267,10 @@ var Tridchessboard = function( canvasId, config ) {
 
 			}
 
-			if ( typeof( arg ) === 'object' && ( typeof ( arg.x ) === 'number' ||
-												 typeof ( arg.y ) === 'number' ||
-												 typeof ( arg.z ) === 'number' ) ) {
+			if ( typeof( arg ) === 'object' && isValidOrientation( arg ) ) {
 
 				camera.position.set( arg.x, arg.y, arg.z );
-				camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
+				orbitControls.update();
 
 				currentOrientation = null;
 
