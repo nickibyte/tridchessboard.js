@@ -6106,7 +6106,6 @@ var Tridchessboard = function( canvasId, config ) {
 	}
 
 	// TODO: Handle empty tower portion of fen string
-	// TODO: Remove DEBUG code
 	function isValidFen( fen ) {
 
 		if ( typeof( fen ) !== 'string' ) { return false; }
@@ -6118,12 +6117,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 		// Check if valid towers (hex 1-c) and not more than 12 towers
 		let reg = new RegExp( '^[1-9a-c]{0,12}$' );
-		if ( !reg.test( fen[ 0 ] ) ) {
-
-			//DEBUG
-			console.log("ERROR: Check if valid towers (hex 1-c) and not more than 12 towers");
-
-			return false; }
+		if ( !reg.test( fen[ 0 ] ) ) { return false; }
 
 		var towPos = fen[ 0 ].split( '' );
 
@@ -6131,9 +6125,6 @@ var Tridchessboard = function( canvasId, config ) {
 
 			// Check for duplicate towers
 			if ( towPos.indexOf( towPos[ i ] ) !== towPos.lastIndexOf( towPos[ i ] ) ) {
-
-				//DEBUG
-				console.log("ERROR: Check for duplicate towers");
 
 				return false;
 
@@ -6150,28 +6141,15 @@ var Tridchessboard = function( canvasId, config ) {
 		// Expand piece positions (add empty/non existing squares)
 		piePos = expandPiecePosition( piePos, towPos );
 
-		//DEBUG
-		console.log("Expanded piePos: " + piePos);
-
 		// Check: 6 levels separated by |
 		var levels = piePos.split( '|' );
-		if ( levels.length !== 6 ) {
-
-			//DEBUG
-			console.log("ERROR: Check 6 levels separated by |");
-
-			return false; }
+		if ( levels.length !== 6 ) { return false; }
 
 		for ( let l = 0; l < levels.length; l++ ) {
 
 			// Check: 4 rows per level seperated by /
 			let rows = levels[ l ].split( '/' );
-			if ( rows.length !== 4 ) {
-
-				//DEBUG
-				console.log("ERROR: Check 4 rows separated by /");
-
-				return false; }
+			if ( rows.length !== 4 ) { return false; }
 
 			for ( let r = 0; r < rows.length; r++ ) {
 
@@ -6190,11 +6168,6 @@ var Tridchessboard = function( canvasId, config ) {
 						let rightExists = ( towPos.indexOf( towR ) !== -1 );
 						let leftExists = ( towPos.indexOf( towL ) !== -1 );
 
-						// DEBUG
-						console.log("Towers: " + towPos.toString() );
-						console.log("Towers that could be on row: " + towR + ", " + towL);
-						console.log("Towers that are on row: " + rightExists + ", " + leftExists);
-
 						// Find out which towers SHOULD BE on the row
 						// And check: valid pieces/squares and 4/2 squares per row
 						let right = new RegExp( '^00[pbnrqkPBNRQK1]{2}$' );
@@ -6204,40 +6177,19 @@ var Tridchessboard = function( canvasId, config ) {
 						if ( right.test( rows[ r ] ) ) {
 
 							// Only the right tower should exists
-							if ( !rightExists || leftExists ) {
-
-								//DEBUG
-								console.log("ERROR: Check only right tower should exist");
-
-								return false; }
+							if ( !rightExists || leftExists ) { return false; }
 
 						} else if ( left.test( rows[ r ] ) ) {
 
 							// Only the left tower should exists
-							if ( !leftExists || rightExists ) {
-
-								//DEBUG
-								console.log("ERROR: Check only left tower should exist");
-
-								return false; }
+							if ( !leftExists || rightExists ) { return false; }
 
 						} else if ( both.test( rows[ r ] ) ) {
 
 							// Both towers should exist
-							if ( !rightExists || !leftExists ) {
+							if ( !rightExists || !leftExists ) { return false; }
 
-								//DEBUG
-								console.log("ERROR: Check both towers should exist");
-
-								return false; }
-
-						} else {
-
-							//DEBUG
-							console.log("ERROR: Invalid pieces in tower level");
-							console.log( rows [ r ].toString() );
-
-							return false; }
+						} else { return false; }
 
 					} else {
 
@@ -6245,12 +6197,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 						// Check: valid pieces/squares and 4 squares per row
 						let reg = new RegExp( '^[pbnrqkPBNRQK1]{4}$' );
-						if ( !reg.test( rows[ r ] ) ) {
-
-							//DEBUG
-							console.log("ERROR: Invalid pieces in main level");
-
-							return false; }
+						if ( !reg.test( rows[ r ] ) ) { return false; }
 
 					}
 
@@ -6315,7 +6262,6 @@ var Tridchessboard = function( canvasId, config ) {
 	// FEN and Position Object conversion
 
 	// TODO: Handle empty tower portion of fen string
-	// TODO: Remove DEBUG code
 	function objToFen( pos ) {
 
 		if( !isValidPos( pos ) ) { return false; }
@@ -6336,9 +6282,6 @@ var Tridchessboard = function( canvasId, config ) {
 			// Tower name
 			let tow = 'T' + i;
 
-			// DEBUG
-			console.log( "Checking tower " + tow );
-
 			if ( pos.hasOwnProperty( tow ) && pos[ tow ] === true ) {
 
 				// If tower exists
@@ -6346,9 +6289,6 @@ var Tridchessboard = function( canvasId, config ) {
 				// Convert tower number to 12-base and add to tower positions
 				let num = i.toString( 13 );
 				towPos += num;
-
-				// DEBUG
-				console.log( "Adding " + num + " to towPos: " + towPos );
 
 			} else {
 
@@ -6367,9 +6307,6 @@ var Tridchessboard = function( canvasId, config ) {
 
 		// Generate piece positions
 		for ( let squ in pos ) {
-
-			// DEBUG
-			console.log( "Checking square " + squ );
 
 			if ( pos.hasOwnProperty( squ ) && squ[ 0 ] !== 'T' ) {
 
@@ -6391,9 +6328,6 @@ var Tridchessboard = function( canvasId, config ) {
 				// Add piece to piece positions
 				piePos = piePos.replace( squ, pieCode );
 
-				// DEBUG
-				console.log( "Square occupied. Adding " + pieCode + " to piePos: " + piePos );
-
 			}
 
 		}
@@ -6410,7 +6344,6 @@ var Tridchessboard = function( canvasId, config ) {
 	}
 
 	// TODO: Handle empty tower portion of fen string
-	// TODO: Remove DEBUG code
 	function fenToObj( fen ) {
 
 		if( !isValidFen( fen ) ) { return false; }
@@ -6425,9 +6358,6 @@ var Tridchessboard = function( canvasId, config ) {
 
 		for ( let i = 0; i < towPos.length; i++ ) {
 
-			// DEBUG
-			console.log( "Checking tower " + towPos[ i ] );
-
 			// Convert 12-base positions to integer
 			towPos[ i ] = parseInt( towPos[ i ], 13 );
 
@@ -6437,9 +6367,6 @@ var Tridchessboard = function( canvasId, config ) {
 			// Add tower to pos
  			pos[ tow ] = true;
 
-			// DEBUG
-			console.log( "Adding " + tow + " to pos." );
-
 		}
 
 		// Get piece positions from fen
@@ -6447,9 +6374,6 @@ var Tridchessboard = function( canvasId, config ) {
 
 		// Expand piece positions (add empty/non existing squares)
 		piePos = expandPiecePosition( piePos, towPos );
-
-		// DEBUG
-		console.log( "Expanded piece position: " + piePos );
 
 		var levels = piePos.split( '|' );
 
@@ -6464,9 +6388,6 @@ var Tridchessboard = function( canvasId, config ) {
 				for ( let f = 0; f < files.length; f++ ) {
 
 					let piece = files[ f ];
-
-					// DEBUG
-					console.log( "Checking square: " + piece );
 
 					if ( piece !== '1' && piece !== '0' ) {
 
@@ -6483,9 +6404,6 @@ var Tridchessboard = function( canvasId, config ) {
 							piece = 'w' + piece.toUpperCase();
 
 						}
-
-						// DEBUG
-						console.log( "Converted FEN piece to " + piece );
 
 						// Compose square name
 						let file = [ 'b', 'c', 'd', 'e' ][ f ];
@@ -6505,9 +6423,6 @@ var Tridchessboard = function( canvasId, config ) {
 
 						// Add square + piece to pos
 						pos[ squ ] = piece;
-
-						// DEBUG
-						console.log( "Adding " + squ + " to pos: " );
 
 					}
 
@@ -6802,7 +6717,6 @@ var Tridchessboard = function( canvasId, config ) {
 	// TODO: Config - show errors
 	// TODO: Config - spare pieces
 	// TODO: Config - notation
-	// TODO: Config - shorthands ('start', fen, position instead of config object)
 	// TODO: Config - configurable colors (background, pieces, squares?)
 
 
@@ -6897,11 +6811,6 @@ var Tridchessboard = function( canvasId, config ) {
 	}
 
 
-	// DEBUG
-	//var axesHelper = new THREE.AxesHelper( 10 );
-	//scene.add( axesHelper );
-
-
 	// TODO: Make into API method
 	// Window Resizing
 	function onWindowResize() {
@@ -6935,12 +6844,6 @@ var Tridchessboard = function( canvasId, config ) {
 	// Tri-D-Chess
 	// ----------------------------------------------------------------
 	// ----------------------------------------------------------------
-
-	// ----------------------------------------------------------------
-	// Defaults and config
-	// ----------------------------------------------------------------
-
-
 
 	// ----------------------------------------------------------------
 	// Globals and helper functions
@@ -6980,49 +6883,6 @@ var Tridchessboard = function( canvasId, config ) {
 
 	}
 
-
-	// Squares
-	// TODO: Remove, replaced by MAIN_SQUARES
-	var MAIN_SQUARES_OLD = [
-		// Low board
-		new Pos(1,1,0), new Pos(2,1,0), new Pos(3,1,0), new Pos(4,1,0),
-		new Pos(1,2,0), new Pos(2,2,0), new Pos(3,2,0), new Pos(4,2,0),
-		new Pos(1,3,0), new Pos(2,3,0), new Pos(3,3,0), new Pos(4,3,0),
-		new Pos(1,4,0), new Pos(2,4,0), new Pos(3,4,0), new Pos(4,4,0),
-
-		// Middle board
-		new Pos(1,3,2), new Pos(2,3,2), new Pos(3,3,2), new Pos(4,3,2),
-		new Pos(1,4,2), new Pos(2,4,2), new Pos(3,4,2), new Pos(4,4,2),
-		new Pos(1,5,2), new Pos(2,5,2), new Pos(3,5,2), new Pos(4,5,2),
-		new Pos(1,6,2), new Pos(2,6,2), new Pos(3,6,2), new Pos(4,6,2),
-
-		// High board
-		new Pos(1,5,4), new Pos(2,5,4), new Pos(3,5,4), new Pos(4,5,4),
-		new Pos(1,6,4), new Pos(2,6,4), new Pos(3,6,4), new Pos(4,6,4),
-		new Pos(1,7,4), new Pos(2,7,4), new Pos(3,7,4), new Pos(4,7,4),
-		new Pos(1,8,4), new Pos(2,8,4), new Pos(3,8,4), new Pos(4,8,4)
-	];
-
-	// TODO: Remove, replaced by TOWER_SQUARES
-	var TOWER_SQUARES_OLD = [
-		// Low board
-		[ new Pos(0,0,1), new Pos(1,0,1), new Pos(0,1,1), new Pos(1,1,1) ],
-		[ new Pos(4,0,1), new Pos(5,0,1), new Pos(4,1,1), new Pos(5,1,1) ],
-		[ new Pos(0,4,1), new Pos(1,4,1), new Pos(0,5,1), new Pos(1,5,1) ],
-		[ new Pos(4,4,1), new Pos(5,4,1), new Pos(4,5,1), new Pos(5,5,1) ],
-
-		// Middle board
-		[ new Pos(0,2,3), new Pos(1,2,3), new Pos(0,3,3), new Pos(1,3,3) ],
-		[ new Pos(4,2,3), new Pos(5,2,3), new Pos(4,3,3), new Pos(5,3,3) ],
-		[ new Pos(0,6,3), new Pos(1,6,3), new Pos(0,7,3), new Pos(1,7,3) ],
-		[ new Pos(4,6,3), new Pos(5,6,3), new Pos(4,7,3), new Pos(5,7,3) ],
-
-		// High board
-		[ new Pos(0,4,5), new Pos(1,4,5), new Pos(0,5,5), new Pos(1,5,5) ],
-		[ new Pos(4,4,5), new Pos(5,4,5), new Pos(4,5,5), new Pos(5,5,5) ],
-		[ new Pos(0,8,5), new Pos(1,8,5), new Pos(0,9,5), new Pos(1,9,5) ],
-		[ new Pos(4,8,5), new Pos(5,8,5), new Pos(4,9,5), new Pos(5,9,5) ]
-	];
 
 	var TOWER_POSITIONS = [
 		new Pos(0.5,0.5,0),
@@ -7267,11 +7127,6 @@ var Tridchessboard = function( canvasId, config ) {
 	} );
 
 
-	//var towGeo = new THREE.BoxGeometry( 0.25, 2, 0.25 );
-	//towGeo.translate( 0, 1, 0 );    // Set origin at bottom
-	//var towMat = new THREE.MeshBasicMaterial( { color: 0xff000 } );
-
-
 	// Tower indicator
 	var towIndGeo = new THREE.BoxGeometry( 2, 2, 2 );
 	towIndGeo.translate( 0, 1, 0 );    // Set origin at bottom
@@ -7433,18 +7288,6 @@ var Tridchessboard = function( canvasId, config ) {
 
 	var pieces = [];
 
-
-	//var pieHeight = 1.25;
-
-	//function pieGeo( height ) {
-
-	//	var pieGeo = new THREE.BoxGeometry( 0.5, height, 0.5 );
-	//	pieGeo.translate( 0, height / 2 + 0.01, 0 );    // Set Origin at bottom
-
-	//	return pieGeo;
-
-	//}
-
 	var pieModels;
 
 	var promises = [ loadModel( config.pieceTheme.wP ),
@@ -7491,9 +7334,6 @@ var Tridchessboard = function( canvasId, config ) {
 
 	} );
 
-
-	//var pieMatWhite = new THREE.MeshBasicMaterial( { color: 0xf7f7f7 } );
-	//var pieMatBlack = new THREE.MeshBasicMaterial( { color: 0x3a3a3a } );
 
 	// Piece object
 	var Piece = function( name ) {
@@ -7861,7 +7701,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 
 	// ----------------------------------------------------------------
-	// Fen and position loading
+	// Fen and position
 	// ----------------------------------------------------------------
 
 	function resetBoard() {
@@ -7877,198 +7717,6 @@ var Tridchessboard = function( canvasId, config ) {
 		}
 
 	}
-
-
-	// TODO: Check if valid fen string
-	// TODO: Replace with loadPos( fenToObj( fen ) )
-	function loadFen( fen ) {
-
-		var oldPos = generatePos();
-
-		// Reset board
-		resetBoard();
-
-		var fields = fen.split( ' ' );
-
-
-		// Get tower positions
-		var towPos = fields[ 0 ].split( '' );
-
-		// Activate towers
-		for ( let i = 0; i < towPos.length; i++ ) {
-
-			// Convert 12-base positions to integer
-			towPos[ i ] = parseInt( towPos[ i ], 13 );
-
-			let tower = board.getObjectByProperty( 'pos', towPos[ i ] );
-			tower.activate();
-
-		}
-
-
-		// Get piece positions
-
-		// Remove slashes
-		var position = fields[ 1 ].split( '/' );
-		position = position.join( '' );
-
-		// Expand empty squares
-		for ( let i = 0; i < position.length; i++ ) {
-
-			if ( '0123456789'.indexOf( position[ i ] ) !== -1 ) { // Is number
-
-				// Replace number with number of spaces (3 ->    )
-				let num = parseInt( position[ i ], 10 );
-				let str = new Array( num + 1 ).join( ' ' );
-				position = position.replace( position[ i ], str );
-
-			}
-
-		}
-
-		// Place pieces
-		var i = 0;
-
-		for ( let l = 5; l >= 0; l-- ) {
-
-			for ( let r = 9; r >= 0; r-- ) {
-
-				for ( let f = 0; f <= 5; f++ ) {
-
-					let piece = position[ i ];
-					let pos = new Pos( f, r, l );
-					let square = getObjectByPos( board, pos );
-
-					// If a square exists and it is not on a inactive tower
-					if ( square !== undefined  && square.parent.parent.active !== false ) {
-
-						// If the square is not supposed to be empty
-						if ( piece !== ' ' ) {
-
-							// Convert FEN piece to piece code (wP, bQ, ...)
-							if ( piece.toLowerCase() === piece ) {
-
-								piece = 'b' + piece.toUpperCase();
-
-							}
-							else {
-
-								piece = 'w' + piece.toUpperCase();
-
-							}
-
-							// Add piece to square
-							square.setPiece( new Piece( piece ) );
-
-						}
-
-						i++;
-
-					}
-
-				}
-
-			}
-
-		}
-
-		callOnChange( oldPos );
-
-	}
-
-
-	// TODO: Replace with objToFen( generatePos )
-	function generateFen() {
-
-		// Get tower positions
-		var towPos = '';
-
-		for ( let i = 0; i < towers.length; i++ ) {
-
-			if ( towers[i].active ) {
-
-				// Convert integer to 12-base position
-				let pos = towers[ i ].pos.toString( 13 );
-
-				// Add to tower positions
-				towPos += pos;
-
-			}
-
-		}
-
-
-		// Get piece positions
-		var piePos = '';
-
-		for ( let l = 5; l >= 0; l-- ) {
-
-			for ( let r = 9; r >= 0; r-- ) {
-
-				let emptySqu = 0;
-
-				for ( let f = 0; f <= 5; f++ ) {
-
-					let pos = new Pos( f, r, l );
-					let square = getObjectByPos( board, pos );
-
-					// If a square exists and it is not on a inactive tower
-					if ( square !== undefined  && square.parent.parent.active !== false ) {
-
-						let piece = square.getPiece();
-
-						// If the square is not empty
-						if ( piece ) {
-
-							// Add piece or empty squares to piece positions
-							if ( emptySqu > 0) { piePos += emptySqu; }
-
-							// Convert piece code to FEN piece
-							let pieCode = '';
-
-							if ( piece.name[ 0 ] === 'b' ) {
-
-								pieCode = piece.name[ 1 ].toLowerCase();
-
-							} else {
-
-								pieCode = piece.name[ 1 ].toUpperCase();
-
-							}
-
-							piePos += pieCode;
-							emptySqu = 0;
-
-						} else {
-
-							emptySqu++;
-
-						}
-
-					}
-
-				}
-
-				if ( emptySqu > 0) { piePos += emptySqu; }
-
-				// Only add row separator if row is now empty or last row
-				if ( !( piePos.endsWith('/') ) && !( l === 0 && r <= 1 ) ) {
-
-					piePos += '/';
-
-				}
-
-			}
-
-		}
-
-		// Compose fen string
-		var fen = towPos + ' ' + piePos;
-
-		return fen;
-
-	}
-
 
 	function loadPos( pos ) {
 
