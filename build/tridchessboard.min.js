@@ -5836,6 +5836,8 @@ var Tridchessboard = function( canvasId, config ) {
 
 	};
 
+	// Position
+	var DEFAULT_STARTING_FEN = '12bc rnnr/pbbp//|pqkp/pppp/4/4|///|4/4/4/4|//PBBP/RNNR|4/4/PPPP/PQKP';
 
 	// ----------------------------------------------------------------
 	// Helpers
@@ -6528,6 +6530,14 @@ var Tridchessboard = function( canvasId, config ) {
 
 	// TODO: DeepCopy config object
 
+	// Config shorthands
+	if ( config === 'start' ) { config = { position: DEFAULT_STARTING_FEN }; }
+	else if ( isValidPos( config ) || isValidFen( config ) ) { config = { position: config }; }
+
+	// TODO: Make sure config is a proper object
+	// (This doesn't work)
+	//if ( typeof( config ) !== 'object' ) { config = {}; }
+
 	if ( config.draggable !== true ) { config.draggable = false; }
 	if ( config.turnable !== true ) { config.turnable = false; }
 	if ( config.dropOffBoard !== 'trash' ) { config.dropOffBoard = 'snapback'; }
@@ -6930,8 +6940,6 @@ var Tridchessboard = function( canvasId, config ) {
 	// Defaults and config
 	// ----------------------------------------------------------------
 
-	var DEFAULT_STARTING_FEN = "12bc rnnr/pbbp/pqkp/pppp/4/4/4/4/4/4/PBBP/RNNR/4/4/PPPP/PQKP w KQkq - 0 1";
-	var EMPTY_BOARD_FEN = "12bc 4/4/4/4/4/4/4/4/4/4/4/4/4/4/4/4 w KQkq - 0 1";
 
 
 	// ----------------------------------------------------------------
@@ -8137,19 +8145,19 @@ var Tridchessboard = function( canvasId, config ) {
 
 		else if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'fen' ) {
 
-			return generateFen();
+			return objToFen( generatePos() );
 
 		}
 
 		else if ( typeof( arg ) === 'string' && arg.toLowerCase() === 'start' ) {
 
-			loadFen( DEFAULT_STARTING_FEN );
+			position( DEFAULT_STARTING_FEN );
 
 		}
 
-		else if ( typeof( arg ) === 'object' ) { loadPos( arg ); }
+		else if ( isValidPos( arg ) ) { loadPos( arg ); }
 
-		else if ( typeof( arg ) === 'string' ) { loadFen( arg ); }
+		else if ( isValidFen( arg ) ) { loadPos( fenToObj( arg ) ); }
 
 	}
 
@@ -8178,7 +8186,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 		position( config.position );
 
-	} else { loadFen( EMPTY_BOARD_FEN ); }
+	}
 
 	// Return object with API methods
 	return {
