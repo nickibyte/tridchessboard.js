@@ -5946,7 +5946,6 @@ var Tridchessboard = function( canvasId, config ) {
 
 	// Validation
 
-	// TODO: Remove this as it is no longer needed
 	function isValidSquare( squ ) {
 
 		if ( typeof( squ ) !== 'string' ) { return false; }
@@ -5960,7 +5959,6 @@ var Tridchessboard = function( canvasId, config ) {
 
 	}
 
-	// TODO: Remove this as it is no longer needed
 	function isValidTower( tow ) {
 
 		if ( typeof( tow ) !== 'string' ) { return false; }
@@ -6287,6 +6285,29 @@ var Tridchessboard = function( canvasId, config ) {
 	function isValidPieceTheme( pieceTheme ) { }
 
 	function isValidBoardTheme( boardTheme ) { }
+
+	function isValidMove( move ) {
+
+		if ( typeof( move ) !== 'string' ) { return false; }
+
+		// Check valid number of squares/towers
+		var squares = move.split( '-' );
+		if ( squares.length !== 2 ) { return false; }
+
+		// Check valid square/tower names + combinations (squ-squ or tow-tow)
+		if ( isValidSquare( squares[ 0 ] ) ) {
+
+			if ( !isValidSquare( squares[ 1 ] ) ) { return false; }
+
+		} else if ( isValidTower( squares[ 0 ] )) {
+
+			if ( !isValidTower( squares[ 1 ] ) ) { return false; }
+
+		} else { return false; }
+
+		return true;
+
+	}
 
 
 	// FEN and Position Object conversion
@@ -6756,7 +6777,7 @@ var Tridchessboard = function( canvasId, config ) {
 
 			// Tower or piece (for towers source and piece are the same)
 			var piece = source.name;
-			if ( target.type === 'square' ) { piece = target.getPiece().name; }
+			if ( source.type === 'square' ) { piece = source.getPiece().name; }
 
 			source = source.name;
 			target = target.name;
@@ -7662,7 +7683,6 @@ var Tridchessboard = function( canvasId, config ) {
 		}
 
 		callOnMoveEnd( oldPos );
-		callOnSnapEnd( source, target );
 		callOnChange( oldPos );
 
 	}
@@ -7816,6 +7836,9 @@ var Tridchessboard = function( canvasId, config ) {
 				callOnSnapbackEnd( selected, selected.parent );
 
 			} else if ( action === 'move' ) {
+
+				// Needs to be called before move, otherwise source === target
+				callOnSnapEnd( selected, target );
 
 				move( selected, target );
 
@@ -8172,20 +8195,21 @@ var Tridchessboard = function( canvasId, config ) {
 
 			for ( let i = 0; i < arguments.length; i++ ) {
 
-				if ( typeof( arguments[ i ] ) !== 'string' ) { continue; }
-
 				let mov = arguments[ i ];
 
 				// Remove whitespace
 				mov = mov.replace( /\s/g, '' );
 
+				// Skip move if invalid
+				if ( !isValidMove( mov ) ) { console.log("Invalid move"); continue; }
+
 				// Perform move
-				mov = mov.split( '-' );
-				move( mov[ 0 ], mov[ 1 ] );
+				let squares = mov.split( '-' );
+				move( squares[ 0 ], squares[ 1 ] );
 
 			}
 
-			return generatePos();
+			return position();
 
 		},
 
