@@ -1,0 +1,157 @@
+body {
+
+	margin: 0;
+
+	font-size: 100%;
+	font-family: sans-serif;
+	color: #2b3236;
+
+
+	line-height: 1.6;
+}
+
+
+a:link, a:visited {
+
+	color: #2b3236;
+	text-decoration: underline;
+
+}
+
+.header {
+
+	z-index: 999;
+	position: fixed;
+	left: 0;
+	right: 0;
+
+	width: 100%;
+	max-width: 110em;
+
+	margin: 0 auto;
+	padding: 0;
+
+	font-size: 1.1em;
+
+}
+
+
+.title a:link, .title a:visited {
+
+color: #2b3236;
+text-decoration: none;
+
+}
+
+nav a:link, nav a:visited {
+
+color: #2b3236;
+text-decoration: none;
+
+}
+
+
+nav a:hover { text-decoration: underline; }
+
+
+.title {
+
+	float: left;
+
+	max-width: 19%;
+	margin: 1.5em;
+	margin-left: 4%;
+	margin-right: 2%;
+
+	overflow-wrap: break-word;
+
+	font-weight: bold;
+
+}
+
+.title a, nav a {
+
+	margin-right: 0.75em;
+	margin-left: 0.75em;
+
+}
+
+
+nav {
+
+	float: right;
+
+	max-width: 19%;
+	margin: 1.5em;
+	margin-left: 2%;
+	margin-right: 4%;
+
+	text-align: right;
+	overflow: hidden;
+
+}
+
+
+.vspacer, .landing {
+
+	height: 100vh;
+
+}
+
+
+.landing {
+
+	z-index: -1;
+	position: fixed;
+	width: 100%;
+	background-color: lightgrey;
+
+}
+
+
+main {
+
+	background-color: white;
+
+}
+
+
+article {
+
+	width: 50%;
+	max-width: 50em;
+	min-width: 20em;
+
+	margin: 0 auto;
+	padding: 0.5em;
+	padding-top: 4em;
+	padding-bottom: 2em;
+
+	font-size: 1.2em;
+
+}
+
+article h1 { font-size: 1.5em; }
+
+
+article h2 { font-size: 1.2em; }
+
+
+article section {
+
+	padding-top: 0.5em;
+	padding-bottom: 1em;
+
+}
+
+
+footer {
+
+	height: 25vh;
+
+	font-size: 1.1em;
+	color: white;
+
+	background-color: #212121;
+
+}

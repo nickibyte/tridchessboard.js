@@ -1,0 +1,140 @@
+<h1 id="documentation">Documentation</h1>
+<p>tridchessboard.js is heavily inspired by <a href="https://github.com/oakmac/chessboardjs">chessboard.js</a> and its API is kept almost identical. This enables you use most of the numerous examples that exist for <a href="https://github.com/oakmac/chessboardjs">chessboard.js</a>. So if you can figure out how to do something using this documentation, chances are you can find a working example for <a href="https://github.com/oakmac/chessboardjs">chessboard.js</a> and apply it to your use case.</p>
+<p>That said, there are some ways in which tridchessboard.js differs from <a href="https://github.com/oakmac/chessboardjs">chessboard.js</a>. Some methods and properties have been left out, added or changed. Either to work better with a Tri-D chessboard or because I was just to lazy to implement them. The most notable changes are the adaptation of the <a href="#position-object">Position Object</a> and <a href="#fen-string">FEN String</a> for Tri-D chess and the introduction of the <a href="#notation-object">Notation-</a> and <a href="#orientation-object">Orientation Object</a> as well as the <code>blackOrientation</code>, <code>whiteOrientation</code> and <code>boardTheme</code> config properties.</p>
+<h2 id="config-properties">Config Properties</h2>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 20%" />
+<col style="width: 5%" />
+<col style="width: 60%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Property</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>draggable</td>
+<td>Boolean</td>
+<td>false</td>
+<td>Enables/disables dragging of pieces and towers</td>
+</tr>
+<tr class="even">
+<td>dropOffBoard</td>
+<td>‘snapback’ or ‘trash’</td>
+<td>‘snapback’</td>
+<td>Specifies what happens when a piece/tower is dropped off the board. <br> If ‘snapback’, piece/tower moves back to original position. <br> If ‘trash’, piece/tower is removed.</td>
+</tr>
+<tr class="odd">
+<td>position</td>
+<td>‘start’, FEN String or Position Object</td>
+<td>n/a</td>
+<td>Sets initial board position.</td>
+</tr>
+<tr class="even">
+<td>onChange</td>
+<td>Function</td>
+<td>n/a</td>
+<td>Called when board position changes. <br> Arguments: old position, new position.</td>
+</tr>
+<tr class="odd">
+<td>onDragStart</td>
+<td>Function</td>
+<td>n/a</td>
+<td>Called when piece/tower is picked up. <br> Arguments: source, piece/tower, current position, current orientation. <br> If this returns false the drag is cancelled.</td>
+</tr>
+<tr class="even">
+<td>onDragMove</td>
+<td>Function</td>
+<td>n/a</td>
+<td>Called when dragged piece/tower changes location. <br> Arguments: new location, old location, source, piece/tower, current position, current orientation</td>
+</tr>
+<tr class="odd">
+<td>onDrop</td>
+<td>Function</td>
+<td>n/a</td>
+<td>Called when piece is dropped. <br> Arguments: source, target, piece/tower, new position, old position, current orientation. <br> If this returns ‘snapback’, piece/tower moves back to source. <br> If this returns ‘trash’, piece/tower is removed. <br> <strong>!!! The new position argument is currently broken and returns the old position instead !!!</strong></td>
+</tr>
+<tr class="even">
+<td>onMoveEnd</td>
+<td>Function</td>
+<td>n/a</td>
+<td>Called at the end of a move, when the board position changes. <br> Arguments: old position, new position. <br> (Basically the same as onChange, kept for compatability to chessboard.js)</td>
+</tr>
+<tr class="odd">
+<td>onSnapbackEnd</td>
+<td>Function</td>
+<td>n/a</td>
+<td>Called when “snapback” of piece/tower is complete. <br> Arguments: piece/tower, source, current position, current orientation.</td>
+</tr>
+<tr class="even">
+<td>onSnapEnd</td>
+<td>Function</td>
+<td>n/a</td>
+<td>Called at the end of a move, when board position changes. <br> Arguments: source, target, piece/tower.</td>
+</tr>
+<tr class="odd">
+<td>orientation</td>
+<td>‘white’, ‘black’ or Orientation Object</td>
+<td>{ x: -10, <br> y: 7, <br> z: 10 }</td>
+<td>Sets initial board orientation.</td>
+</tr>
+<tr class="even">
+<td>showNotation</td>
+<td>Boolean</td>
+<td>false</td>
+<td>Enable/disable board notation. <br> <strong>!!! Not implemented yet. !!!</strong></td>
+</tr>
+<tr class="odd">
+<td>sparePieces</td>
+<td>Boolean</td>
+<td>false</td>
+<td>Enable/disable spare pieces that can be dragged onto the board. <br> <strong>!!! Not implemented yet. !!!</strong></td>
+</tr>
+<tr class="even">
+<td>showErrors</td>
+<td>false, String or Function</td>
+<td>n/a</td>
+<td>Choose how errors are reported. <br> If false, errors are ignored. <br> If ‘console’, errors output to console.log(). <br> If ‘alert’, errors output to window.alert(). <br> If function, it is called with following arguments: error code, error string, data. <br> <strong>!!! Not implemented yet. !!!</strong></td>
+</tr>
+<tr class="odd">
+<td>pieceTheme</td>
+<td>String or Function</td>
+<td>’’</td>
+<td>Source of piece models. <br> <strong>!!! Not implemented yet. !!!</strong></td>
+</tr>
+<tr class="even">
+<td>boardTheme</td>
+<td>String or Function</td>
+<td>’’</td>
+<td>Source of board models. <br> <strong>!!! Not implemented yet. !!!</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The following <a href="https://github.com/oakmac/chessboardjs">chessboard.js</a> properties are not implemented:</p>
+<ul>
+<li><code>onMouseoutSquare</code></li>
+<li><code>onMouseoverSquare</code></li>
+<li><code>appearSpeed</code> (pieces/towers appear instantly)</li>
+<li><code>moveSpeed</code> (no move animation, pieces/towers move instantly)</li>
+<li><code>snapbackSpeed</code> (no snapback animation, pieces/towers snapback instantly)</li>
+<li><code>snapSpeed</code> (no snap animation, pieces/towers snap instantly)</li>
+<li><code>trashSpeed</code> (no trash animation, pieces/towers disapear instantly)</li>
+</ul>
+<h2 id="methods">Methods</h2>
+<p>Work in progress.</p>
+<h2 id="position-object">Position Object</h2>
+<p>Work in progress.</p>
+<h2 id="fen-string">FEN String</h2>
+<p>Work in progress.</p>
+<h2 id="orientation-object">Orientation Object</h2>
+<p>Work in progress.</p>
+<h2 id="notation-object">Notation Object</h2>
+<p>Work in progress.</p>
+<h2 id="errors">Errors</h2>
+<p>Work in progress.</p>
